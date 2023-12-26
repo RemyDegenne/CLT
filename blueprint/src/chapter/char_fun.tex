@@ -28,9 +28,9 @@ For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_
 If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has characteristic function $\phi_{X+Y} = \phi_X \phi_Y$. 
 \end{lemma}
 
-\begin{lemma}\label{lem:charFun_tendsto_iff_measure_tendsto}
+\begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{lem:charFun_tendsto_iff_measure_tendsto}
 Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.
-\end{lemma}
+\end{theorem}
 
 \begin{proof}\uses{def:cvg_distribution}
 For all $t$, $x \mapsto e^{i \langle t, x \rangle}$ is a bounded continuous function. Hence by the definition of convergence in distribution, $\mu_n \xrightarrow{w} \mu \implies \hat{\mu}_n(t) \to \hat{\mu}(t)$ for all $t$.

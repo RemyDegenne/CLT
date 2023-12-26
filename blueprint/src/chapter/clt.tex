@@ -1,6 +1,5 @@
-\chapter{Applications of Jensen's inequality}
+\chapter{The central limit theorem}
 
-In this chapter, $h$ denotes the function $h(x) := x \log \frac{1}{x}$ for $x \in [0,1]$.
 
 \begin{lemma}[Concavity]\label{concave}
   \lean{Real.strictConcaveOn_negMulLog}\leanok
@@ -26,3 +25,10 @@ If equality holds in the above lemma, then $p_s = \sum_{s \in S} w_s h(p_s)$ whe
 
 \begin{proof} \uses{concave}\leanok Need some converse form of Jensen, not sure if it is already in Mathlib.  May also wish to state it as an if and only if.
 \end{proof}
+
+\begin{theorem}[Central limit theorem]\label{clt}
+Let $\xi_1, \xi_2, \ldots$ be i.i.d. random variables with mean 0 and variance 1, and let $\zeta$ be a random variable with law $\mathcal N(0,1)$. Then
+\begin{align*}
+\frac{1}{\sqrt{n}}\sum_{k=1}^n \xi_k \xrightarrow{d} \zeta \: .
+\end{align*}
+\end{theorem}

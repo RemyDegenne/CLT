@@ -1,0 +1,10 @@
+\chapter{Useful definitions from Mathlib}
+
+\begin{definition}[Convergence in probability]\label{def:cvg_probability}
+\lean{MeasureTheory.TendstoInMeasure} \leanok
+We say that $(\xi_i)_{i \in \mathbb{N}}$ tends to $\xi$ in probability (or in measure) if for all $\varepsilon > 0$
+\begin{align*}
+\mathbb{P}(d(\xi_n, \xi) \ge \varepsilon) \to_{n \to +\infty} 0
+\end{align*}
+
+\end{definition}

@@ -71,10 +71,10 @@ jobs:
         run: |
           mv .lake/build/doc docs/docs
 
-      - name: Upload docs & blueprint artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: docs/_site
+      #- name: Upload docs & blueprint artifact
+      #  uses: actions/upload-pages-artifact@v1
+      #  with:
+      #    path: docs/_site
 
       - name: Make sure the cache works
         run: |

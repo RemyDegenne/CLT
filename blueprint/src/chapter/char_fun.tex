@@ -1,7 +1,9 @@
 \chapter{The characteristic function}
 
+\section{Definition and first properties}
+
 \begin{definition}[Characteristic function]\label{def:charFun}
-Let $\mu$ be a measure on an inner product space. The characteristic function of $\mu$, denoted by $\hat{\mu}$, is the function $E \to \mathbb{C}$ defined by
+Let $\mu$ be a measure on a real inner product space $E$. The characteristic function of $\mu$, denoted by $\hat{\mu}$, is the function $E \to \mathbb{C}$ defined by
 \begin{align*}
 \hat{\mu}(t) = \int_x e^{i \langle t, x \rangle} d\mu(x) \: .
 \end{align*}
@@ -18,6 +20,11 @@ For all $t$, $\Vert\hat{\mu}(t)\Vert \le 1$.
 The characteristic function is a continuous function.
 \end{lemma}
 
+\begin{lemma}\label{lem:charFun_neg}
+\uses{def:charFun}
+$\hat{\mu}(-t) = \overline{\hat{\mu}(t)}$.
+\end{lemma}
+
 \begin{lemma}\label{lem:charFun_smul}
 \uses{def:charFun}
 For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_X(at)$.
@@ -28,7 +35,38 @@ For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_
 If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has characteristic function $\phi_{X+Y} = \phi_X \phi_Y$. 
 \end{lemma}
 
-\begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{lem:charFun_tendsto_iff_measure_tendsto}
+\section{Convergence of characteristic functions and weak convergence of measures}
+
+\begin{lemma}\label{lem:starSubalgebra_expPoly}
+The functions of the form $x \map \sum_{k=1}^n a_k e^{i\langle t_k, x\rangle}$ for $n \in \mathbb{N}$, $a_1, \ldots, a_n \in \mathbb{R}$ and $t_1, \ldots, t_n \in E$ are a star-subalgebra of $\mathcal C_b(E, \mathbb{C})$ (the bounded continuous functions from $E$ to $\mathbb{C}$). 
+\end{lemma}
+
+Let $\mathcal M$ be the set of these functions, which we call exponential polynomials.
+
+\begin{lemma}\label{lem:separating_expPoly}
+\uses{lem:starSubalgebra_expPoly}
+The star-subalgebra $\mathcal M$ separates points. (TODO: define this)
+\end{lemma}
+
+\begin{definition}\label{def:separating}
+A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x, y \in E$ with $x \ne y$, there exists $f \in \mathcal F$ with $f(x) \ne f(y)$.
+
+A set $\mathcal F$ of functions $E \to F$ is separating in $\mathcal P(E)$ if for all probability measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists $f \in \mathcal F$ with $\mu[f] \ne \nu[f]$.
+\end{definition}
+
+\begin{theorem}\label{thm:separating_starSubalgebra}
+\uses{def:separating}
+Let $E$ be a complete separable pseudo-metric space. Let $\mathcal M \subseteq \mathcal C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal M$ is separating in $\mathcal P(E)$.
+\end{theorem}
+
+\begin{lemma}\label{lem:ext_charFun}
+Two probability measure are equal iff they have the same characteristic function.
+\end{lemma}
+
+\begin{proof}\uses{thm:separating_starSubalgebra}
+\end{proof}
+
+\begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}
 Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.
 \end{theorem}
 

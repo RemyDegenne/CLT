@@ -1,1 +1,20 @@
 \chapter{The characteristic function}
+
+\begin{definition}\label{def:charFun}
+Let $\mu$ be a measure on an inner product space. The characteristic function of $\mu$, denoted by $\hat{\mu}$, is the function $E \to \mathbb{C}$ defined by
+\begin{align*}
+\hat{\mu}(t) = \int_x e^{i \langle t, x \rangle} d\mu(x) \: .
+\end{align*}
+The characteristic function of a random variable $X$ is defined as the characteristic function of $\mathcal L(X)$.
+\end{definition}
+
+
+\begin{lemma}\label{lem:charFun_smul}
+\uses{def:charFun}
+For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_X(at)$.
+\end{lemma}
+
+\begin{lemma}\label{lem:charFun_add_of_indep}
+\uses{def:charFun}
+If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has characteristic function $\phi_{X+Y} = \phi_X \phi_Y$. 
+\end{lemma}

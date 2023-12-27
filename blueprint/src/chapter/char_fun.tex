@@ -37,10 +37,6 @@ If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has ch
 
 \section{Convergence of characteristic functions and weak convergence of measures}
 
-\begin{lemma}\label{lem:exp_character}
-$x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a character from $(E,+)$ to $C_b(E, \mathbb{C})$, the bounded continuous functions from $E$ to $\mathbb{C}$.
-\end{lemma}
-
 \begin{definition}\label{def:separates_points}
 \lean{Set.SeparatesPoints} \leanok
 A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x, y \in E$ with $x \ne y$, there exists $f \in \mathcal F$ with $f(x) \ne f(y)$.
@@ -59,29 +55,6 @@ In a Borel space $E$, the set $C_b(E, \mathbb{C})$ is separating in $\mathcal P(
 The Mathlib lemma \texttt{MeasureTheory.FiniteMeasure.ext\_of\_forall\_lintegral\_eq} shows that $C_b(E, \mathbb{R}_+)$ is separating. Since $C_b(E, \mathbb{R}_{+}) \subseteq C_b(E, \mathbb{C})$, the larger set is also separating.
 \end{proof}
 
-\begin{theorem}\label{thm:separating_starSubalgebra}
-\uses{def:separates_points, def:separating}
-Let $E$ be a complete separable pseudo-metric space. Let $\mathcal M \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal M$ is separating in $\mathcal P(E)$.
-\end{theorem}
-
-\begin{proof}\uses{lem:bounded_continuous_separating}
-\end{proof}
-
-\begin{lemma}\label{lem:starSubalgebra_expPoly}
-The functions of the form $x \mapsto \sum_{k=1}^n a_k e^{i\langle t_k, x\rangle}$ for $n \in \mathbb{N}$, $a_1, \ldots, a_n \in \mathbb{R}$ and $t_1, \ldots, t_n \in E$ are a star-subalgebra of $C_b(E, \mathbb{C})$. 
-\end{lemma}
-
-Let $\mathcal M$ be the set of these functions, which we call exponential polynomials.
-
-\begin{lemma}\label{lem:separating_expPoly}
-\uses{lem:starSubalgebra_expPoly}
-The star-subalgebra $\mathcal M$ separates points.
-\end{lemma}
-
-\begin{lemma}\label{lem:dirac_dense}
-On a suitable (?) compact space, finite linear combinations of Dirac measures are dense in the probability measures for the weak convergence of measures.
-\end{lemma}
-
 \begin{lemma}\label{lem:innerRegular_ne_iff_compact}
 For any two regular measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists a compact set $K$ with $\mu(K) \ne \nu(K)$.
 \end{lemma}
@@ -90,15 +63,53 @@ For any two regular measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists 
 By definition of \texttt{InnerRegularCompactLTTop}.
 \end{proof}
 
-\begin{lemma}\label{lem:ext_charFun}
-Two probability measure on a TODO space are equal iff they have the same characteristic function.
-\end{lemma}
-\begin{proof}
+\begin{theorem}\label{thm:separating_starSubalgebra}
+\uses{def:separates_points, def:separating}
+Let $E$ be a complete separable pseudo-metric space. Let $\mathcal M \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal M$ is separating in $\mathcal P(E)$.
+\end{theorem}
+
+\begin{proof}\uses{lem:bounded_continuous_separating, lem:innerRegular_ne_iff_compact}
 Let $\mu$ and $\nu$ be two probability measures with same characteristic function, and such that $\mu \ne \nu$.
 These two measures are inner regular, hence there exists $K$ compact with $\mu(K) \ne \nu(K)$.
 We consider the restrictions $\mu_K$ and $\nu_K$ of the measures to that compact set.
 
+On $K$, the Stone-Weierstrass theorem \texttt{ContinuousMap.starSubalgebra_topologicalClosure_eq_top_of_separatesPoints} gives that a star-subalgebra that separates points is dense.
+
 TODO
+\end{proof}
+
+\begin{lemma}\label{lem:exp_character}
+$x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a monoid homomorphism from $(E,+)$ to $C_b(E, \mathbb{C})$, the bounded continuous functions from $E$ to $\mathbb{C}$.
+\end{lemma}
+
+\begin{lemma}\label{lem:starSubalgebra_expPoly}
+The functions of the form $x \mapsto \sum_{k=1}^n a_k e^{i\langle t_k, x\rangle}$ for $n \in \mathbb{N}$, $a_1, \ldots, a_n \in \mathbb{R}$ and $t_1, \ldots, t_n \in E$ are a star-subalgebra of $C_b(E, \mathbb{C})$. 
+\end{lemma}
+
+\begin{proof}\uses{lem:exp_character}
+The monoid homomorphism can be lifted to a homomorphism of algebras from \texttt{AddMonoidAlgebra ℝ E} to $C_b(E, \mathbb{C})$ using \texttt{AddMonoidAlgebra.lift}. $\mathcal M$ is the range of this homomorphism. The ``star'' part can be checked easily.
+\end{proof}
+
+Let $\mathcal M$ be the set of these functions, which we call exponential polynomials.
+
+\begin{lemma}\label{lem:separating_expPoly}
+\uses{lem:starSubalgebra_expPoly}
+The star-subalgebra $\mathcal M$ separates points.
+\end{lemma}
+
+\begin{proof}
+TODO
+\end{proof}
+
+%\begin{lemma}\label{lem:dirac_dense}
+%On a suitable (?) compact space, finite linear combinations of Dirac measures are dense in the probability measures for the weak convergence of measures.
+%\end{lemma}
+
+\begin{lemma}\label{lem:ext_charFun}
+Two probability measure on a TODO space are equal iff they have the same characteristic function.
+\end{lemma}
+\begin{proof}
+
 \end{proof}
 
 \begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}

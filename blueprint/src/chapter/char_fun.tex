@@ -38,7 +38,7 @@ If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has ch
 \section{Convergence of characteristic functions and weak convergence of measures}
 
 \begin{lemma}\label{lem:exp_character}
-$x \mapsto \exp(i \langle t, x \rangle)$ is a character from $(E,+)$ to $\mathbb{C}$.
+$x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a character from $(E,+)$ to $C_b(E, \mathbb{C})$, the bounded continuous functions from $E$ to $\mathbb{C}$.
 \end{lemma}
 
 \begin{definition}\label{def:separates_points}
@@ -52,7 +52,7 @@ A set $\mathcal F$ of functions $E \to F$ is separating in $\mathcal P(E)$ if fo
 
 \begin{lemma}\label{lem:bounded_continuous_separating}
 \uses{def:separating}
-In a Borel space $E$, the set $C_b(E, \mathbb{C})$ of bounded continuous functions from $E$ to $\mathbb{C}$ is separating in $\mathcal P(E)$.
+In a Borel space $E$, the set $C_b(E, \mathbb{C})$ is separating in $\mathcal P(E)$.
 \end{lemma}
 
 \begin{proof}

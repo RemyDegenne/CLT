@@ -46,6 +46,8 @@ A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x,
 A set $\mathcal F$ of functions $E \to F$ is separating in $\mathcal P(E)$ if for all probability measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists $f \in \mathcal F$ with $\mu[f] \ne \nu[f]$.
 \end{definition}
 
+TODO: this is a special case of a definition about duality pairings. Two types $E$, $F$ and a bilinear function $B : E \times F \to k$ form a pairing (in the def above $\mathcal P(E)$, $C_b(E, \mathbb{C})$ and the integral). A set $\mathcal E$ of $E$ is separating if for all $f, f' \in F$ with $f \ne f'$, there exists $x \in \mathcal E$ with $B(x, f) \ne B(x, f')$. 
+
 \begin{lemma}\label{lem:bounded_continuous_separating}
 \uses{def:separating}
 In a Borel space $E$, the set $C_b(E, \mathbb{C})$ is separating in $\mathcal P(E)$.
@@ -63,8 +65,8 @@ For any two regular measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists 
 By definition of \texttt{InnerRegularCompactLTTop}.
 \end{proof}
 
-\begin{theorem}\label{thm:separating_starSubalgebra}
-\uses{def:separates_points, def:separating}
+\begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
+\uses{def:separates_points}
 Let $E$ be a complete separable pseudo-metric space. Let $\mathcal M \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal M$ is separating in $\mathcal P(E)$.
 \end{theorem}
 

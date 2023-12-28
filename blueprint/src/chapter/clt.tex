@@ -1,5 +1,25 @@
 \chapter{The central limit theorem}
 
+\begin{lemma}\label{lem:deriv_charFun}
+\uses{def:charFun}
+Let $X$ be a real random variable with characteristic function $\phi$ with $\mathbb{E}[\vert X \vert^n] < \infty$ and let $k \le n$. Then the $k$textsuperscript{th} derivative of $\phi$ is 
+$\phi^{(k)}(t) = \mathbb{E}[i X]^k e^{i t X}$ \: .
+\end{lemma}
+
+\begin{proof}
+\end{proof}
+
+\begin{lemma}\label{lem:charFun_taylor}
+Let $X$ be a real random variable with characteristic function $\phi$, with $\mathbb{E}[\vert X \vert^n] < \infty$. Then as $t \to 0$,
+\begin{align*}
+\phi(t) = \sum_{k=0}^n \frac{(it)^k \mathbb{E}[X^k]}{k!} + o(t^n)
+\: .
+\end{align*}
+\end{lemma}
+
+\begin{proof}\uses{lem:deriv_charFun}
+\end{proof}
+
 \begin{theorem}[Central limit theorem]\label{clt}
 Let $X_1, X_2, \ldots$ be i.i.d. random variables with mean 0 and variance 1, and let $Z$ be a random variable with law $\mathcal N(0,1)$. Then
 \begin{align*}
@@ -7,10 +27,10 @@ Let $X_1, X_2, \ldots$ be i.i.d. random variables with mean 0 and variance 1, an
 \end{align*}
 \end{theorem}
 
-\begin{proof}\uses{lem:charFun_smul, lem:charFun_add_of_indep, thm:charFun_tendsto_iff_measure_tendsto}
+\begin{proof}\uses{lem:charFun_smul, lem:charFun_add_of_indep, thm:charFun_tendsto_iff_measure_tendsto, lem:charFun_taylor}
 Let $S_n = \frac{1}{\sqrt{n}}\sum_{k=1}^n X_k$. Let $\phi$ be the characteristic function of $X_k$. By Lemma~\ref{lem:charFun_smul} and~\ref{lem:charFun_add_of_indep}, the characteristic function of $S_n$ is $\phi_n(t) = (\phi(n^{-1/2}t))^n$.
 
-By Lemma TODO,
+By Lemma \ref{lem:charFun_taylor},
 \begin{align*}
 \phi_n(t) = (\phi(n^{-1/2}t))^n = \left(1 - \frac{1}{2n}t^2 + o(\frac{1}{n})\right)^n \to_{n \to +\infty} e^{-t^2/2} \: .
 \end{align*}

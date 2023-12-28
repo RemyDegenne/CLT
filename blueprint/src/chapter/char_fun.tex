@@ -85,7 +85,24 @@ Let $X$ be a random variable with law $\mu$. Then for any $s, t$,
 A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu(\Omega \setminus K) \le \varepsilon$.
 \end{definition}
 
+\begin{lemma}\label{lem:tight_of_cvg}
+\uses{def:tight}
+If $\mu_1, \mu_2, \ldots$ converge weakly to $\mu$, then $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
+\end{lemma}
+
+\begin{proof}
+Fix $r > 0$ and let $f(x) = (1 - (r - \vert x \vert)_+)_+$ . $f$ is a bounded continuous function. Then
+\begin{align*}
+\limsup_{n \to +\infty} \mu_n\{\vert X \vert > r\}
+\le \lim_{n \to +\infty} \mu_n\left[ f \right]
+= \mu[f]
+\le \mu\{\vert X \vert > r - 1\} \: .
+\end{align*}
+As $r \to +\infty$, the last quantity tends to 0.
+\end{proof}
+
 \begin{lemma}\label{lem:tight_iff_charFun_equiContinuous}
+\uses{def:tight}
 A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $\hat{\mu}_a$ is equi-continuous at 0.
 \end{lemma}
 

@@ -104,6 +104,8 @@ TODO
 
 \section{Convergence of characteristic functions and weak convergence of measures}
 
+\subsection{Characteristic function and tightness}
+
 \begin{lemma}\label{lem:tight_iff_charFun_equiContinuous}
 \uses{def:tight}
 A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $\hat{\mu}_a$ is equi-continuous at 0.
@@ -123,6 +125,8 @@ TODO
 
 Remark: the finite dimension is necessary. Counterexample: $\ell^2$ with $\mu_n$ the law of $X_n = \sum_{k=1}^n \zeta_k e_k$ where $e_k = (0, \ldots, 0, 1, 0 \ldots)$ and the $\zeta_k$ are i.i.d. $\mathcal N(0,1)$. Then $\hat{\mu}_n(t) \to e^{- \Vert t \Vert^2 / 2}$ for all $t \in \ell^2$ but $(\mu_n)$ is not tight (todo: why?).
 
+\subsection{Separating sub-algebras}
+
 \begin{definition}\label{def:separates_points}
 \lean{Set.SeparatesPoints} \leanok
 A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x, y \in E$ with $x \ne y$, there exists $f \in \mathcal F$ with $f(x) \ne f(y)$.
@@ -141,29 +145,6 @@ In a Borel space $E$, the set $C_b(E, \mathbb{C})$ is separating in $\mathcal P(
 
 \begin{proof}
 The Mathlib lemma \texttt{MeasureTheory.FiniteMeasure.ext\_of\_forall\_lintegral\_eq} shows that $C_b(E, \mathbb{R}_+)$ is separating. Since $C_b(E, \mathbb{R}_{+}) \subseteq C_b(E, \mathbb{C})$, the larger set is also separating.
-\end{proof}
-
-\begin{lemma}\label{lem:innerRegular_ne_iff_compact}
-For any two regular measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists a compact set $K$ with $\mu(K) \ne \nu(K)$.
-\end{lemma}
-
-\begin{proof}
-By definition of \texttt{InnerRegularCompactLTTop}.
-\end{proof}
-
-\begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
-\uses{def:separates_points}
-Let $E$ be a complete separable pseudo-metric space. Let $\mathcal M \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal M$ is separating in $\mathcal P(E)$.
-\end{theorem}
-
-\begin{proof}\uses{lem:bounded_continuous_separating, lem:innerRegular_ne_iff_compact}
-Let $\mu$ and $\nu$ be two probability measures with same characteristic function, and such that $\mu \ne \nu$.
-These two measures are inner regular, hence there exists $K$ compact with $\mu(K) \ne \nu(K)$.
-We consider the restrictions $\mu_K$ and $\nu_K$ of the measures to that compact set.
-
-On $K$, the Stone-Weierstrass theorem \texttt{ContinuousMap.starSubalgebra\_topologicalClosure\_eq\_top\_of\_separatesPoints} gives that a subalgebra that separates points is dense.
-
-TODO
 \end{proof}
 
 \begin{lemma}\label{lem:exp_character}
@@ -192,22 +173,80 @@ The star-subalgebra $\mathcal M$ separates points.
 TODO
 \end{proof}
 
-%\begin{lemma}\label{lem:dirac_dense}
-%On a suitable (?) compact space, finite linear combinations of Dirac measures are dense in the probability measures for the weak convergence of measures.
-%\end{lemma}
+\begin{lemma}\label{lem:integral_restrict_compact}
+Let $\mu$ be a measure on $E$ and $K$ be a compact set such that $\mu(K^c) \le \varepsilon$. Let $f \in C_b(E, \mathbb{C})$. Then
+\begin{align*}
+\left\Vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K] \right\Vert
+\le C \sqrt{\varepsilon} \: ,
+\end{align*}
+where $C = \sup_{x \ge 0} x e^{-x^2}$.
+\end{lemma}
+
+\begin{proof}
+\begin{align*}
+\left\Vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K] \right\Vert
+&= \left\Vert \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_{K^c}] \right\Vert
+\\
+&\le \frac{1}{\sqrt{\varepsilon}} \mu \left[ \sqrt{\varepsilon} \Vert f \Vert e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_{K^c} \right]
+\\
+&\le C \sqrt{\varepsilon} \: ,
+\end{align*}
+\end{proof}
+
+\begin{lemma}\label{lem:introduce_exponential}
+For any $f \in C_b(E, \mathbb{C})$ and probability measures $\mu, \nu$,
+\begin{align*}
+\left\vert \mu[f] - \nu[f] \right\vert
+= \lim_{\varepsilon \to 0} \left\vert \mu\left[f e^{-\varepsilon \Vert f \Vert^2} \right] - \nu\left[f e^{-\varepsilon \Vert f \Vert^2} \right] \right\vert
+\: .
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+\end{proof}
+
+\begin{lemma}\label{lem:exponiential_M_eq_limit_M}
+For $f \in \mathcal M$, $\varepsilon \ge 0$ and $n \in \mathbb{N}$, $f (1 - \frac{\varepsilon}{n} f)^n \in \mathcal M$. Furthermore, for a measure $\mu$,
+\begin{align*}
+\mu\left[f e^{-\varepsilon \Vert f \Vert^2}\right] = \lim_{n \to + \infty} \mu\left[f (1 - \frac{\varepsilon}{n} f)^n\right] \: .
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+\end{proof}
+
+\begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
+\uses{def:separates_points}
+Let $E$ be a complete separable pseudo-metric space. Let $\mathcal M \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal M$ is separating in $\mathcal P(E)$.
+\end{theorem}
+
+\begin{proof}\uses{lem:bounded_continuous_separating, lem:introduce_exponential}
+Let $\mu$ and $\nu$ be two probability measures such that $\mu[f] = \nu[f]$ for all $f \in \mathcal M$. We want to prove that $\mu = \nu$. Since $C_b(E, \mathbb{C})$ is separating, it suffices to prove that for $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$. Let then $g \in C_b(E, \mathbb{C})$ and $\varepsilon > 0$.
+
+By Lemma~\ref{lem:introduce_exponential}, it suffices to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] - \nu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] \right\vert = 0$.
+
+The two measures are inner regular, hence there exists $K$ compact with $\mu(K^c) \le \varepsilon$ and $\nu(K^c) \le \varepsilon$.
+
+By Lemma~\ref{lem:integral_restrict_compact}, it suffices to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \mathbb{I}_K \right] - \nu\left[g e^{-\varepsilon \Vert g \Vert^2} \mathbb{I}_K \right] \right\vert = 0$.
+
+
+On $K$, the Stone-Weierstrass theorem \texttt{ContinuousMap.starSubalgebra\_topologicalClosure\_eq\_top\_of\_separatesPoints} gives that a subalgebra that separates points is dense. There exists then $f \in \mathcal M$ such that $\left\vert \mu[f \mathbb{I}_K] - \mu[g \mathbb{I}_K] \right\vert \le \varepsilon$ and $\left\vert \nu[f \mathbb{I}_K] - \nu[g \mathbb{I}_K] \right\vert \le \varepsilon$.
+
+TODO
+\end{proof}
 
 \begin{lemma}\label{lem:ext_charFun}
 Two probability measure on a TODO space are equal iff they have the same characteristic function.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\uses{lem:separating_expPoly, thm:separating_starSubalgebra}
 \end{proof}
 
 \begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}
 Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.
 \end{theorem}
 
-\begin{proof}\uses{def:cvg_distribution, lem:ext_charFun}
+\begin{proof}\uses{def:cvg_distribution, lem:ext_charFun, lem:tight_of_tendsto_charFun}
 For all $t$, $x \mapsto e^{i \langle t, x \rangle}$ is a bounded continuous function. Hence by the definition of convergence in distribution, $\mu_n \xrightarrow{w} \mu \implies \hat{\mu}_n(t) \to \hat{\mu}(t)$ for all $t$.
 
 TODO reverse direction.

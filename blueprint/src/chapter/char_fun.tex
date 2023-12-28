@@ -148,23 +148,26 @@ The Mathlib lemma \texttt{MeasureTheory.FiniteMeasure.ext\_of\_forall\_lintegral
 \end{proof}
 
 \begin{lemma}\label{lem:exp_character}
+\lean{Clt.expInnerMulI} \leanok
 $x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a monoid homomorphism from $(E,+)$ to $C_b(E, \mathbb{C})$, the bounded continuous functions from $E$ to $\mathbb{C}$.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\leanok
 \end{proof}
 
 \begin{lemma}\label{lem:starSubalgebra_expPoly}
+\lean{Clt.expPoly} \leanok
 The functions of the form $x \mapsto \sum_{k=1}^n a_k e^{i\langle t_k, x\rangle}$ for $n \in \mathbb{N}$, $a_1, \ldots, a_n \in \mathbb{R}$ and $t_1, \ldots, t_n \in E$ are a star-subalgebra of $C_b(E, \mathbb{C})$. 
 \end{lemma}
 
-\begin{proof}\uses{lem:exp_character}
+\begin{proof}\uses{lem:exp_character} \leanok
 The monoid homomorphism can be lifted to a homomorphism of algebras from \texttt{AddMonoidAlgebra ℝ E} to $C_b(E, \mathbb{C})$ using \texttt{AddMonoidAlgebra.lift}. $\mathcal M$ is the range of this homomorphism. The ``star'' part can be checked easily.
 \end{proof}
 
 Let $\mathcal M$ be the set of these functions, which we call exponential polynomials.
 
 \begin{lemma}\label{lem:separating_expPoly}
+\lean{Clt.expPoly_separatesPoints} \leanok
 \uses{lem:starSubalgebra_expPoly}
 The star-subalgebra $\mathcal M$ separates points.
 \end{lemma}

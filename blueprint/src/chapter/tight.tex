@@ -1,0 +1,34 @@
+\chapter{Tight families of measures}
+
+\begin{definition}\label{def:tight}
+A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu(\Omega \setminus K) \le \varepsilon$.
+\end{definition}
+
+\begin{lemma}\label{lem:tight_of_cvg}
+\uses{def:tight}
+If $\mu_1, \mu_2, \ldots$ converge weakly to $\mu$, then $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
+\end{lemma}
+
+\begin{proof}
+Fix $r > 0$ and let $f(x) = (1 - (r - \vert x \vert)_+)_+$ . $f$ is a bounded continuous function. Then
+\begin{align*}
+\limsup_{n \to +\infty} \mu_n\{\vert X \vert > r\}
+\le \lim_{n \to +\infty} \mu_n\left[ f \right]
+= \mu[f]
+\le \mu\{\vert X \vert > r - 1\} \: .
+\end{align*}
+As $r \to +\infty$, the last quantity tends to 0.
+\end{proof}
+
+\begin{lemma}\label{tight_iff_cvg_probability}
+\uses{def:tight, def:cvg_probability}
+For random variables $(X_i)_{i \in \mathbb{N}}$ (TODO in which kind of space?), the two following conditions are equivalent:
+\begin{itemize}
+	\item $(\mathcal L(X_n))$ is tight,
+	\item For all $(c_n) \ge 0$ with $c_n \to 0$, $c_n X_n \xrightarrow{p} 0$.
+\end{itemize}
+\end{lemma}
+
+\begin{proof}
+
+\end{proof}

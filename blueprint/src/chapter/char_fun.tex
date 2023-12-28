@@ -17,10 +17,16 @@ The characteristic function of a random variable $X$ is defined as the character
 For all $t$, $\Vert\hat{\mu}(t)\Vert \le 1$.
 \end{lemma}
 
+\begin{proof}\leanok
+\end{proof}
+
 \begin{lemma}\label{lem:charFun_continuous}
 \uses{def:charFun}
 The characteristic function is a continuous function.
 \end{lemma}
+
+\begin{proof}
+\end{proof}
 
 \begin{lemma}\label{lem:charFun_neg}
 \lean{ProbabilityTheory.charFun_neg} \leanok
@@ -28,15 +34,24 @@ The characteristic function is a continuous function.
 $\hat{\mu}(-t) = \overline{\hat{\mu}(t)}$.
 \end{lemma}
 
+\begin{proof}\leanok
+\end{proof}
+
 \begin{lemma}\label{lem:charFun_smul}
 \uses{def:charFun}
 For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_X(at)$.
 \end{lemma}
 
+\begin{proof}
+\end{proof}
+
 \begin{lemma}\label{lem:charFun_add_of_indep}
 \uses{def:charFun}
 If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has characteristic function $\phi_{X+Y} = \phi_X \phi_Y$. 
 \end{lemma}
+
+\begin{proof}
+\end{proof}
 
 \begin{lemma}\label{lem:charFun_bound}
 \uses{def:charFun}
@@ -80,27 +95,6 @@ Let $X$ be a random variable with law $\mu$. Then for any $s, t$,
 
 \section{Convergence of characteristic functions and weak convergence of measures}
 
-
-\begin{definition}\label{def:tight}
-A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu(\Omega \setminus K) \le \varepsilon$.
-\end{definition}
-
-\begin{lemma}\label{lem:tight_of_cvg}
-\uses{def:tight}
-If $\mu_1, \mu_2, \ldots$ converge weakly to $\mu$, then $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
-\end{lemma}
-
-\begin{proof}
-Fix $r > 0$ and let $f(x) = (1 - (r - \vert x \vert)_+)_+$ . $f$ is a bounded continuous function. Then
-\begin{align*}
-\limsup_{n \to +\infty} \mu_n\{\vert X \vert > r\}
-\le \lim_{n \to +\infty} \mu_n\left[ f \right]
-= \mu[f]
-\le \mu\{\vert X \vert > r - 1\} \: .
-\end{align*}
-As $r \to +\infty$, the last quantity tends to 0.
-\end{proof}
-
 \begin{lemma}\label{lem:tight_iff_charFun_equiContinuous}
 \uses{def:tight}
 A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $\hat{\mu}_a$ is equi-continuous at 0.
@@ -111,12 +105,14 @@ TODO
 \end{proof}
 
 \begin{lemma}\label{lem:tight_of_tendsto_charFun}
-Let $(\mu_n)_{n \in \mathbb{N}}$ be measures with characteristic functions $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0, then $(\mu_n)$ is tight.
+Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0, then $(\mu_n)$ is tight.
 \end{lemma}
 
 \begin{proof}\uses{lem:tight_iff_charFun_equiContinuous}
 TODO
 \end{proof}
+
+Remark: the finite dimension is necessary. Counterexample: $\ell^2$ with $\mu_n$ the law of $X_n = \sum_{k=1}^n \zeta_k e_k$ where $e_k = (0, \ldots, 0, 1, 0 \ldots)$ and the $\zeta_k$ are i.i.d. $\mathcal N(0,1)$. Then $\hat{\mu}_n(t) \to e^{- \Vert t \Vert^2 / 2}$ for all $t \in \ell^2$ but $(\mu_n)$ is not tight (todo: why?).
 
 \begin{definition}\label{def:separates_points}
 \lean{Set.SeparatesPoints} \leanok
@@ -165,6 +161,9 @@ TODO
 $x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a monoid homomorphism from $(E,+)$ to $C_b(E, \mathbb{C})$, the bounded continuous functions from $E$ to $\mathbb{C}$.
 \end{lemma}
 
+\begin{proof}
+\end{proof}
+
 \begin{lemma}\label{lem:starSubalgebra_expPoly}
 The functions of the form $x \mapsto \sum_{k=1}^n a_k e^{i\langle t_k, x\rangle}$ for $n \in \mathbb{N}$, $a_1, \ldots, a_n \in \mathbb{R}$ and $t_1, \ldots, t_n \in E$ are a star-subalgebra of $C_b(E, \mathbb{C})$. 
 \end{lemma}
@@ -191,8 +190,8 @@ TODO
 \begin{lemma}\label{lem:ext_charFun}
 Two probability measure on a TODO space are equal iff they have the same characteristic function.
 \end{lemma}
-\begin{proof}
 
+\begin{proof}
 \end{proof}
 
 \begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}

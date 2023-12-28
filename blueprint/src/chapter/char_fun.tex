@@ -116,6 +116,7 @@ TODO
 \end{proof}
 
 \begin{lemma}\label{lem:tight_of_tendsto_charFun}
+\uses{def:weak_cvg_measure}
 Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0, then $(\mu_n)$ is tight.
 \end{lemma}
 
@@ -218,13 +219,12 @@ For $f \in \mathcal M$, $\varepsilon \ge 0$ and $n \in \mathbb{N}$, $f (1 - \fra
 \begin{proof}
 \end{proof}
 
-\begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
-\uses{def:separates_points}
-Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal A$ is separating in $\mathcal P(E)$.
-\end{theorem}
+\begin{lemma}\label{lem:Cb_eq_of_separating}
+Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \nu$ be two probability measures. If for all $f \in \mathcal A$, $\mu[f] = \nu[f]$, then for all $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$.
+\end{lemma}
 
-\begin{proof}\uses{lem:bounded_continuous_separating, lem:introduce_exponential, lem:integral_restrict_compact, lem:exponiential_M_eq_limit_M}
-Let $\mu$ and $\nu$ be two probability measures such that $\mu[f] = \nu[f]$ for all $f \in \mathcal A$. We want to prove that $\mu = \nu$. Since $C_b(E, \mathbb{C})$ is separating, it suffices to prove that for $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$. Let then $g \in C_b(E, \mathbb{C})$ and $\varepsilon > 0$.
+\begin{proof}\uses{lem:introduce_exponential, lem:integral_restrict_compact, lem:exponiential_M_eq_limit_M}
+Let $g \in C_b(E, \mathbb{C})$ and $\varepsilon > 0$.
 
 By Lemma~\ref{lem:introduce_exponential}, it suffices to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] - \nu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] \right\vert = 0$.
 
@@ -241,20 +241,43 @@ It remains to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[f e^{-\var
 TODO. Use~\ref{lem:exponiential_M_eq_limit_M} to use that $\mu[f'] = \nu[f']$ for all $f' \in \mathcal A$.
 \end{proof}
 
+\begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
+\uses{def:separates_points}
+Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal A$ is separating in $\mathcal P(E)$.
+\end{theorem}
+
+\begin{proof}\uses{lem:bounded_continuous_separating, lem:Cb_eq_of_separating}
+Let $\mu$ and $\nu$ be two probability measures such that $\mu[f] = \nu[f]$ for all $f \in \mathcal A$. We want to prove that $\mu = \nu$. Since $C_b(E, \mathbb{C})$ is separating, it suffices to prove that for $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$. This is proved in Lemma~\ref{lem:Cb_eq_of_separating}
+\end{proof}
+
 \begin{lemma}\label{lem:ext_charFun}
-Two probability measure on a TODO space are equal iff they have the same characteristic function.
+Two probability measures on a TODO space are equal iff they have the same characteristic function.
 \end{lemma}
 
 \begin{proof}\uses{lem:separating_expPoly, thm:separating_starSubalgebra}
 The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\ref{lem:separating_expPoly} and Theorem~\ref{thm:separating_starSubalgebra}. Equality of characteristic functions implies equality on $\mathcal M$, which then implies equality of the measures since $\mathcal M$ is separating.
 \end{proof}
 
+\begin{lemma}\label{lem:cvg_of_separating}
+Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures, with $(\mu_n)$ tight. If for all $f \in \mathcal A$, $\mu_n[f] \to \mu[f]$, then $\mu_n \xrightarrow{w} \mu$.
+\end{lemma}
+
+\begin{proof}\uses{lem:introduce_exponential, lem:integral_restrict_compact, lem:exponiential_M_eq_limit_M}
+Let $K$ be a compact such that $\mu(K^c) \le \varepsilon$ and $\mu_n(K^c) \le \varepsilon$ for all $n$, which exists since the family is tight.
+
+TODO: similar to the proof of Lemma~\ref{lem:Cb_eq_of_separating}.
+\end{proof}
+
 \begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}
-Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.
+Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.
 \end{theorem}
 
-\begin{proof}\uses{def:cvg_distribution, lem:tight_of_tendsto_charFun}
+\begin{proof}\uses{lem:separating_expPoly, lem:tight_of_tendsto_charFun, lem:cvg_of_separating}
 For all $t$, $x \mapsto e^{i \langle t, x \rangle}$ is a bounded continuous function. Hence by the definition of convergence in distribution, $\mu_n \xrightarrow{w} \mu \implies \hat{\mu}_n(t) \to \hat{\mu}(t)$ for all $t$.
 
-TODO reverse direction.
+Let's now prove the other direction.
+If the characteristic functions converge pointwise, we get from Lemma~\ref{lem:tight_of_tendsto_charFun} that the family of measures is tight. 
+Then apply Lemma~\ref{lem:cvg_of_separating} to the subalbegra $\mathcal M$: it suffices to show that $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal M$.
+
+TODO
 \end{proof}

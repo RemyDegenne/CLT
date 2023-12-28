@@ -32,3 +32,26 @@ For random variables $(X_i)_{i \in \mathbb{N}}$ (TODO in which kind of space?), 
 \begin{proof}
 
 \end{proof}
+
+
+\subsection{Prokhorov's theorem}
+
+\begin{theorem}[Prokhorov's theorem]\label{thm:prokhorov}
+\uses{def:tight}
+Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$. Then the following are equivalent:
+\begin{enumerate}
+	\item $S$ is tight.
+	\item For all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu((K^\varepsilon)^c) \le \varepsilon$, where $K^\varepsilon$ is the $\varepsilon$-thickening of $K$.
+	\item the closure of $S$ is compact.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\end{proof}
+
+\begin{lemma}\label{lem:relatively_compact_of_tight}
+Let $E$ be a metric space and let $S \subseteq \mathcal P(E)$ be tight. Then the closure of $S$ is compact.
+\end{lemma}
+
+\begin{proof}\uses{thm:prokhorov}
+\end{proof}

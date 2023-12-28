@@ -108,7 +108,7 @@ TODO
 
 \begin{lemma}\label{lem:tight_iff_charFun_equiContinuous}
 \uses{def:tight}
-A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $\hat{\mu}_a$ is equi-continuous at 0.
+A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $(\hat{\mu}_a)$ is equi-continuous at 0.
 \end{lemma}
 
 \begin{proof}\uses{lem:charFun_bound, lem:abs_sub_charFun}
@@ -126,146 +126,12 @@ TODO
 
 Remark: the finite dimension is necessary. Counterexample: $\ell^2$ with $\mu_n$ the law of $X_n = \sum_{k=1}^n \zeta_k e_k$ where $e_k = (0, \ldots, 0, 1, 0 \ldots)$ and the $\zeta_k$ are i.i.d. $\mathcal N(0,1)$. Then $\hat{\mu}_n(t) \to e^{- \Vert t \Vert^2 / 2}$ for all $t \in \ell^2$ but $(\mu_n)$ is not tight (todo: why?).
 
-\subsection{Separating sub-algebras}
-
-\begin{definition}\label{def:separates_points}
-\lean{Set.SeparatesPoints} \leanok
-A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x, y \in E$ with $x \ne y$, there exists $f \in \mathcal F$ with $f(x) \ne f(y)$.
-\end{definition}
-
-\begin{definition}\label{def:separating}
-A set $\mathcal F$ of functions $E \to F$ is separating in $\mathcal P(E)$ if for all probability measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists $f \in \mathcal F$ with $\mu[f] \ne \nu[f]$.
-\end{definition}
-
-TODO: this is a special case of a definition about duality pairings. Two types $E$, $F$ and a bilinear function $B : E \times F \to \mathbb{k}$ form a pairing (in the def above $\mathcal P(E)$, $C_b(E, \mathbb{C})$ and the integral). A set $\mathcal E$ of $E$ is separating if for all $f, f' \in F$ with $f \ne f'$, there exists $x \in \mathcal E$ with $B(x, f) \ne B(x, f')$. 
-
-\begin{lemma}\label{lem:bounded_continuous_separating}
-\uses{def:separating}
-In a Borel space $E$, the set $C_b(E, \mathbb{C})$ is separating in $\mathcal P(E)$.
-\end{lemma}
-
-\begin{proof}
-The Mathlib lemma \texttt{MeasureTheory.FiniteMeasure.ext\_of\_forall\_lintegral\_eq} shows that $C_b(E, \mathbb{R}_+)$ is separating. Since $C_b(E, \mathbb{R}_{+}) \subseteq C_b(E, \mathbb{C})$, the larger set is also separating.
-\end{proof}
-
-\begin{lemma}\label{lem:exp_character}
-\lean{Clt.expInnerMulI} \leanok
-$x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a monoid homomorphism from $(E,+)$ to $C_b(E, \mathbb{C})$, the bounded continuous functions from $E$ to $\mathbb{C}$.
-\end{lemma}
-
-\begin{proof}\leanok
-\end{proof}
-
-\begin{lemma}\label{lem:starSubalgebra_expPoly}
-\lean{Clt.expPoly} \leanok
-The functions of the form $x \mapsto \sum_{k=1}^n a_k e^{i\langle t_k, x\rangle}$ for $n \in \mathbb{N}$, $a_1, \ldots, a_n \in \mathbb{R}$ and $t_1, \ldots, t_n \in E$ are a star-subalgebra of $C_b(E, \mathbb{C})$. 
-\end{lemma}
-
-\begin{proof}\uses{lem:exp_character} \leanok
-The monoid homomorphism can be lifted to a homomorphism of algebras from \texttt{AddMonoidAlgebra ℝ E} to $C_b(E, \mathbb{C})$ using \texttt{AddMonoidAlgebra.lift}. $\mathcal M$ is the range of this homomorphism. The ``star'' part can be checked easily.
-\end{proof}
-
-Let $\mathcal M$ be the set of these functions, which we call exponential polynomials.
-
-\begin{lemma}\label{lem:separating_expPoly}
-\lean{Clt.expPoly_separatesPoints} \leanok
-\uses{lem:starSubalgebra_expPoly}
-The star-subalgebra $\mathcal M$ separates points.
-\end{lemma}
-
-\begin{proof}
-TODO
-\end{proof}
-
-\begin{lemma}\label{lem:integral_restrict_compact}
-Let $\mu$ be a measure on $E$ and $K$ be a compact set such that $\mu(K^c) \le \varepsilon$. Let $f \in C_b(E, \mathbb{C})$. Then
-\begin{align*}
-\left\Vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K] \right\Vert
-\le C \sqrt{\varepsilon} \: ,
-\end{align*}
-where $C = \sup_{x \ge 0} x e^{-x^2}$.
-\end{lemma}
-
-\begin{proof}
-\begin{align*}
-\left\Vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K] \right\Vert
-&= \left\Vert \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_{K^c}] \right\Vert
-\\
-&\le \frac{1}{\sqrt{\varepsilon}} \mu \left[ \sqrt{\varepsilon} \Vert f \Vert e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_{K^c} \right]
-\\
-&\le C \sqrt{\varepsilon} \: ,
-\end{align*}
-\end{proof}
-
-\begin{lemma}\label{lem:introduce_exponential}
-For any $f \in C_b(E, \mathbb{C})$ and probability measures $\mu, \nu$,
-\begin{align*}
-\left\vert \mu[f] - \nu[f] \right\vert
-= \lim_{\varepsilon \to 0} \left\vert \mu\left[f e^{-\varepsilon \Vert f \Vert^2} \right] - \nu\left[f e^{-\varepsilon \Vert f \Vert^2} \right] \right\vert
-\: .
-\end{align*}
-\end{lemma}
-
-\begin{proof}
-\end{proof}
-
-\begin{lemma}\label{lem:exponiential_M_eq_limit_M}
-For $f \in \mathcal M$, $\varepsilon \ge 0$ and $n \in \mathbb{N}$, $f (1 - \frac{\varepsilon}{n} f)^n \in \mathcal M$. Furthermore, for a measure $\mu$,
-\begin{align*}
-\mu\left[f e^{-\varepsilon \Vert f \Vert^2}\right] = \lim_{n \to + \infty} \mu\left[f (1 - \frac{\varepsilon}{n} f)^n\right] \: .
-\end{align*}
-\end{lemma}
-
-\begin{proof}
-\end{proof}
-
-\begin{lemma}\label{lem:Cb_eq_of_separating}
-Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \nu$ be two probability measures. If for all $f \in \mathcal A$, $\mu[f] = \nu[f]$, then for all $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$.
-\end{lemma}
-
-\begin{proof}\uses{lem:introduce_exponential, lem:integral_restrict_compact, lem:exponiential_M_eq_limit_M}
-Let $g \in C_b(E, \mathbb{C})$ and $\varepsilon > 0$.
-
-By Lemma~\ref{lem:introduce_exponential}, it suffices to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] - \nu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] \right\vert = 0$.
-
-The two measures are inner regular, hence there exists $K$ compact with $\mu(K^c) \le \varepsilon$ and $\nu(K^c) \le \varepsilon$.
-
-By Lemma~\ref{lem:integral_restrict_compact}, it suffices to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \mathbb{I}_K \right] - \nu\left[g e^{-\varepsilon \Vert g \Vert^2} \mathbb{I}_K \right] \right\vert = 0$.
-
-On $K$, the Stone-Weierstrass theorem \texttt{ContinuousMap.starSubalgebra\_topologicalClosure\_eq\_top\_of\_separatesPoints} gives that a subalgebra that separates points is dense. There exists then $f \in \mathcal A$ such that $\sup_{x \in K} \left\vert f(x) - g(x) \right\vert \le \varepsilon$.
-
-TODO: we can bound $\left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \mathbb{I}_K \right] - \mu\left[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K \right] \right\vert$ by a function of $\varepsilon$ tending to 0. Same for $\nu$.
-
-It remains to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K \right] - \nu\left[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K \right] \right\vert = 0$.
-
-TODO. Use~\ref{lem:exponiential_M_eq_limit_M} to use that $\mu[f'] = \nu[f']$ for all $f' \in \mathcal A$.
-\end{proof}
-
-\begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
-\uses{def:separates_points}
-Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal A$ is separating in $\mathcal P(E)$.
-\end{theorem}
-
-\begin{proof}\uses{lem:bounded_continuous_separating, lem:Cb_eq_of_separating}
-Let $\mu$ and $\nu$ be two probability measures such that $\mu[f] = \nu[f]$ for all $f \in \mathcal A$. We want to prove that $\mu = \nu$. Since $C_b(E, \mathbb{C})$ is separating, it suffices to prove that for $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$. This is proved in Lemma~\ref{lem:Cb_eq_of_separating}
-\end{proof}
-
 \begin{lemma}\label{lem:ext_charFun}
 Two probability measures on a TODO space are equal iff they have the same characteristic function.
 \end{lemma}
 
 \begin{proof}\uses{lem:separating_expPoly, thm:separating_starSubalgebra}
 The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\ref{lem:separating_expPoly} and Theorem~\ref{thm:separating_starSubalgebra}. Equality of characteristic functions implies equality on $\mathcal M$, which then implies equality of the measures since $\mathcal M$ is separating.
-\end{proof}
-
-\begin{lemma}\label{lem:cvg_of_separating}
-Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures, with $(\mu_n)$ tight. If for all $f \in \mathcal A$, $\mu_n[f] \to \mu[f]$, then $\mu_n \xrightarrow{w} \mu$.
-\end{lemma}
-
-\begin{proof}\uses{lem:introduce_exponential, lem:integral_restrict_compact, lem:exponiential_M_eq_limit_M}
-Let $K$ be a compact such that $\mu(K^c) \le \varepsilon$ and $\mu_n(K^c) \le \varepsilon$ for all $n$, which exists since the family is tight.
-
-TODO: similar to the proof of Lemma~\ref{lem:Cb_eq_of_separating}.
 \end{proof}
 
 \begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}

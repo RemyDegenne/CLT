@@ -39,7 +39,7 @@ The monoid homomorphism can be lifted to a homomorphism of algebras from \texttt
 
 Let $\mathcal M$ be the set of these functions, which we call exponential polynomials.
 
-\begin{lemma}\label{lem:separating_expPoly}
+\begin{lemma}\label{lem:separates_points_expPoly}
 \lean{Clt.expPoly_separatesPoints} \leanok
 \uses{lem:starSubalgebra_expPoly}
 The star-subalgebra $\mathcal M$ separates points.
@@ -121,6 +121,14 @@ Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C
 
 \begin{proof}\uses{lem:bounded_continuous_separating, lem:Cb_eq_of_separating}
 Let $\mu$ and $\nu$ be two probability measures such that $\mu[f] = \nu[f]$ for all $f \in \mathcal A$. We want to prove that $\mu = \nu$. Since $C_b(E, \mathbb{C})$ is separating, it suffices to prove that for $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$. This is proved in Lemma~\ref{lem:Cb_eq_of_separating}
+\end{proof}
+
+\begin{lemma}\label{lem:separating_expPoly}
+The exponential polynomials $\mathcal M$ are separating.
+\end{lemma}
+
+\begin{proof}\uses{thm:separating_starSubalgebra, lem:separates_points_expPoly}
+Apply Theorem~\ref{thm:separating_starSubalgebra}, using Lemma~\ref{lem:separates_points_expPoly}.
 \end{proof}
 
 \begin{lemma}\label{lem:cvg_of_separating}

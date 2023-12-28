@@ -69,6 +69,7 @@ namespace ProbabilityTheory
 
 variable {E : Type*} [MeasurableSpace E]
 
+/-- The characteristic function of a measure. -/
 noncomputable
 def charFun [Inner ℝ E] (μ : Measure E) (t : E) : ℂ := ∫ x, exp (⟪t, x⟫ • I) ∂μ
 

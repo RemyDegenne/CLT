@@ -6,6 +6,7 @@ A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x,
 \end{definition}
 
 \begin{definition}\label{def:separating}
+\lean{MeasureTheory.Separating} \leanok
 A set $\mathcal F$ of functions $E \to F$ is separating in $\mathcal P(E)$ if for all probability measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists $f \in \mathcal F$ with $\mu[f] \ne \nu[f]$.
 \end{definition}
 
@@ -93,6 +94,7 @@ Dominated convergence.
 \end{proof}
 
 \begin{lemma}\label{lem:Cb_eq_of_separating}
+\uses{def:separates_points}
 Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \nu$ be two probability measures. If for all $f \in \mathcal A$, $\mu[f] = \nu[f]$, then for all $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$.
 \end{lemma}
 
@@ -115,7 +117,6 @@ TODO. Use~\ref{lem:exponiential_M_eq_limit_M} to use that $\mu[f'] = \nu[f']$ fo
 \end{proof}
 
 \begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
-\uses{def:separates_points}
 Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal A$ is separating in $\mathcal P(E)$.
 \end{theorem}
 

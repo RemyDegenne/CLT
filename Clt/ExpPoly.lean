@@ -119,7 +119,25 @@ def toContinuousFunₐ : (E →ᵇ ℂ) →⋆ₐ[ℝ] C(E, ℂ) where
   map_star' := fun _ ↦ rfl
 
 lemma expPoly_separatesPoints : ((expPoly E).map (toContinuousFunₐ E)).SeparatesPoints := by
-  intro u v huv
-  sorry
+  intro x y hxy_ne
+  simp only [toContinuousFunₐ, StarSubalgebra.coe_toSubalgebra, StarSubalgebra.coe_map,
+    StarAlgHom.coe_mk', AlgHom.coe_mk, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
+    Set.mem_image, SetLike.mem_coe, mem_expPoly, exists_exists_and_eq_and, ContinuousMap.coe_coe,
+    ne_eq]
+  obtain ⟨v, hv_ne⟩ : ∃ v, inner v x ≠ inner v y := by
+    by_contra! h
+    exact hxy_ne (ext_inner_left ℝ h)
+  obtain ⟨r, hr_ne⟩ : ∃ r : ℝ,
+      cexp (((inner (r • v) x : ℝ) : ℂ) * I) ≠ cexp (((inner (r • v) y : ℝ) : ℂ) * I) := by
+    simp_rw [inner_smul_left, IsROrC.conj_to_real, ofReal_mul]
+    sorry
+  let u := AddMonoidAlgebra.single (r • v) (1 : ℝ)
+  refine ⟨expInnerMulIₐ u, ⟨u, ?_⟩, ?_⟩
+  · ext x
+    rw [expInnerMulIₐ_apply]
+  · rw [expInnerMulIₐ_apply,expInnerMulIₐ_apply]
+    simp only [ne_eq, one_ne_zero, not_false_eq_true, Finsupp.support_single_ne_zero,
+      Finset.sum_singleton, Finsupp.single_eq_same, ofReal_one, one_mul]
+    exact hr_ne
 
 end Clt

@@ -1,7 +1,8 @@
 \chapter{Tight families of measures}
 
 \begin{definition}\label{def:tight}
-A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu(\Omega \setminus K) \le \varepsilon$.
+\lean{MeasureTheory.Tight} \leanok
+A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu(K^c) \le \varepsilon$.
 \end{definition}
 
 \begin{lemma}\label{lem:tight_of_cvg}

@@ -17,14 +17,19 @@ open scoped ENNReal
 
 namespace MeasureTheory
 
-variable {α E : Type*} {mα : MeasurableSpace α} [TopologicalSpace α]
-  [NormedRing E] [NormedAlgebra ℝ E]
+variable {α E : Type*} [MeasurableSpace α] [TopologicalSpace α] [NormedRing E] [NormedAlgebra ℝ E]
 
 /-- A subalgebra `A` of the bounded continuous function from `α` to `E` is separating in the
 probability measures if for all probability measures `μ ≠ ν`, there exists `f ∈ A` such that
 `∫ x, f x ∂μ ≠ ∫ x, f x ∂ν`. -/
 structure Separating (A : Subalgebra ℝ (α →ᵇ E)) : Prop :=
-(exists_ne : ∀ μ ν : ProbabilityMeasure α, μ ≠ ν → ∃ f ∈ A, ∫ x, f x ∂μ ≠ ∫ x, f x ∂ν)
+(exists_ne : ∀ ⦃μ ν : ProbabilityMeasure α⦄, μ ≠ ν → ∃ f ∈ A, ∫ x, f x ∂μ ≠ ∫ x, f x ∂ν)
 
+lemma ProbabilityMeasure.ext_of_Separating {μ ν : ProbabilityMeasure α} {A : Subalgebra ℝ (α →ᵇ E)}
+    (hA : Separating A) (h : ∀ f ∈ A, ∫ x, f x ∂μ = ∫ x, f x ∂ν) :
+    μ = ν := by
+  by_contra h_ne
+  obtain ⟨f, hfA, hf_ne⟩ := hA.exists_ne h_ne
+  exact hf_ne (h f hfA)
 
 end MeasureTheory

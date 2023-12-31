@@ -34,15 +34,21 @@ For random variables $(X_i)_{i \in \mathbb{N}}$ (TODO in which kind of space?), 
 
 \end{proof}
 
+\begin{lemma}\label{tight_closure}
+\uses{def:tight}
+The closure of a tight set of measures is tight.
+\end{lemma}
+
+\begin{proof}
+\end{proof}
 
 \section{Prokhorov's theorem}
 
 \begin{lemma}\label{lem:exists_finite_union_inter_lt}
-Let $(U_n)_{n \in \mathbb{N}}$ be measurable sets such that $\bigcap_{n=1}^{+ \infty} U_n = \emptyset$. Let $\mu$ be a measure and let $\varepsilon > 0$. Then there exists a finite set $S \subseteq \mathbb{N}$ such that $\mu(\bigcap_{n \in S} U_n) < \varepsilon$.
+Let $(U_n)_{n \in \mathbb{N}}$ be open sets in a complete separable metric space $E$ such that $\bigcup_{n=1}^{+ \infty} U_n = E$. Let $\Gamma$ be a relatively compact set of probability measures on $E$ for the topology of weak convergence of measures. Then for all $\varepsilon > 0$ there exists a finite set $S \subseteq \mathbb{N}$ such that for all $\mu \in \Gamma$, $\mu(\bigcup_{n \in S} U_n) > 1 - \varepsilon$.
 \end{lemma}
 
 \begin{proof}
-Rémy: I have a proof of that result in the project formalizing Kolmogorov's extension theorem (joint work with Peter Pfaffelhuber).
 \end{proof}
 
 \begin{lemma}\label{lem:prokhorov_aux1}
@@ -50,6 +56,13 @@ Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$
 \end{lemma}
 
 \begin{proof}\uses{lem:exists_finite_union_inter_lt}
+\end{proof}
+
+\begin{lemma}\label{ProbabilityMeasure_compact}
+If $E$ is a compact metric space, then $\mathcal P(X)$ with the Prokhorov metric is a compact metric space.
+\end{lemma}
+
+\begin{proof}
 \end{proof}
 
 \begin{theorem}[Prokhorov's theorem]\label{thm:prokhorov}

@@ -37,17 +37,35 @@ For random variables $(X_i)_{i \in \mathbb{N}}$ (TODO in which kind of space?), 
 
 \section{Prokhorov's theorem}
 
+\begin{lemma}\label{lem:exists_finite_union_inter_lt}
+Let $(U_n)_{n \in \mathbb{N}}$ be measurable sets such that $\bigcap_{n=1}^{+ \infty} U_n = \emptyset$. Let $\mu$ be a measure and let $\varepsilon > 0$. Then there exists a finite set $S \subseteq \mathbb{N}$ such that $\mu(\bigcap_{n \in S} U_n) < \varepsilon$.
+\end{lemma}
+
+\begin{proof}
+Rémy: I have a proof of that result in the project formalizing Kolmogorov's extension theorem (joint work with Peter Pfaffelhuber).
+\end{proof}
+
+\begin{lemma}\label{lem:prokhorov_aux1}
+Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$. If the closure of $S$ is compact, then $S$ is tight.
+\end{lemma}
+
+\begin{proof}\uses{lem:exists_finite_union_inter_lt}
+\end{proof}
+
 \begin{theorem}[Prokhorov's theorem]\label{thm:prokhorov}
 \uses{def:tight}
 Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$. Then the following are equivalent:
 \begin{enumerate}
 	\item $S$ is tight.
-	\item For all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu((K^\varepsilon)^c) \le \varepsilon$, where $K^\varepsilon$ is the $\varepsilon$-thickening of $K$.
+	%\item For all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu((K^\varepsilon)^c) \le \varepsilon$, where $K^\varepsilon$ is the $\varepsilon$-thickening of $K$.
 	\item the closure of $S$ is compact.
 \end{enumerate}
 \end{theorem}
 
-\begin{proof}
+\begin{proof}\uses{lem:prokhorov_aux1}
+Lemma~\ref{lem:prokhorov_aux1} provides one direction.
+
+TODO: proof of the other one.
 \end{proof}
 
 \begin{lemma}\label{lem:relatively_compact_of_tight}

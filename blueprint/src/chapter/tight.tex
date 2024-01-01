@@ -59,11 +59,21 @@ Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$
 \begin{proof}\uses{lem:exists_finite_union_inter_lt}
 \end{proof}
 
-\begin{lemma}\label{ProbabilityMeasure_compact}
-If $E$ is a compact metric space, then $\mathcal P(X)$ with the Prokhorov metric is a compact metric space.
-\end{lemma}
+\begin{theorem}[Riesz-Markov-Kakutani representation theorem, for compact spaces]\label{thm:riesz_markov_kakutani}
+Let $E$ be a compact T2 space and let $\psi$ be a positive linear functional on $C(E, \mathbb{C})$. There exists a regular measure $\mu$ finite on compacts such that
+\begin{align*}
+\forall f \in C(E, \mathbb{C}), \ \psi(f) = \int_{x \in E} f(x) \partial\mu(x) \: .
+\end{align*}
+\end{theorem}
 
 \begin{proof}
+\end{proof}
+
+\begin{lemma}\label{lem:ProbabilityMeasure_compact}
+If $E$ is a compact metric space, then $\mathcal P(E)$ with the Prokhorov metric is a compact metric space.
+\end{lemma}
+
+\begin{proof}\uses{thm:riesz_markov_kakutani}
 \end{proof}
 
 \begin{theorem}[Prokhorov's theorem]\label{thm:prokhorov}
@@ -75,7 +85,7 @@ Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$
 \end{enumerate}
 \end{theorem}
 
-\begin{proof}\uses{lem:prokhorov_aux1}
+\begin{proof}\uses{lem:prokhorov_aux1, lem:ProbabilityMeasure_compact}
 Lemma~\ref{lem:prokhorov_aux1} provides one direction.
 
 TODO: proof of the other one.

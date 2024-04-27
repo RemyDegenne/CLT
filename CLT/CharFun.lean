@@ -43,9 +43,9 @@ def probFourierChar : Multiplicative ℝ →* circle where
   map_one' := by simp only; rw [toAdd_one, neg_zero, expMapCircle_zero]
   map_mul' x y := by simp only; rw [toAdd_mul, neg_add, expMapCircle_add]
 
-theorem probFourierChar_apply' (x : ℝ) : probFourierChar[x] = exp (↑(-x) * I) := rfl
+theorem probFourierChar_apply' (x : ℝ) : probFourierChar x = exp (↑(-x) * I) := rfl
 
-theorem probFourierChar_apply (x : ℝ) : probFourierChar[x] = exp (- ↑x * I) := by
+theorem probFourierChar_apply (x : ℝ) : probFourierChar x = exp (- ↑x * I) := by
   simp only [probFourierChar_apply', ofReal_neg]
 
 @[continuity]

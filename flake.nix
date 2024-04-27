@@ -12,7 +12,7 @@
         lean4-pkgs = lean4.packages.${system};
       in {
         devShells.default = pkgs.mkShell {
-          packages = [ lean4-pkgs.lean-all lean4-pkgs.vscode ];
+          packages = [ lean4-pkgs.lean-all lean4-pkgs.vscode pkgs.elan ];
         };
       });
 }

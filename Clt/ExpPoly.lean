@@ -122,8 +122,7 @@ lemma expPoly_separatesPoints : ((expPoly E).map (toContinuousFunₐ E)).Separat
   intro x y hxy_ne
   simp only [toContinuousFunₐ, StarSubalgebra.coe_toSubalgebra, StarSubalgebra.coe_map,
     StarAlgHom.coe_mk', AlgHom.coe_mk, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
-    Set.mem_image, SetLike.mem_coe, mem_expPoly, exists_exists_and_eq_and, ContinuousMap.coe_coe,
-    ne_eq]
+    Set.mem_image, SetLike.mem_coe, exists_exists_and_eq_and, ContinuousMap.coe_coe, ne_eq]
   obtain ⟨v, hv_ne⟩ : ∃ v, inner v x ≠ inner v y := by
     by_contra! h
     exact hxy_ne (ext_inner_left ℝ h)
@@ -141,12 +140,10 @@ lemma expPoly_separatesPoints : ((expPoly E).map (toContinuousFunₐ E)).Separat
     rw [inv_mul_cancel_right₀ (sub_ne_zero_of_ne hv_ne)] at hn
     simpa [← mul_assoc, Real.pi_ne_zero] using hn
   set u := AddMonoidAlgebra.single (r • v) (1 : ℝ) with hu
-  refine ⟨expInnerMulIₐ u, ⟨u, ?_⟩, ?_⟩
-  · ext x
-    rw [expInnerMulIₐ_apply]
-  · rw [expInnerMulIₐ_apply,expInnerMulIₐ_apply]
-    simp only [hu, ne_eq, one_ne_zero, not_false_eq_true, Finsupp.support_single_ne_zero,
-      Finset.sum_singleton, Finsupp.single_eq_same, ofReal_one, one_mul]
-    exact hr_ne
+  use expInnerMulIₐ u, ⟨u, rfl⟩
+  rw [expInnerMulIₐ_apply,expInnerMulIₐ_apply]
+  simp only [hu, ne_eq, one_ne_zero, not_false_eq_true, Finsupp.support_single_ne_zero,
+    Finset.sum_singleton, Finsupp.single_eq_same, ofReal_one, one_mul]
+  exact hr_ne
 
 end Clt

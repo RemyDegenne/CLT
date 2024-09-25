@@ -51,7 +51,7 @@ lemma tight_singleton [T2Space α] [OpensMeasurableSpace α]
     simp
   | inr hμ =>
     let r := μ Set.univ
-    have hr : 0 < r := by simp [hμ.out]
+    have hr : 0 < r := Measure.measure_univ_pos.mpr hμ.out
     intro ε hε
     cases lt_or_ge ε r with
     | inl hεr =>

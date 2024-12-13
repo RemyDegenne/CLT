@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2024 Thomas Zhu. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Thomas Zhu
+-/
 import Mathlib.Analysis.Calculus.Taylor
 import Mathlib.Analysis.Fourier.FourierTransformDeriv
 import Clt.CharFun

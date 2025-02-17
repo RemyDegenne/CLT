@@ -35,6 +35,7 @@ section PR
 variable {V W : Type*} [AddCommGroup V] [Module ℝ V] [TopologicalSpace V]
     [AddCommGroup W] [Module ℝ W] [TopologicalSpace W]
     {e : AddChar ℝ Circle} {L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ}
+    {he : Continuous e} {hL : Continuous fun p : V × W ↦ L p.1 p.2}
 
 @[simp]
 lemma starRingEnd_addChar (x : ℝ) : starRingEnd ℂ (e x) = e (-x) := by
@@ -57,21 +58,18 @@ def probChar (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2)
     _ = 2 := by ring
 
 @[simp]
-lemma probChar_apply (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2)
-    (w : Multiplicative W) :
+lemma probChar_apply (w : Multiplicative W) :
     probChar he hL w v = e (L v (Multiplicative.toAdd w)) := rfl
 
-lemma probChar_one (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2) :
-    probChar he hL 1 = 1 := by ext; simp
+@[simp]
+lemma probChar_one : probChar he hL 1 = 1 := by ext; simp
 
-lemma probChar_mul (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2)
-    (x y : Multiplicative W) :
+lemma probChar_mul (x y : Multiplicative W) :
     probChar he hL (x * y) = probChar he hL x * probChar he hL y := by
   ext
   simp [e.map_add_eq_mul]
 
-lemma probChar_inv (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2)
-    (w : Multiplicative W) :
+lemma probChar_inv (w : Multiplicative W) :
     probChar he hL w⁻¹ = star (probChar he hL w) := by ext; simp
 
 theorem probChar_SeparatesPoints (he : Continuous e) (he' : e ≠ 1)
@@ -103,12 +101,11 @@ theorem probChar_SeparatesPoints (he : Continuous e) (he' : e ≠ 1)
 def expInnerMulI' (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2) :
     Multiplicative W →* (V →ᵇ ℂ) where
   toFun := probChar he hL
-  map_one' := probChar_one he hL
-  map_mul' := probChar_mul he hL
+  map_one' := probChar_one
+  map_mul' := probChar_mul (he := he) (hL := hL)
 
 @[simp]
-lemma expInnerMulI'_apply (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2)
-    (w : Multiplicative W) (v : V) :
+lemma expInnerMulI'_apply (w : Multiplicative W) (v : V) :
     expInnerMulI' he hL w v = e (L v (Multiplicative.toAdd w)) := by simp [expInnerMulI']
 
 def expInnerMulIₐ' (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2) :
@@ -116,8 +113,7 @@ def expInnerMulIₐ' (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p
   AddMonoidAlgebra.lift ℝ W (V →ᵇ ℂ) (expInnerMulI' he hL)
 
 @[simp]
-lemma expInnerMulIₐ'_apply (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2)
-    (w : AddMonoidAlgebra ℝ W) (v : V) :
+lemma expInnerMulIₐ'_apply (w : AddMonoidAlgebra ℝ W) (v : V) :
     expInnerMulIₐ' he hL w v = ∑ a ∈ w.support, w a * (e (L v a) : ℂ) := by
   simp only [expInnerMulIₐ', AddMonoidAlgebra.lift_apply]
   rw [Finsupp.sum_of_support_subset w subset_rfl]
@@ -143,8 +139,7 @@ def expPoly' (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2) 
     simp_rw [← map_neg (L u)]
     rfl
 
-lemma mem_expPoly' (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2)
-    (f : V →ᵇ ℂ) :
+lemma mem_expPoly' (f : V →ᵇ ℂ) :
     f ∈ expPoly' he hL
       ↔ ∃ w : AddMonoidAlgebra ℝ W, f = fun x ↦ ∑ a ∈ w.support, w a * (e (L x a) : ℂ) := by
   change f ∈ (expInnerMulIₐ' he hL).range ↔ _
@@ -159,17 +154,7 @@ lemma mem_expPoly' (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1
     ext
     simp [h]
 
-def toContinuousFunₐ : (V →ᵇ ℂ) →⋆ₐ[ℝ] C(V, ℂ) where
-  toFun := (↑)
-  map_one' := rfl
-  map_mul' _ _ := rfl
-  map_zero' := rfl
-  map_add' _ _ := rfl
-  commutes' _ := rfl
-  map_star' _ := rfl
-
-lemma probChar_mem_expPoly' (he : Continuous e) (hL : Continuous fun p : V × W ↦ L p.1 p.2) :
-    probChar he hL w ∈ expPoly' he hL := by
+lemma probChar_mem_expPoly' : probChar he hL w ∈ expPoly' he hL := by
   rw [mem_expPoly']
   refine ⟨AddMonoidAlgebra.single w 1, ?_⟩
   ext v
@@ -181,6 +166,15 @@ lemma probChar_mem_expPoly' (he : Continuous e) (hL : Continuous fun p : V × W 
   · simp [Finsupp.single_apply_ne_zero]
   · simp
 
+def toContinuousFunₐ : (V →ᵇ ℂ) →⋆ₐ[ℝ] C(V, ℂ) where
+  toFun := (↑)
+  map_one' := rfl
+  map_mul' _ _ := rfl
+  map_zero' := rfl
+  map_add' _ _ := rfl
+  commutes' _ := rfl
+  map_star' _ := rfl
+
 lemma expPoly'_separatesPoints (he : Continuous e) (he' : e ≠ 1)
     (hL : Continuous fun p : V × W ↦ L p.1 p.2) (hL' : ∀ v ≠ 0, L v ≠ 0) :
     ((expPoly' he hL).map toContinuousFunₐ).SeparatesPoints := by
@@ -189,8 +183,7 @@ lemma expPoly'_separatesPoints (he : Continuous e) (he' : e ≠ 1)
   use probChar he hL w
   simp only [StarSubalgebra.coe_toSubalgebra, StarSubalgebra.coe_map, Set.mem_image,
     SetLike.mem_coe, exists_exists_and_eq_and, ne_eq, SetLike.coe_eq_coe]
-  refine ⟨?_, hw⟩
-  refine ⟨probChar he hL w, probChar_mem_expPoly' he hL, rfl⟩
+  exact ⟨⟨probChar he hL w, probChar_mem_expPoly', rfl⟩, hw⟩
 
 end PR
 

@@ -1,102 +1,58 @@
+name: Build Project
+
 on:
   push:
     branches:
       - master
+    paths:
+      - '**/*.lean'
+      - 'lean-toolchain'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**/*.lean'
+      - 'lean-toolchain'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+  workflow_dispatch: # Allow manual triggering of the workflow from the GitHub Actions interface
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Cancel previous runs if a new commit is pushed to the same PR or branch
+concurrency:
+  group: ${{ github.ref }}  # Group runs by the ref (branch or PR)
+  cancel-in-progress: true  # Cancel any ongoing runs in the same group
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages and modify PR labels
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: read          # Read access to repository contents
+  pages: write            # Write access to GitHub Pages
+  id-token: write         # Write access to ID tokens
 
 jobs:
-  style_lint:
-    name: Lint style
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check for long lines
-        if: always()
-        run: |
-          ! (find Clt -name "*.lean" -type f -exec grep -E -H -n '^.{101,}$' {} \; | grep -v -E 'https?://')
-
-      - name: Don't 'import Mathlib', use precise imports
-        if: always()
-        run: |
-          ! (find Clt -name "*.lean" -type f -print0 | xargs -0 grep -E -n '^import Mathlib$')
-
   build_project:
     runs-on: ubuntu-latest
     name: Build project
     steps:
       - name: Checkout project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Print files to upstream
-        run: |
-          grep -r --files-without-match 'import Clt' Clt | sort > 1.txt
-          grep -r --files-with-match 'sorry' Clt | sort > 2.txt
-          mkdir -p docs/_includes
-          comm -23 1.txt 2.txt | sed -e 's/^\(.*\)$/- [`\1`](https:\/\/github.com\/RemyDegenne\/Clt\/blob\/master\/\1)/' > docs/_includes/files_to_upstream.md
-          rm 1.txt 2.txt
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Install elan
-        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:4.0.0
+        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
 
-      - name: Get cache
-        run: ~/.elan/bin/lake -Kenv=dev exe cache get || true
+      - name: Get Mathlib cache
+        run: ~/.elan/bin/lake exe cache get || true
 
-      - name: Build project
-        run: ~/.elan/bin/lake -Kenv=dev build Clt
-
-      - name: Cache mathlib docs
-        uses: actions/cache@v3
+      - name: Cache build artifacts
+        uses: actions/cache@v4
         with:
           path: |
-            .lake/build/doc/Init
-            .lake/build/doc/Lake
-            .lake/build/doc/Lean
-            .lake/build/doc/Std
-            .lake/build/doc/Mathlib
-            .lake/build/doc/declarations
-          key: MathlibDoc-${{ hashFiles('lake-manifest.json') }}
-          restore-keys: |
-            MathlibDoc-
+            .lake/build
+          key: LakeBuild-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          restore-keys: LakeBuild-
 
-      - name: Build documentation
-        run: ~/.elan/bin/lake -Kenv=dev build Clt:docs
-
-      - name: Build blueprint and copy to `docs/blueprint`
-        uses: xu-cheng/texlive-action@v2
-        with:
-          docker_image: ghcr.io/xu-cheng/texlive-full:20231201
-          run: |
-            export PIP_BREAK_SYSTEM_PACKAGES=1
-            apk update
-            apk add --update make py3-pip git
-            apk add --update make py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
-            git config --global --add safe.directory $GITHUB_WORKSPACE
-            git config --global --add safe.directory `pwd`
-            python3 -m pip install --upgrade pip requests wheel
-            python3 -m pip install pygraphviz --global-option=build_ext --global-option="-L/usr/lib/graphviz/" --global-option="-R/usr/lib/graphviz/"
-            pip install -r blueprint/requirements.txt
-            python3 -m pip install invoke
-            inv all
-
-      - name: Copy documentation to `docs/docs`
-        run: |
-          mv .lake/build/doc docs/docs
-
-      - name: Upload docs & blueprint artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: docs/blueprint
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
-
-      - name: Make sure the cache works
-        run: |
-          mv docs/docs .lake/build/doc
+      - name: Build project
+        run: ~/.elan/bin/lake build Project

@@ -32,8 +32,8 @@ namespace Clt
 
 section PR
 
-variable {V : Type*} [AddCommGroup V] [Module ℝ V] [TopologicalSpace V]
-    {W : Type*} [TopologicalSpace W] [AddCommGroup W] [Module ℝ W]
+variable {V W : Type*} [AddCommGroup V] [Module ℝ V] [TopologicalSpace V]
+    [AddCommGroup W] [Module ℝ W] [TopologicalSpace W]
     {e : AddChar ℝ Circle} {L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ}
 
 @[simp]

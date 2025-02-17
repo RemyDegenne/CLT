@@ -3,12 +3,14 @@ Copyright (c) 2023 Rémy Degenne. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rémy Degenne
 -/
-import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Algebra.MonoidAlgebra.Basic
-import Mathlib.Topology.ContinuousFunction.Compact
-import Mathlib.Analysis.Fourier.FourierTransform
+import Mathlib.Analysis.CStarAlgebra.Classes
+import Mathlib.Analysis.Complex.Circle
+import Mathlib.Analysis.InnerProductSpace.Continuous
+import Mathlib.Analysis.SpecialFunctions.Complex.Log
 import Mathlib.Data.Real.Irrational
-import Mathlib.Topology.ContinuousFunction.StoneWeierstrass
+import Mathlib.Topology.ContinuousMap.Bounded.Star
+import Mathlib.Topology.ContinuousMap.Star
+
 
 /-!
 # Exponential polynomials
@@ -66,7 +68,7 @@ def expInnerMulIₐ : AddMonoidAlgebra ℝ E →ₐ[ℝ] (E →ᵇ ℂ) :=
   AddMonoidAlgebra.lift ℝ E (E →ᵇ ℂ) expInnerMulI
 
 lemma expInnerMulIₐ_apply (x : AddMonoidAlgebra ℝ E) (v : E) :
-    expInnerMulIₐ x v = ∑ a in x.support, x a * exp (⟪a, v⟫ * I) := by
+    expInnerMulIₐ x v = ∑ a ∈ x.support, x a * exp (⟪a, v⟫ * I) := by
   simp only [expInnerMulIₐ, AddMonoidAlgebra.lift_apply, Circle.exp, expInnerMulI_apply]
   rw [Finsupp.sum_of_support_subset x subset_rfl]
   · simp [expInnerMulI_apply]
@@ -95,7 +97,7 @@ def expPoly : StarSubalgebra ℝ (E →ᵇ ℂ) where
 
 lemma mem_expPoly (f : E →ᵇ ℂ) :
     f ∈ expPoly E
-      ↔ ∃ y : AddMonoidAlgebra ℝ E, f = fun x ↦ ∑ a in y.support, y a * exp (⟪a, x⟫ * I) := by
+      ↔ ∃ y : AddMonoidAlgebra ℝ E, f = fun x ↦ ∑ a ∈ y.support, y a * exp (⟪a, x⟫ * I) := by
   change f ∈ AlgHom.range expInnerMulIₐ ↔ _
   simp only [AlgHom.mem_range]
   constructor

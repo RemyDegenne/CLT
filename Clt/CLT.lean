@@ -17,7 +17,7 @@ noncomputable section
 open MeasureTheory ProbabilityTheory Complex Filter
 open scoped Real Topology
 
-#check tendsto_one_plus_div_pow_exp
+-- #check tendsto_one_plus_div_pow_exp
 /-- `(1 + t/n + o(1/n)) ^ n → exp t`. -/
 lemma tendsto_one_plus_div_pow_exp' {f : ℕ → ℂ} (t : ℝ)
     (hf : (fun n ↦ f n - (1 + t / n)) =o[atTop] fun n ↦ 1 / (n : ℝ)) :

@@ -21,6 +21,8 @@ Let $X$ be a real random variable with characteristic function $\phi$, with $\ma
 \end{proof}
 
 \begin{theorem}[Central limit theorem]\label{clt}
+    \leanok
+    \lean{central_limit}
 Let $X_1, X_2, \ldots$ be i.i.d. real random variables with mean 0 and variance 1, and let $Z$ be a random variable with law $\mathcal N(0,1)$. Then
 \begin{align*}
 \frac{1}{\sqrt{n}}\sum_{k=1}^n X_k \xrightarrow{d} Z \: .
@@ -28,6 +30,7 @@ Let $X_1, X_2, \ldots$ be i.i.d. real random variables with mean 0 and variance 
 \end{theorem}
 
 \begin{proof}\uses{lem:charFun_smul, lem:charFun_add_of_indep, thm:charFun_tendsto_iff_measure_tendsto, lem:charFun_taylor, lem:gaussian_charFun}
+\leanok
 Let $S_n = \frac{1}{\sqrt{n}}\sum_{k=1}^n X_k$. Let $\phi$ be the characteristic function of $X_k$. By Lemma~\ref{lem:charFun_smul} and~\ref{lem:charFun_add_of_indep}, the characteristic function of $S_n$ is $\phi_n(t) = (\phi(n^{-1/2}t))^n$.
 
 By Lemma \ref{lem:charFun_taylor},

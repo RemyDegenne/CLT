@@ -11,6 +11,7 @@ Let $\mu$ be a measure on a real inner product space $E$. The characteristic fun
 The characteristic function of a random variable $X$ is defined as the characteristic function of $\mathcal L(X)$.
 \end{definition}
 
+
 \begin{lemma}\label{lem:charFun_bounded}
 \lean{ProbabilityTheory.norm_charFun_le_one} \leanok
 \uses{def:charFun}
@@ -20,6 +21,7 @@ For all $t$, $\Vert\hat{\mu}(t)\Vert \le 1$.
 \begin{proof}\leanok
 \end{proof}
 
+
 \begin{lemma}\label{lem:charFun_continuous}
 \uses{def:charFun}
 The characteristic function is a continuous function.
@@ -27,6 +29,7 @@ The characteristic function is a continuous function.
 
 \begin{proof}
 \end{proof}
+
 
 \begin{lemma}\label{lem:charFun_neg}
 \lean{ProbabilityTheory.charFun_neg} \leanok
@@ -37,6 +40,7 @@ $\hat{\mu}(-t) = \overline{\hat{\mu}(t)}$.
 \begin{proof}\leanok
 \end{proof}
 
+
 \begin{lemma}\label{lem:charFun_smul}
 \uses{def:charFun}
 For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_X(at)$.
@@ -45,6 +49,7 @@ For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_
 \begin{proof}
 \end{proof}
 
+
 \begin{lemma}\label{lem:charFun_add_of_indep}
 \uses{def:charFun}
 If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has characteristic function $\phi_{X+Y} = \phi_X \phi_Y$. 
@@ -52,6 +57,7 @@ If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has ch
 
 \begin{proof}
 \end{proof}
+
 
 \begin{lemma}\label{lem:charFun_bound}
 \uses{def:charFun}
@@ -69,6 +75,7 @@ For $\mu$ a probability measure on $\mathbb{R}$ and $r > 0$,
 \begin{proof}
 TODO
 \end{proof}
+
 
 \begin{lemma}\label{lem:abs_sub_charFun}
 \uses{def:charFun}
@@ -93,14 +100,18 @@ Let $X$ be a random variable with law $\mu$. Then for any $s, t$,
 \end{align*}
 \end{proof}
 
+
 \begin{lemma}\label{lem:gaussian_charFun}
+\leanok
+\lean{ProbabilityTheory.charFun_gaussianReal}
 \uses{def:charFun}
 The Gaussian distribution $\mathcal N(m, \sigma^2)$ has characteristic function $\phi(t) = e^{itm - \sigma^2 t^2 /2}$.
 \end{lemma}
 
-\begin{proof}
-TODO
+\begin{proof}\leanok
 \end{proof}
+
+
 
 \section{Convergence of characteristic functions and weak convergence of measures}
 
@@ -112,6 +123,7 @@ A family of measures $(\mu_a)$ on a finite dimensional inner product space is ti
 \begin{proof}\uses{lem:charFun_bound, lem:abs_sub_charFun}
 TODO
 \end{proof}
+
 
 \begin{lemma}\label{lem:tight_of_tendsto_charFun}
 \uses{def:weak_cvg_measure}
@@ -131,13 +143,15 @@ If two probability measures $\mu, \nu$ have same characteristic function, then f
 \begin{proof}\uses{lem:starSubalgebra_expPoly}
 \end{proof}
 
+
 \begin{lemma}\label{lem:ext_charFun}
 Two probability measures on a TODO space are equal iff they have the same characteristic function.
 \end{lemma}
 
 \begin{proof}\uses{lem:separating_expPoly, lem:eq_M_of_eq_charFun}
-The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\ref{separating_expPoly}. Equality of characteristic functions implies equality on $\mathcal M$ by Lemma~\ref{lem:eq_M_of_eq_charFun}, which then implies equality of the measures since $\mathcal M$ is separating.
+The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\ref{lem:separating_expPoly}. Equality of characteristic functions implies equality on $\mathcal M$ by Lemma~\ref{lem:eq_M_of_eq_charFun}, which then implies equality of the measures since $\mathcal M$ is separating.
 \end{proof}
+
 
 \begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}
 Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.

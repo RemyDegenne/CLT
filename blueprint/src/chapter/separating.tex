@@ -81,10 +81,11 @@ For any $f \in C_b(E, \mathbb{R})$ and a probability measure $\mu$,
 \begin{proof}\leanok
 \end{proof}
 
+
 \begin{lemma}\label{lem:dist_integral_mulExpNegMulSq_comp_le}
 \mathlibok
 \lean{dist_integral_mulExpNegMulSq_comp_le}
-Let $\mu, \nu$ be two finite measures in a standard Borel space. Let $\mathcal{A}$ be a subalgebra of $C_b(E, \mathbb{R})$ that separates points.
+Let $\mu, \nu$ be two finite measures in a standard Borel space $E$. Let $\mathcal{A}$ be a subalgebra of $C_b(E, \mathbb{R})$ that separates points.
 If for all $g \in \mathcal A$, $\mu[g] = \nu[g]$, then for all $f \in C_b(E, \mathbb{R})$ and all $\varepsilon > 0$,
 \begin{align*}
     \left\vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \nu[f e^{-\varepsilon \Vert f \Vert^2}] \right\vert
@@ -93,29 +94,19 @@ If for all $g \in \mathcal A$, $\mu[g] = \nu[g]$, then for all $f \in C_b(E, \ma
 \end{lemma}
 
 \begin{proof}\leanok
+\uses{lem:integral_restrict_compact}
 \end{proof}
+
 
 \begin{lemma}\label{lem:Cb_eq_of_separating}
 \uses{def:separates_points}
-Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \nu$ be two probability measures. If for all $f \in \mathcal A$, $\mu[f] = \nu[f]$, then for all $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$.
+Let $\mu, \nu$ be two finite measures in a standard Borel space $E$. Let $\mathcal{A}$ be a subalgebra of $C_b(E, \mathbb{k})$ that separates points, where $\mathbb{k}$ is $\mathbb{R}$ or $\mathbb{C}$.
+If for all $g \in \mathcal A$, $\mu[g] = \nu[g]$, then for all $f \in C_b(E, \mathbb{k})$, $\mu[f] = \nu[f]$.
 \end{lemma}
 
-\begin{proof}\uses{lem:introduce_exponential, lem:integral_restrict_compact, lem:exponiential_M_eq_limit_M, lem:dist_integral_mulExpNegMulSq_comp_le}
-Let $g \in C_b(E, \mathbb{C})$ and $\varepsilon > 0$.
-
-By Lemma~\ref{lem:introduce_exponential}, it suffices to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] - \nu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] \right\vert = 0$.
-
-The two measures are inner regular, hence there exists $K$ compact with $\mu(K^c) \le \varepsilon$ and $\nu(K^c) \le \varepsilon$.
-
-By Lemma~\ref{lem:integral_restrict_compact}, it suffices to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \mathbb{I}_K \right] - \nu\left[g e^{-\varepsilon \Vert g \Vert^2} \mathbb{I}_K \right] \right\vert = 0$.
-
-On $K$, the Stone-Weierstrass theorem \texttt{ContinuousMap.starSubalgebra\_topologicalClosure\_eq\_top\_of\_separatesPoints} gives that a subalgebra that separates points is dense. There exists then $f \in \mathcal A$ such that $\sup_{x \in K} \left\vert f(x) - g(x) \right\vert \le \varepsilon$.
-
-TODO: we can bound $\left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \mathbb{I}_K \right] - \mu\left[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K \right] \right\vert$ by a function of $\varepsilon$ tending to 0. Same for $\nu$.
-
-It remains to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K \right] - \nu\left[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K \right] \right\vert = 0$.
-
-TODO. Use~\ref{lem:exponiential_M_eq_limit_M} to use that $\mu[f'] = \nu[f']$ for all $f' \in \mathcal A$.
+\begin{proof}
+\uses{lem:introduce_exponential, lem:dist_integral_mulExpNegMulSq_comp_le}
+Proved in Mathlib PR \#19782
 \end{proof}
 
 

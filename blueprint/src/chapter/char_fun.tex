@@ -42,20 +42,24 @@ $\hat{\mu}(-t) = \overline{\hat{\mu}(t)}$.
 
 
 \begin{lemma}\label{lem:charFun_smul}
+\leanok
+\lean{ProbabilityTheory.charFun_map_smul}
 \uses{def:charFun}
 For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_X(at)$.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\leanok
 \end{proof}
 
 
 \begin{lemma}\label{lem:charFun_add_of_indep}
+\leanok
+\lean{ProbabilityTheory.charFun_conv}
 \uses{def:charFun}
 If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has characteristic function $\phi_{X+Y} = \phi_X \phi_Y$. 
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\leanok
 \end{proof}
 
 
@@ -145,10 +149,12 @@ If two probability measures $\mu, \nu$ have same characteristic function, then f
 
 
 \begin{lemma}\label{lem:ext_charFun}
-Two probability measures on a TODO space are equal iff they have the same characteristic function.
+Two finite measures on a TODO space are equal iff they have the same characteristic function.
 \end{lemma}
 
 \begin{proof}\uses{lem:separating_expPoly, lem:eq_M_of_eq_charFun}
+See Mathlib PR \#19783.
+
 The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\ref{lem:separating_expPoly}. Equality of characteristic functions implies equality on $\mathcal M$ by Lemma~\ref{lem:eq_M_of_eq_charFun}, which then implies equality of the measures since $\mathcal M$ is separating.
 \end{proof}
 

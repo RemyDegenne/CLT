@@ -1,7 +1,8 @@
 \chapter{Separating subalgebras}
 
 \begin{definition}\label{def:separates_points}
-\lean{Set.SeparatesPoints} \leanok
+\mathlibok
+\lean{Set.SeparatesPoints}
 A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x, y \in E$ with $x \ne y$, there exists $f \in \mathcal F$ with $f(x) \ne f(y)$.
 \end{definition}
 
@@ -136,6 +137,4 @@ Let $\mathcal A$ be a separating subalgebra of $C_b(E, \mathbb{C})$. Let $\mu, \
 To show convergence to $\mu$, it suffices to show that every subsequence has a subsequence that converges to $\mu$ (\texttt{Filter.tendsto\_of\_subseq\_tendsto}).
 Since the family is tight, it is relatively compact by Prokhorov's theorem. We get that each subsequence has a converging subsequence.
 Let then $\mu'$ be a weak limit of $\mu_n$. We have $\mu_n[f] \to \mu'[f]$ and $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal A$, hence $\mu'[f] = \mu[f]$ for all $f \in \mathcal A$. Since $\mathcal A$ is separating, $\mathcal \mu' = \mu$.
-
-Alternative proof without Prokhorov's theorem: we can proceed similarly to the proof of Lemma~\ref{lem:Cb_eq_of_separating}, starting with: let $K$ be a compact such that $\mu(K^c) \le \varepsilon$ and $\mu_n(K^c) \le \varepsilon$ for all $n$, which exists since the family is tight. Etc. (check that this works)
 \end{proof}

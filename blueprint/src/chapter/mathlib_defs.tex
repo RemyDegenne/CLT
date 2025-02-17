@@ -1,7 +1,8 @@
 \chapter{Convergence definitions}
 
 \begin{definition}[Convergence in probability]\label{def:cvg_probability}
-\lean{MeasureTheory.TendstoInMeasure} \leanok
+\mathlibok
+\lean{MeasureTheory.TendstoInMeasure}
 We say that $(X_i)_{i \in \mathbb{N}}$ tends to $X$ in probability (or in measure) in a space with distance function $d$ if for all $\varepsilon > 0$
 \begin{align*}
 \mathbb{P}(d(X_n, X) \ge \varepsilon) \to_{n \to +\infty} 0
@@ -10,7 +11,8 @@ We write $X_n \xrightarrow{p} X$.
 \end{definition}
 
 \begin{definition}[Weak convergence of probability measures]\label{def:weak_cvg_measure}
-\lean{MeasureTheory.ProbabilityMeasure.tendsto_iff_forall_integral_tendsto} \leanok
+\mathlibok
+\lean{MeasureTheory.ProbabilityMeasure.tendsto_iff_forall_integral_tendsto}
 In a topological space $S$ in which the opens are measurable, we say that a sequence of probability measures $\mu_n$ converges weakly to a probability measure $\mu$ and write $\mu_n \xrightarrow{w} \mu$ if $\mu_n[f] \to \mu[f]$ for every bounded continuous function $f : S \to \mathbb{R}$.
 \end{definition}
 

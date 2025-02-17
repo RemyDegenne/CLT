@@ -10,7 +10,6 @@ A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x,
 A set $\mathcal F$ of functions $E \to F$ is separating in $\mathcal P(E)$ if for all probability measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists $f \in \mathcal F$ with $\mu[f] \ne \nu[f]$.
 \end{definition}
 
-TODO: this is a special case of a definition about duality pairings. Two types $E$, $F$ and a bilinear function $B : E \times F \to \mathbb{k}$ form a pairing (in the def above $\mathcal P(E)$, $C_b(E, \mathbb{C})$ and the integral). A set $\mathcal E$ of $E$ is separating if for all $f, f' \in F$ with $f \ne f'$, there exists $x \in \mathcal E$ with $B(x, f) \ne B(x, f')$. 
 
 \begin{lemma}\label{lem:bounded_continuous_separating}
 \uses{def:separating}
@@ -21,6 +20,7 @@ In a Borel space $E$, the set $C_b(E, \mathbb{C})$ of bounded continuous functio
 The Mathlib lemma \texttt{MeasureTheory.FiniteMeasure.ext\_of\_forall\_lintegral\_eq} shows that $C_b(E, \mathbb{R}_+)$ is separating. Since $C_b(E, \mathbb{R}_{+}) \subseteq C_b(E, \mathbb{C})$, the larger set is also separating.
 \end{proof}
 
+
 \begin{lemma}\label{lem:exp_character}
 \lean{Clt.expInnerMulI} \leanok
 $x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a monoid homomorphism from $(E,+)$ to $C_b(E, \mathbb{C})$.
@@ -28,6 +28,7 @@ $x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a monoid homomorphism fr
 
 \begin{proof}\leanok
 \end{proof}
+
 
 \begin{lemma}\label{lem:starSubalgebra_expPoly}
 \lean{Clt.expPoly} \leanok
@@ -37,6 +38,7 @@ The functions of the form $x \mapsto \sum_{k=1}^n a_k e^{i\langle t_k, x\rangle}
 \begin{proof}\uses{lem:exp_character} \leanok
 The monoid homomorphism can be lifted to a homomorphism of algebras from \texttt{AddMonoidAlgebra ℝ E} to $C_b(E, \mathbb{C})$ using \texttt{AddMonoidAlgebra.lift}. $\mathcal M$ is the range of this homomorphism. The ``star'' part can be checked easily.
 \end{proof}
+
 
 Let $\mathcal M$ be the set of these functions, which we call exponential polynomials.
 
@@ -50,47 +52,47 @@ The star-subalgebra $\mathcal M$ separates points.
 TODO
 \end{proof}
 
+
 \begin{lemma}\label{lem:integral_restrict_compact}
-Let $\mu$ be a measure on $E$ and $K$ be a compact set such that $\mu(K^c) \le \varepsilon$. Let $f \in C_b(E, \mathbb{C})$. Then
+\mathlibok
+\lean{abs_integral_sub_setIntegral_mulExpNegMulSq_comp_lt}
+Let $\mu$ be a finite measure on a Borel space $E$ and let $K$ be a measurable compact set such that $\mu(K^c) \le \varepsilon$. Let $f \in C(E, \mathbb{R})$. Then
 \begin{align*}
-\left\Vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K] \right\Vert
-\le C \sqrt{\varepsilon} \: ,
+\left\vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K] \right\vert
+\le \sqrt{\varepsilon} \: .
 \end{align*}
-where $C = \sup_{x \ge 0} x e^{-x^2}$.
 \end{lemma}
 
-\begin{proof}
-\begin{align*}
-\left\Vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_K] \right\Vert
-&= \left\Vert \mu[f e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_{K^c}] \right\Vert
-\\
-&\le \frac{1}{\sqrt{\varepsilon}} \mu \left[ \sqrt{\varepsilon} \Vert f \Vert e^{-\varepsilon \Vert f \Vert^2} \mathbb{I}_{K^c} \right]
-\\
-&\le C \sqrt{\varepsilon} \: ,
-\end{align*}
+\begin{proof}\leanok
 \end{proof}
 
+
 \begin{lemma}\label{lem:introduce_exponential}
-For any $f \in C_b(E, \mathbb{C})$ and probability measures $\mu, \nu$,
+\mathlibok
+\lean{tendsto_integral_mulExpNegMulSq_comp}
+For any $f \in C_b(E, \mathbb{R})$ and a probability measure $\mu$,
 \begin{align*}
-\left\vert \mu[f] - \nu[f] \right\vert
-= \lim_{\varepsilon \to 0} \left\vert \mu\left[f e^{-\varepsilon \Vert f \Vert^2} \right] - \nu\left[f e^{-\varepsilon \Vert f \Vert^2} \right] \right\vert
+\mu[f] 
+= \lim_{\varepsilon \to 0} \mu\left[f e^{-\varepsilon \Vert f \Vert^2} \right]
 \: .
 \end{align*}
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\leanok
 \end{proof}
 
-\begin{lemma}\label{lem:exponiential_M_eq_limit_M}
-For $f \in \mathcal A$ a subalgebra of $C_b(E, \mathbb{C})$, $\varepsilon \ge 0$ and $n \in \mathbb{N}$, $f (1 - \frac{\varepsilon}{n} f)^n \in \mathcal A$. Furthermore, for a measure $\mu$,
+\begin{lemma}\label{lem:dist_integral_mulExpNegMulSq_comp_le}
+\mathlibok
+\lean{dist_integral_mulExpNegMulSq_comp_le}
+Let $\mu, \nu$ be two finite measures in a standard Borel space. Let $\mathcal{A}$ be a subalgebra of $C_b(E, \mathbb{R})$ that separates points.
+If for all $g \in \mathcal A$, $\mu[g] = \nu[g]$, then for all $f \in C_b(E, \mathbb{R})$ and all $\varepsilon > 0$,
 \begin{align*}
-\mu\left[f e^{-\varepsilon \Vert f \Vert^2}\right] = \lim_{n \to + \infty} \mu\left[f (1 - \frac{\varepsilon}{n} f)^n\right] \: .
+    \left\vert \mu[fe^{-\varepsilon \Vert f \Vert^2}] - \nu[f e^{-\varepsilon \Vert f \Vert^2}] \right\vert
+    \le 6\sqrt{\varepsilon} \: .
 \end{align*}
 \end{lemma}
 
-\begin{proof}
-Dominated convergence.
+\begin{proof}\leanok
 \end{proof}
 
 \begin{lemma}\label{lem:Cb_eq_of_separating}
@@ -98,7 +100,7 @@ Dominated convergence.
 Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \nu$ be two probability measures. If for all $f \in \mathcal A$, $\mu[f] = \nu[f]$, then for all $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$.
 \end{lemma}
 
-\begin{proof}\uses{lem:introduce_exponential, lem:integral_restrict_compact, lem:exponiential_M_eq_limit_M}
+\begin{proof}\uses{lem:introduce_exponential, lem:integral_restrict_compact, lem:exponiential_M_eq_limit_M, lem:dist_integral_mulExpNegMulSq_comp_le}
 Let $g \in C_b(E, \mathbb{C})$ and $\varepsilon > 0$.
 
 By Lemma~\ref{lem:introduce_exponential}, it suffices to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] - \nu\left[g e^{-\varepsilon \Vert g \Vert^2} \right] \right\vert = 0$.
@@ -116,6 +118,7 @@ It remains to show that $\lim_{\varepsilon \to 0} \left\vert \mu\left[f e^{-\var
 TODO. Use~\ref{lem:exponiential_M_eq_limit_M} to use that $\mu[f'] = \nu[f']$ for all $f' \in \mathcal A$.
 \end{proof}
 
+
 \begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
 Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal A$ is separating in $\mathcal P(E)$.
 \end{theorem}
@@ -124,6 +127,7 @@ Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C
 Let $\mu$ and $\nu$ be two probability measures such that $\mu[f] = \nu[f]$ for all $f \in \mathcal A$. We want to prove that $\mu = \nu$. Since $C_b(E, \mathbb{C})$ is separating, it suffices to prove that for $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$. This is proved in Lemma~\ref{lem:Cb_eq_of_separating}
 \end{proof}
 
+
 \begin{lemma}\label{lem:separating_expPoly}
 The exponential polynomials $\mathcal M$ are separating.
 \end{lemma}
@@ -131,6 +135,7 @@ The exponential polynomials $\mathcal M$ are separating.
 \begin{proof}\uses{thm:separating_starSubalgebra, lem:separates_points_expPoly}
 Apply Theorem~\ref{thm:separating_starSubalgebra}, using Lemma~\ref{lem:separates_points_expPoly}.
 \end{proof}
+
 
 \begin{lemma}\label{lem:cvg_of_separating}
 Let $\mathcal A$ be a separating subalgebra of $C_b(E, \mathbb{C})$. Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures, with $(\mu_n)$ tight. If for all $f \in \mathcal A$, $\mu_n[f] \to \mu[f]$, then $\mu_n \xrightarrow{w} \mu$.

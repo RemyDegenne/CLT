@@ -166,7 +166,7 @@ lemma probChar_mem_expPoly' : probChar he hL w ∈ expPoly' he hL := by
   · simp [Finsupp.single_apply_ne_zero]
   · simp
 
-def toContinuousFunₐ : (V →ᵇ ℂ) →⋆ₐ[ℝ] C(V, ℂ) where
+def toContinuousFunₐ {𝕜 : Type*} [RCLike 𝕜] : (V →ᵇ 𝕜) →⋆ₐ[ℝ] C(V, 𝕜) where
   toFun := (↑)
   map_one' := rfl
   map_mul' _ _ := rfl

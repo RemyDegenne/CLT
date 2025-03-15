@@ -35,7 +35,7 @@ theorem iIndepFun_iff_pi_map_eq_map {Ω : Type u_1} {_mΩ : MeasurableSpace Ω}
     {μ : Measure Ω} {ι : Type*} {β : ι → Type*} [Fintype ι]
     (f : ∀ x : ι, Ω → β x) [m : ∀ x : ι, MeasurableSpace (β x)]
     [IsProbabilityMeasure μ] (hf : ∀ (x : ι), Measurable (f x)) :
-    iIndepFun m f μ ↔ Measure.pi (fun i ↦ μ.map (f i)) = μ.map (fun ω i ↦ f i ω) := by
+    iIndepFun f μ ↔ Measure.pi (fun i ↦ μ.map (f i)) = μ.map (fun ω i ↦ f i ω) := by
   sorry
 
 abbrev stdGaussian : ProbabilityMeasure ℝ :=
@@ -64,13 +64,13 @@ variable {P : ProbabilityMeasure Ω}
 
 theorem central_limit (hX : ∀ n, Measurable (X n))
     (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)
-    (hindep : iIndepFun inferInstance X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) :
+    (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) :
     Tendsto (fun n : ℕ => P.map (aemeasurable_invSqrtMulSum n hX)) atTop (𝓝 stdGaussian) := by
   refine (charFun_tendsto_iff_measure_tendsto _ _).mp fun t ↦ ?_
   rw [stdGaussian, ProbabilityMeasure.coe_mk, charFun_gaussianReal]
 
   -- convert to independence over Fin n
-  have indep_fin (n : ℕ) : iIndepFun inferInstance (fun i : Fin n ↦ X i) P := by
+  have indep_fin (n : ℕ) : iIndepFun (fun i : Fin n ↦ X i) P := by
     rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
     intro S s hs
     let sets (i : ℕ) := if h : i < n then s ⟨i, h⟩ else ∅

@@ -39,8 +39,8 @@ section ForMathlib
 theorem memℒp_iff_integrable_norm_rpow {α} [MeasurableSpace α] (μ : Measure α)
     {E} [NormedAddCommGroup E] {f : α → E} (hf : AEStronglyMeasurable f μ)
     (p : ℝ≥0∞) (p_zero : p ≠ 0) (p_top : p ≠ ∞) :
-    Memℒp f p μ ↔ Integrable (fun x ↦ ‖f x‖ ^ p.toReal) μ := by
-  rw [← memℒp_one_iff_integrable, ← memℒp_norm_rpow_iff hf p_zero p_top,
+    MemLp f p μ ↔ Integrable (fun x ↦ ‖f x‖ ^ p.toReal) μ := by
+  rw [← memLp_one_iff_integrable, ← memLp_norm_rpow_iff hf p_zero p_top,
     ENNReal.div_self p_zero p_top]
 
 lemma integrable_norm_rpow_antitone {α} [MeasurableSpace α]
@@ -54,7 +54,7 @@ lemma integrable_norm_rpow_antitone {α} [MeasurableSpace α]
   rcases hq.eq_or_lt with (rfl | hq)
   · exact (hp.not_le hpq).elim
   revert hint
-  convert fun h ↦ Memℒp.mono_exponent h (ENNReal.ofReal_le_ofReal hpq) using 1
+  convert fun h ↦ MemLp.mono_exponent h (ENNReal.ofReal_le_ofReal hpq) using 1
   · rw [memℒp_iff_integrable_norm_rpow μ hf, ENNReal.toReal_ofReal hq.le] <;> simp_all
   · rw [memℒp_iff_integrable_norm_rpow μ hf, ENNReal.toReal_ofReal hp.le] <;> simp_all
   · infer_instance

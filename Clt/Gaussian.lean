@@ -23,12 +23,15 @@ variable (μ : ℝ) (v : ℝ≥0)
 theorem charFun_gaussianReal : charFun (gaussianReal μ v) t = exp (t * μ * I - v * t ^ 2 / 2) := by
   unfold charFun gaussianReal
   split_ifs with hv
-  · simp [hv]
+  · simp only [RCLike.inner_apply, conj_trivial, real_smul, ofReal_mul, integral_dirac, hv,
+      NNReal.coe_zero, ofReal_zero, zero_mul, zero_div, sub_zero]
+    rw [mul_comm (μ : ℂ)]
   calc
     _ = ∫ x, (gaussianPDFReal μ v x).toNNReal • cexp (inner t x • I) ∂ℙ :=
       integral_withDensity_eq_integral_smul (measurable_gaussianPDFReal μ v).real_toNNReal _
     _ = ∫ x, gaussianPDFReal μ v x * cexp (t * x * I) ∂ℙ := by
-      congr; ext x
+      congr with x
+      rw [mul_comm (t : ℂ)]
       simp [NNReal.smul_def, Real.coe_toNNReal _ (gaussianPDFReal_nonneg μ v x)]
     _ = (√(2 * π * v))⁻¹ * ∫ x : ℝ, cexp (-(2 * v)⁻¹ * x ^ 2 + (t * I + μ / v) * x + -μ ^ 2 / (2 * v)) ∂ℙ := by
       unfold gaussianPDFReal

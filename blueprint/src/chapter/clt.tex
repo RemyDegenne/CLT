@@ -1,17 +1,22 @@
 \chapter{The central limit theorem}
 
 \begin{lemma}\label{lem:deriv_charFun}
+\leanok
+\lean{iteratedDeriv_charFun}
 \uses{def:charFun}
 Let $X$ be a real random variable with characteristic function $\phi$ with $\mathbb{E}[\vert X \vert^n] < \infty$ and let $k \le n$.
 Then the $k$\textsuperscript{th} derivative of $\phi$ is 
 $\phi^{(k)}(t) = \mathbb{E}[i X]^k e^{i t X}$ \: .
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\leanok
+\uses{lem:charFun_contDiff}
 \end{proof}
 
 
 \begin{lemma}\label{lem:charFun_taylor}
+\leanok
+\lean{taylor_charFun}
 Let $X$ be a real random variable with characteristic function $\phi$, with $\mathbb{E}[\vert X \vert^n] < \infty$. Then as $t \to 0$,
 \begin{align*}
 \phi(t) = \sum_{k=0}^n \frac{(it)^k \mathbb{E}[X^k]}{k!} + o(t^n)
@@ -19,7 +24,8 @@ Let $X$ be a real random variable with characteristic function $\phi$, with $\ma
 \end{align*}
 \end{lemma}
 
-\begin{proof}\uses{lem:deriv_charFun}
+\begin{proof}\leanok
+\uses{lem:deriv_charFun}
 \end{proof}
 
 

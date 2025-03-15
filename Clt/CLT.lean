@@ -24,10 +24,11 @@ lemma tendsto_one_plus_div_pow_exp' {f : ℕ → ℂ} (t : ℝ)
     Tendsto (fun n ↦ f n ^ n) atTop (𝓝 (exp t)) := by
   sorry
 
-lemma tendsto_sqrt_atTop :
-    Tendsto (√·) atTop atTop := by
+lemma tendsto_sqrt_atTop : Tendsto (√·) atTop atTop := by
   simp_rw [Real.sqrt_eq_rpow]
   exact tendsto_rpow_atTop (by norm_num)
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {X : ℕ → Ω → ℝ}
 
 /-- From PFR -/
 theorem iIndepFun_iff_pi_map_eq_map {Ω : Type u_1} {_mΩ : MeasurableSpace Ω}
@@ -43,18 +44,12 @@ abbrev stdGaussian : ProbabilityMeasure ℝ :=
 abbrev invSqrtMulSum {Ω} (X : ℕ → Ω → ℝ) (n : ℕ) (ω : Ω) : ℝ :=
   (√n)⁻¹ * ∑ i : Fin n, X i ω
 
-lemma map_invSqrtMulSum {Ω} [MeasurableSpace Ω] (μ : Measure Ω) {X : ℕ → Ω → ℝ} (hX : ∀ n, Measurable (X n)) (n : ℕ) :
-    μ.map (invSqrtMulSum X n) = ((μ.map (fun ω (i : Fin n) ↦ X i ω)).map (fun x ↦ ∑ i, x i)).map ((√n)⁻¹ * ·) := by
+lemma map_invSqrtMulSum (μ : Measure Ω) {X : ℕ → Ω → ℝ} (hX : ∀ n, Measurable (X n)) (n : ℕ) :
+    μ.map (invSqrtMulSum X n)
+      = ((μ.map (fun ω (i : Fin n) ↦ X i ω)).map (fun x ↦ ∑ i, x i)).map ((√n)⁻¹ * ·) := by
   rw [Measure.map_map, Measure.map_map]
   · rfl
-  · exact (measurable_const_mul _).comp (Finset.measurable_sum _ fun i _ ↦ measurable_pi_apply i)
-  · exact measurable_pi_lambda _ fun i : Fin n ↦ hX i
-  · exact measurable_const_mul _
-  · exact Finset.measurable_sum _ fun i _ ↦ measurable_pi_apply i
-
--- using ProbabilityMeasure for the topology
-variable {Ω} [MeasurableSpace Ω] {P : ProbabilityMeasure Ω}
-variable {X : ℕ → Ω → ℝ}
+  all_goals { fun_prop }
 
 lemma measurable_invSqrtMulSum (n) (hX : ∀ n, Measurable (X n)) :
     Measurable (invSqrtMulSum X n) :=
@@ -63,6 +58,9 @@ lemma measurable_invSqrtMulSum (n) (hX : ∀ n, Measurable (X n)) :
 lemma aemeasurable_invSqrtMulSum {μ : Measure Ω} (n) (hX : ∀ n, Measurable (X n)) :
     AEMeasurable (invSqrtMulSum X n) μ :=
   (measurable_invSqrtMulSum n hX).aemeasurable
+
+-- using ProbabilityMeasure for the topology
+variable {P : ProbabilityMeasure Ω}
 
 theorem central_limit (hX : ∀ n, Measurable (X n))
     (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)

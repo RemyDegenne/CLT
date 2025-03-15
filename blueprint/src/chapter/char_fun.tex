@@ -133,26 +133,6 @@ The Gaussian distribution $\mathcal N(m, \sigma^2)$ has characteristic function 
 
 \section{Convergence of characteristic functions and weak convergence of measures}
 
-\begin{lemma}\label{lem:tight_iff_charFun_equiContinuous}
-\uses{def:tight}
-A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $(\hat{\mu}_a)$ is equi-continuous at 0.
-\end{lemma}
-
-\begin{proof}\uses{lem:charFun_bound, lem:abs_sub_charFun}
-TODO
-\end{proof}
-
-
-\begin{lemma}\label{lem:tight_of_tendsto_charFun}
-\uses{def:weak_cvg_measure}
-Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0, then $(\mu_n)$ is tight.
-\end{lemma}
-
-\begin{proof}\uses{lem:tight_iff_charFun_equiContinuous}
-TODO
-\end{proof}
-
-Remark: the finite dimension is necessary. Counterexample: $\ell^2$ with $\mu_n$ the law of $X_n = \sum_{k=1}^n \zeta_k e_k$ where $e_k = (0, \ldots, 0, 1, 0 \ldots)$ and the $\zeta_k$ are i.i.d. $\mathcal N(0,1)$. Then $\hat{\mu}_n(t) \to e^{- \Vert t \Vert^2 / 2}$ for all $t \in \ell^2$ but $(\mu_n)$ is not tight (todo: why?).
 
 \begin{lemma}\label{lem:eq_M_of_eq_charFun}
 If two probability measures $\mu, \nu$ have same characteristic function, then for all exponential polynomial $f \in \mathcal M$, $\mu[f] = \nu[f]$.
@@ -173,7 +153,38 @@ The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\
 \end{proof}
 
 
-\begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}
+\begin{lemma}\label{lem:tight_iff_charFun_equiContinuous}
+\leanok
+\lean{isTightMeasureSet_iff_equiContinuousAt_charFun}
+\uses{def:tight}
+A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $(\hat{\mu}_a)$ is equi-continuous at 0.
+\end{lemma}
+
+\begin{proof}\uses{lem:charFun_bound, lem:abs_sub_charFun}
+TODO
+\end{proof}
+
+
+\begin{lemma}\label{lem:tight_of_tendsto_charFun}
+\leanok
+\lean{isTightMeasureSet_of_tendsto_charFun}
+\uses{def:weak_cvg_measure}
+Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0, then $(\mu_n)$ is tight.
+\end{lemma}
+
+\begin{proof}\uses{lem:tight_iff_charFun_equiContinuous}
+TODO
+\end{proof}
+
+Remark: the finite dimension is necessary.
+Counterexample: $\ell^2$ with $\mu_n$ the law of $X_n = \sum_{k=1}^n \zeta_k e_k$ where $e_k = (0, \ldots, 0, 1, 0 \ldots)$ and the $\zeta_k$ are i.i.d. $\mathcal N(0,1)$.
+Then $\hat{\mu}_n(t) \to e^{- \Vert t \Vert^2 / 2}$ for all $t \in \ell^2$ but $(\mu_n)$ is not tight.
+
+
+\begin{theorem}[Convergence of characteristic functions and weak convergence of measures]
+\label{thm:charFun_tendsto_iff_measure_tendsto}
+\leanok
+\lean{ProbabilityMeasure.tendsto_iff_tendsto_charFun}
 Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.
 \end{theorem}
 
@@ -182,5 +193,5 @@ For all $t$, $x \mapsto e^{i \langle t, x \rangle}$ is a bounded continuous func
 
 Let's now prove the other direction.
 If the characteristic functions converge pointwise, we get from Lemma~\ref{lem:tight_of_tendsto_charFun} that the family of measures is tight. 
-Then apply Lemma~\ref{lem:cvg_of_separating} to the subalbegra $\mathcal M$: it suffices to show that $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal M$. This is obtained with Lemma~\ref{lem:eq_M_of_eq_charFun}.
+Then apply Lemma~\ref{lem:cvg_of_separating} to the subalgebra $\mathcal M$: it suffices to show that $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal M$. This is obtained with Lemma~\ref{lem:eq_M_of_eq_charFun}.
 \end{proof}

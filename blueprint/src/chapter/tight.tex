@@ -1,7 +1,7 @@
 \chapter{Tight families of measures}
 
 \begin{definition}\label{def:tight}
-\lean{MeasureTheory.Tight} \leanok
+\lean{MeasureTheory.IsTightMeasureSet} \mathlibok
 A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu(K^c) \le \varepsilon$.
 \end{definition}
 
@@ -44,51 +44,51 @@ The closure of a tight set of measures is tight.
 
 \section{Prokhorov's theorem}
 
-\begin{lemma}\label{lem:exists_finite_union_inter_lt}
-Let $(U_n)_{n \in \mathbb{N}}$ be open sets in a complete separable metric space $E$ such that $\bigcup_{n=1}^{+ \infty} U_n = E$. Let $\Gamma$ be a relatively compact set of probability measures on $E$ for the topology of weak convergence of measures. Then for all $\varepsilon > 0$ there exists a finite set $S \subseteq \mathbb{N}$ such that for all $\mu \in \Gamma$, $\mu(\bigcup_{n \in S} U_n) > 1 - \varepsilon$.
-\end{lemma}
+% \begin{lemma}\label{lem:exists_finite_union_inter_lt}
+% Let $(U_n)_{n \in \mathbb{N}}$ be open sets in a complete separable metric space $E$ such that $\bigcup_{n=1}^{+ \infty} U_n = E$. Let $\Gamma$ be a relatively compact set of probability measures on $E$ for the topology of weak convergence of measures. Then for all $\varepsilon > 0$ there exists a finite set $S \subseteq \mathbb{N}$ such that for all $\mu \in \Gamma$, $\mu(\bigcup_{n \in S} U_n) > 1 - \varepsilon$.
+% \end{lemma}
 
-\begin{proof}
-\end{proof}
+% \begin{proof}
+% \end{proof}
 
-\begin{lemma}\label{lem:prokhorov_aux1}
-\uses{def:tight}
-Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$. If the closure of $S$ is compact, then $S$ is tight.
-\end{lemma}
+% \begin{lemma}\label{lem:prokhorov_aux1}
+% \uses{def:tight}
+% Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$. If the closure of $S$ is compact, then $S$ is tight.
+% \end{lemma}
 
-\begin{proof}\uses{lem:exists_finite_union_inter_lt}
-\end{proof}
+% \begin{proof}\uses{lem:exists_finite_union_inter_lt}
+% \end{proof}
 
-\begin{theorem}[Riesz-Markov-Kakutani representation theorem, for compact spaces]\label{thm:riesz_markov_kakutani}
-Let $E$ be a compact T2 space and let $\psi$ be a positive linear functional on $C(E, \mathbb{C})$. There exists a regular measure $\mu$ finite on compacts such that
-\begin{align*}
-\forall f \in C(E, \mathbb{C}), \ \psi(f) = \int_{x \in E} f(x) \partial\mu(x) \: .
-\end{align*}
-\end{theorem}
+% \begin{theorem}[Riesz-Markov-Kakutani representation theorem, for compact spaces]\label{thm:riesz_markov_kakutani}
+% Let $E$ be a compact T2 space and let $\psi$ be a positive linear functional on $C(E, \mathbb{C})$. There exists a regular measure $\mu$ finite on compacts such that
+% \begin{align*}
+% \forall f \in C(E, \mathbb{C}), \ \psi(f) = \int_{x \in E} f(x) \partial\mu(x) \: .
+% \end{align*}
+% \end{theorem}
 
-\begin{proof}
-\end{proof}
+% \begin{proof}
+% \end{proof}
 
-\begin{lemma}\label{lem:ProbabilityMeasure_compact}
-If $E$ is a compact metric space, then $\mathcal P(E)$ with the Prokhorov metric is a compact metric space.
-\end{lemma}
+% \begin{lemma}\label{lem:ProbabilityMeasure_compact}
+% If $E$ is a compact metric space, then $\mathcal P(E)$ with the Prokhorov metric is a compact metric space.
+% \end{lemma}
 
-\begin{proof}\uses{thm:riesz_markov_kakutani}
-\end{proof}
+% \begin{proof}\uses{thm:riesz_markov_kakutani}
+% \end{proof}
 
 \begin{theorem}[Prokhorov's theorem]\label{thm:prokhorov}
+\notready
 Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$. Then the following are equivalent:
 \begin{enumerate}
 	\item $S$ is tight.
-	%\item For all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu((K^\varepsilon)^c) \le \varepsilon$, where $K^\varepsilon$ is the $\varepsilon$-thickening of $K$.
 	\item the closure of $S$ is compact.
 \end{enumerate}
 \end{theorem}
 
-\begin{proof}\uses{lem:prokhorov_aux1, lem:ProbabilityMeasure_compact}
-Lemma~\ref{lem:prokhorov_aux1} provides one direction.
+\begin{proof}%\uses{lem:prokhorov_aux1, lem:ProbabilityMeasure_compact}
+% Lemma~\ref{lem:prokhorov_aux1} provides one direction.
 
-TODO: proof of the other one.
+% TODO: proof of the other one.
 \end{proof}
 
 \begin{lemma}\label{lem:relatively_compact_of_tight}

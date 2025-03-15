@@ -93,6 +93,12 @@ theorem contDiff_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
   apply (VectorFourier.contDiff_fourierIntegral _ hint').comp
   exact contDiff_const_smul _
 
+lemma continuous_charFun : Continuous (charFun μ) := by
+  rw [← contDiff_zero (𝕜 := ℝ)]
+  refine contDiff_charFun ?_
+  suffices Integrable (fun _ ↦ (1 : ℝ)) μ by convert this
+  fun_prop
+
 open VectorFourier in
 theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) μ) :
     iteratedDeriv n (charFun μ) t = I ^ n * ∫ x, x ^ n * exp (t * x * I) ∂μ := by

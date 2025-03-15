@@ -18,7 +18,7 @@ open scoped NNReal Real
 
 namespace ProbabilityTheory
 
-variable (μ : ℝ) (v : ℝ≥0)
+variable (μ : ℝ) (v : ℝ≥0) {t : ℝ}
 
 theorem charFun_gaussianReal : charFun (gaussianReal μ v) t = exp (t * μ * I - v * t ^ 2 / 2) := by
   unfold charFun gaussianReal
@@ -33,13 +33,15 @@ theorem charFun_gaussianReal : charFun (gaussianReal μ v) t = exp (t * μ * I -
       congr with x
       rw [mul_comm (t : ℂ)]
       simp [NNReal.smul_def, Real.coe_toNNReal _ (gaussianPDFReal_nonneg μ v x)]
-    _ = (√(2 * π * v))⁻¹ * ∫ x : ℝ, cexp (-(2 * v)⁻¹ * x ^ 2 + (t * I + μ / v) * x + -μ ^ 2 / (2 * v)) ∂ℙ := by
+    _ = (√(2 * π * v))⁻¹
+        * ∫ x : ℝ, cexp (-(2 * v)⁻¹ * x ^ 2 + (t * I + μ / v) * x + -μ ^ 2 / (2 * v)) ∂ℙ := by
       unfold gaussianPDFReal
       simp_rw [ofReal_mul, mul_assoc _ _ (exp _), integral_mul_left, ofReal_exp, ← exp_add]
       congr; ext x; congr 1
       push_cast
       ring
-    _ = (√(2 * π * v))⁻¹ * (π / - -(2 * v)⁻¹) ^ (1 / 2 : ℂ) * cexp (-μ ^ 2 / (2 * v) - (t * I + μ / v) ^ 2 / (4 * -(2 * v)⁻¹)) := by
+    _ = (√(2 * π * v))⁻¹ * (π / - -(2 * v)⁻¹) ^ (1 / 2 : ℂ)
+        * cexp (-μ ^ 2 / (2 * v) - (t * I + μ / v) ^ 2 / (4 * -(2 * v)⁻¹)) := by
       rw [integral_cexp_quadratic (by simpa using pos_iff_ne_zero.mpr hv), ← mul_assoc]
     _ = 1 * cexp (-μ ^ 2 / (2 * v) - (t * I + μ / v) ^ 2 / (4 * -(2 * v)⁻¹)) := by
       congr 1

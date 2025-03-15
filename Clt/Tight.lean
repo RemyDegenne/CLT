@@ -40,7 +40,6 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
     {f : E → ℂ} (hf : ContinuousAt f 0)
     (h : ∀ t, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (f t))) :
     IsTightMeasureSet {μ i | i} := by
-  rw [isTightMeasureSet_iff_equiContinuousAt_charFun]
   sorry
 
 /-- Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with characteristic

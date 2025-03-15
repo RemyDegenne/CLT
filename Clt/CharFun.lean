@@ -51,7 +51,7 @@ theorem probFourierChar_apply' (x : ℝ) : probFourierChar x = exp (↑(-x) * I)
 theorem probFourierChar_apply (x : ℝ) : probFourierChar x = exp (- ↑x * I) := by
   simp only [probFourierChar_apply', ofReal_neg]
 
-@[continuity]
+@[continuity, fun_prop]
 theorem continuous_probFourierChar : Continuous probFourierChar :=
   Circle.exp.continuous.comp continuous_neg
 
@@ -155,15 +155,31 @@ lemma charFun_map_sum_pi_const (μ : Measure E) [IsFiniteMeasure μ] (n : ℕ) (
     have h := (measurePreserving_piFinSuccAbove (fun (_ : Fin (n + 1)) ↦ μ) 0).map_eq
     nth_rw 2 [← μ.map_id]
     rw [Measure.conv, Measure.map_prod_map, ← h, Measure.map_map, Measure.map_map]
-    · congr 1; ext1 x
+    · congr 1 with x
       apply Fin.sum_univ_succ
-    · apply measurable_fst.add
-      simp_rw [Prod.map_snd]
-      exact Finset.measurable_sum _ fun i _ ↦ (measurable_pi_apply i).comp measurable_snd
-    · apply MeasurableEquiv.measurable
-    · exact measurable_add
-    · exact measurable_id.prodMap (Finset.measurable_sum _ fun i _ ↦ measurable_pi_apply i)
-    · exact measurable_id
-    · exact Finset.measurable_sum _ fun i _ ↦ measurable_pi_apply i
+    all_goals { fun_prop }
+
+section bounds
+
+lemma integral_one_sub_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
+    ∫ t in (-r)..r, 1 - charFun μ t
+      = 2 * r * ∫ x, (1 - sin (r * x) / (r * x)) ∂μ := by
+  sorry
+
+lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
+    (μ {x | r < |x|}).toReal
+      ≤ 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
+  have h := integral_one_sub_charFun (r := 2 * r⁻¹) (μ := μ) (by positivity)
+  sorry
+
+lemma measure_Icc_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
+    (μ (Set.Icc (-r) r)).toReal ≤ 2 * r * ∫ t in (- r⁻¹)..(r⁻¹), ‖charFun μ t‖ := by
+  sorry
+
+lemma abs_sub_charFun_le {μ : Measure ℝ} [IsProbabilityMeasure μ] {s t : ℝ} :
+    ‖charFun μ s - charFun μ t‖ ≤ 2 * ∫ x, min (|(s - t) * x|) 1 ∂μ := by
+  sorry
+
+end bounds
 
 end ProbabilityTheory

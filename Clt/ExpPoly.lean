@@ -35,7 +35,7 @@ lemma conj_exp_mul_I (x : ℝ) : starRingEnd ℂ (exp (x * I)) = exp (- x * I) :
   have h := Circle.coe_inv_eq_conj ⟨exp (x * I), ?_⟩
   · simp only [Circle.coe_inv] at h
     rw [← h, neg_mul, exp_neg]
-  · simp [exp_mul_I, abs_cos_add_sin_mul_I, Submonoid.unitSphere]
+  · simp [exp_mul_I, norm_cos_add_sin_mul_I, Submonoid.unitSphere]
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 

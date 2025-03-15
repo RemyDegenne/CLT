@@ -18,7 +18,7 @@ section Taylor
 open Set
 open scoped Topology
 
-variable {E} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 /-- Peano's form of Taylor's theorem (c/f formulations in Mathlib.Analysis.Calculus.Taylor)
 The general form should have some more general `hf` (using `ContDiff*`).
@@ -36,13 +36,6 @@ open scoped Nat Real NNReal ENNReal Topology
 
 section ForMathlib
 
-theorem memℒp_iff_integrable_norm_rpow {α} [MeasurableSpace α] (μ : Measure α)
-    {E} [NormedAddCommGroup E] {f : α → E} (hf : AEStronglyMeasurable f μ)
-    (p : ℝ≥0∞) (p_zero : p ≠ 0) (p_top : p ≠ ∞) :
-    Memℒp f p μ ↔ Integrable (fun x ↦ ‖f x‖ ^ p.toReal) μ := by
-  rw [← memℒp_one_iff_integrable, ← memℒp_norm_rpow_iff hf p_zero p_top,
-    ENNReal.div_self p_zero p_top]
-
 lemma integrable_norm_rpow_antitone {α} [MeasurableSpace α]
     (μ : Measure α) [IsFiniteMeasure μ]
     {E} [NormedAddCommGroup E] {f : α → E} (hf : AEStronglyMeasurable f μ)
@@ -54,9 +47,9 @@ lemma integrable_norm_rpow_antitone {α} [MeasurableSpace α]
   rcases hq.eq_or_lt with (rfl | hq)
   · exact (hp.not_le hpq).elim
   revert hint
-  convert fun h ↦ Memℒp.mono_exponent h (ENNReal.ofReal_le_ofReal hpq) using 1
-  · rw [memℒp_iff_integrable_norm_rpow μ hf, ENNReal.toReal_ofReal hq.le] <;> simp_all
-  · rw [memℒp_iff_integrable_norm_rpow μ hf, ENNReal.toReal_ofReal hp.le] <;> simp_all
+  convert fun h ↦ MemLp.mono_exponent h (ENNReal.ofReal_le_ofReal hpq) using 1
+  · rw [← integrable_norm_rpow_iff hf, ENNReal.toReal_ofReal hq.le] <;> simp_all
+  · rw [← integrable_norm_rpow_iff hf, ENNReal.toReal_ofReal hp.le] <;> simp_all
   · infer_instance
 
 lemma integrable_norm_pow_antitone {α} [MeasurableSpace α]
@@ -98,7 +91,7 @@ theorem contDiff_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
   simp_rw [funext (charFun_eq_fourierIntegral' μ)]
   rw [h]
   apply (VectorFourier.contDiff_fourierIntegral _ hint').comp
-  apply contDiff_const_smul
+  exact contDiff_const_smul _
 
 open VectorFourier in
 theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) μ) :
@@ -109,8 +102,7 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
     rw [Nat.cast_le] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
   simp_rw [funext (charFun_eq_fourierIntegral' μ), smul_eq_mul]
-  sorry
-  -- todo: fix the proof below
+  sorry -- todo: fix the proof below. It broke after a mathlib bump
   -- rw [iteratedDeriv_const_smul]
   -- · dsimp only
   --   rw [h, iteratedDeriv, iteratedFDeriv_fourierIntegral _ hint']
@@ -140,13 +132,15 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
 
 theorem iteratedDeriv_charFun_zero {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
     iteratedDeriv n (charFun μ) 0 = I ^ n * ∫ x, x ^ n ∂μ := by
-  simp [iteratedDeriv_charFun hint]
+  simp only [iteratedDeriv_charFun hint, ofReal_zero, zero_mul, exp_zero, mul_one,
+    mul_eq_mul_left_iff, pow_eq_zero_iff', I_ne_zero, ne_eq, false_and, or_false]
   norm_cast
   -- maybe this should have been done by norm_cast?
   exact integral_ofReal
 
 theorem taylor_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
-    (fun t ↦ charFun μ t - ∑ k ∈ Finset.range (n + 1), (k ! : ℝ)⁻¹ * (t * I) ^ k * ∫ x, x ^ k ∂μ) =o[𝓝 0] fun t ↦ t ^ n := by
+    (fun t ↦ charFun μ t - ∑ k ∈ Finset.range (n + 1), (k ! : ℝ)⁻¹ * (t * I) ^ k * ∫ x, x ^ k ∂μ)
+      =o[𝓝 0] fun t ↦ t ^ n := by
   have := taylor_mean_remainder_peano (x₀ := 0) (contDiff_charFun hint)
   simp_rw [sub_zero] at this
   convert this with t
@@ -155,9 +149,9 @@ theorem taylor_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
   intro k hkn
   push_cast
   have hint' : Integrable (fun x ↦ |x| ^ k) μ :=
-    integrable_norm_pow_antitone μ aestronglyMeasurable_id
-      (Finset.mem_range_succ_iff.mp hkn) hint
-  rw [iteratedDerivWithin, iteratedFDerivWithin_eq_iteratedFDeriv, ← iteratedDeriv, iteratedDeriv_charFun_zero]
+    integrable_norm_pow_antitone μ aestronglyMeasurable_id (Finset.mem_range_succ_iff.mp hkn) hint
+  rw [iteratedDerivWithin, iteratedFDerivWithin_eq_iteratedFDeriv, ← iteratedDeriv,
+    iteratedDeriv_charFun_zero]
   · simp [mul_pow, mul_comm, mul_assoc, mul_left_comm]
   · exact hint'
   · exact uniqueDiffOn_univ

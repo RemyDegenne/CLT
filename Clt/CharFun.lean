@@ -162,7 +162,7 @@ lemma charFun_map_sum_pi_const (μ : Measure E) [IsFiniteMeasure μ] (n : ℕ) (
       exact Finset.measurable_sum _ fun i _ ↦ (measurable_pi_apply i).comp measurable_snd
     · apply MeasurableEquiv.measurable
     · exact measurable_add
-    · exact measurable_id.prod_map (Finset.measurable_sum _ fun i _ ↦ measurable_pi_apply i)
+    · exact measurable_id.prodMap (Finset.measurable_sum _ fun i _ ↦ measurable_pi_apply i)
     · exact measurable_id
     · exact Finset.measurable_sum _ fun i _ ↦ measurable_pi_apply i
 

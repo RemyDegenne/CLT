@@ -3,9 +3,8 @@ Copyright (c) 2025 Rémy Degenne. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rémy Degenne
 -/
-import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
-import Mathlib.MeasureTheory.Measure.Tight
 import Clt.CharFun
+import Clt.Prokhorov
 
 /-!
 # Tightness and characteristic functions
@@ -40,14 +39,4 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
     {f : E → ℂ} (hf : ContinuousAt f 0)
     (h : ∀ t, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (f t))) :
     IsTightMeasureSet {μ i | i} := by
-  sorry
-
-/-- Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with characteristic
-functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff
-for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$. -/
--- TODO: generalize from ℝ to ℝ^d
-theorem ProbabilityMeasure.tendsto_iff_tendsto_charFun {μ : ℕ → ProbabilityMeasure ℝ}
-    {μ₀ : ProbabilityMeasure ℝ} :
-    Tendsto μ atTop (𝓝 μ₀) ↔
-      ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
   sorry

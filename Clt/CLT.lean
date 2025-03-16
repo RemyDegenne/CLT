@@ -63,7 +63,7 @@ theorem central_limit (hX : ∀ n, Measurable (X n))
     {P : ProbabilityMeasure Ω} (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)
     (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) :
     Tendsto (fun n : ℕ => P.map (aemeasurable_invSqrtMulSum n hX)) atTop (𝓝 stdGaussian) := by
-  refine (charFun_tendsto_iff_measure_tendsto _ _).mp fun t ↦ ?_
+  refine ProbabilityMeasure.tendsto_iff_tendsto_charFun.mpr fun t ↦ ?_
   rw [stdGaussian, ProbabilityMeasure.coe_mk, charFun_gaussianReal]
 
   -- convert to independence over Fin n

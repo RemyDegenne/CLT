@@ -161,9 +161,17 @@ lemma charFun_map_sum_pi_const (μ : Measure E) [IsFiniteMeasure μ] (n : ℕ) (
 
 section bounds
 
+lemma sin_le_half {x : ℝ} (hx : 2 ≤ x) : Real.sin x ≤ x / 2 :=
+  calc Real.sin x
+      ≤ 1 := Real.sin_le_one x
+    _ ≤ x / 2 := by linarith
+
+lemma integral_exp_Icc {r : ℝ} (hr : 0 ≤ r) :
+    ∫ t in (-r)..r, cexp (t * I) = 2 * Real.sin r := by
+  sorry
+
 lemma integral_one_sub_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
-    ∫ t in (-r)..r, 1 - charFun μ t
-      = 2 * r * ∫ x, (1 - sin (r * x) / (r * x)) ∂μ := by
+    ∫ t in (-r)..r, 1 - charFun μ t = 2 * r * ∫ x, (1 - Real.sin (r * x) / (r * x)) ∂μ := by
   sorry
 
 lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :

@@ -175,11 +175,11 @@ The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\
 \leanok
 \lean{isTightMeasureSet_iff_equiContinuousAt_charFun}
 \uses{def:tight}
-A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $(\hat{\mu}_a)$ is equi-continuous at 0.
+A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $(\hat{\mu}_a)$ is equicontinuous at 0.
 \end{lemma}
 
 \begin{proof}\uses{lem:charFun_bound_small, lem:charFun_bound_large, lem:abs_sub_charFun}
-TODO: equi-continuous implies tight.
+TODO: equicontinuous implies tight.
 
 For the other direction, by Lemma~\ref{lem:abs_sub_charFun}, for all $a$,
 \begin{align*}
@@ -188,7 +188,7 @@ For the other direction, by Lemma~\ref{lem:abs_sub_charFun}, for all $a$,
     \: .
 \end{align*}
 Since $(\mu_a)$ is tight, the right-hand side converges to 0 as $s - t \to 0$ uniformly in $a$.
-We obtain equi-continuity at 0 of the family $(\hat{\mu}_a)$.
+We obtain equicontinuity at 0 of the family $(\hat{\mu}_a)$.
 \end{proof}
 
 

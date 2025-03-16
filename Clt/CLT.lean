@@ -3,7 +3,6 @@ Copyright (c) 2024 Thomas Zhu. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Thomas Zhu, Rémy Degenne
 -/
-import Mathlib.MeasureTheory.Measure.Tight
 import Mathlib.Probability.IdentDistrib
 import Clt.Gaussian
 import Clt.Inversion
@@ -60,25 +59,22 @@ lemma aemeasurable_invSqrtMulSum {μ : Measure Ω} (n) (hX : ∀ n, Measurable (
     AEMeasurable (invSqrtMulSum X n) μ :=
   (measurable_invSqrtMulSum n hX).aemeasurable
 
--- using ProbabilityMeasure for the topology
-variable {P : ProbabilityMeasure Ω}
-
 theorem central_limit (hX : ∀ n, Measurable (X n))
-    (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)
+    {P : ProbabilityMeasure Ω} (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)
     (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) :
     Tendsto (fun n : ℕ => P.map (aemeasurable_invSqrtMulSum n hX)) atTop (𝓝 stdGaussian) := by
-  refine (charFun_tendsto_iff_measure_tendsto _ _).mp fun t ↦ ?_
+  refine ProbabilityMeasure.tendsto_iff_tendsto_charFun.mpr fun t ↦ ?_
   rw [stdGaussian, ProbabilityMeasure.coe_mk, charFun_gaussianReal]
 
   -- convert to independence over Fin n
   have indep_fin (n : ℕ) : iIndepFun (fun i : Fin n ↦ X i) P := by
     rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
     intro S s hs
-    let sets (i : ℕ) := if h : i < n then s ⟨i, h⟩ else ∅
-    convert hindep.measure_inter_preimage_eq_mul (S.map Fin.valEmbedding) (sets := sets) ?_
-    · simp [sets]
-    · simp [sets]
-    · simpa [sets]
+    convert hindep.measure_inter_preimage_eq_mul (S.map Fin.valEmbedding)
+      (sets := fun i ↦ if h : i < n then s ⟨i, h⟩ else ∅) ?_
+    · simp
+    · simp
+    · simpa
   have pi_fin (n : ℕ) := (iIndepFun_iff_pi_map_eq_map _ fun i : Fin n ↦ hX i).mp (indep_fin n)
   have map_eq (n : ℕ) := (hident n).map_eq
 
@@ -109,7 +105,11 @@ theorem central_limit (hX : ∀ n, Measurable (X n))
     tendsto_sqrt_atTop.comp <| tendsto_natCast_atTop_atTop
   rw [mul_zero] at t_mul_inv_sqrt
   have littleO : _ =o[atTop] fun k ↦ _ := (taylor_charFun hint).comp_tendsto t_mul_inv_sqrt
-  simp [Finset.sum_range_succ, mul_pow] at littleO
+  simp only [Nat.reduceAdd, ofReal_inv, ofReal_natCast, mul_pow, Finset.sum_range_succ,
+    Finset.range_one, Finset.sum_singleton, Nat.factorial_zero, Nat.cast_one, inv_one, pow_zero,
+    mul_one, integral_const, measure_univ, ENNReal.one_toReal, smul_eq_mul, ofReal_one,
+    Nat.factorial_one, pow_one, one_mul, Nat.factorial_two, Nat.cast_ofNat, I_sq, mul_neg, neg_mul,
+    Function.comp_apply, inv_pow, Nat.cast_nonneg, Real.sq_sqrt] at littleO
 
   -- littleO is what we wanted
   convert littleO.of_const_mul_right with n

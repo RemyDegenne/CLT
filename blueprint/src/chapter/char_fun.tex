@@ -59,7 +59,7 @@ $\hat{\mu}(-t) = \overline{\hat{\mu}(t)}$.
 \leanok
 \lean{ProbabilityTheory.charFun_map_smul}
 \uses{def:charFun}
-For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_X(at)$.
+For $a \in \mathbb{R}$ and $X$ a random variable with law $\mu$, the characteristic function of $a X$ is $t \mapsto \hat{\mu}(at)$.
 \end{lemma}
 
 \begin{proof}\leanok
@@ -70,20 +70,55 @@ For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_
 \leanok
 \lean{ProbabilityTheory.charFun_conv}
 \uses{def:charFun}
-If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has characteristic function $\phi_{X+Y} = \phi_X \phi_Y$. 
+If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are independent, then $X+Y$ has characteristic function $\hat{\mu} + \hat{\nu}$. 
 \end{lemma}
 
 \begin{proof}\leanok
 \end{proof}
 
 
-\begin{lemma}\label{lem:charFun_bound}
+\begin{lemma}\label{lem:integral_exp_I}
+\leanok
+\lean{ProbabilityTheory.integral_exp_Icc}
+\begin{align*}
+    \int_{-r}^r e^{i t} \, d t = 2 \sin r \: .
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+\end{proof}
+
+
+\begin{lemma}\label{lem:integral_charFun}
+\leanok
+\lean{ProbabilityTheory.integral_charFun_Icc}
+\begin{align*}
+    \int_{-r}^r \hat{\mu}(t) dt = 2 r \int \frac{\sin(r x)}{r x} \, d\mu(x)
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+\uses{lem:integral_exp_I}
+We will use Fubini's theorem to exchange the order of integration.
+\begin{align*}
+    \int_{-r}^r \hat{\mu}(t) \, dt
+    &= \int_{-r}^r \int e^{i t x} \, d\mu(x) \, dt
+    \\
+    &= \int \left( \int_{-r}^r e^{i t x} \, dt \right) \, d\mu(x)
+    \\
+    &= \int 2 \frac{\sin(r x)}{x} \, d\mu(x)
+    \\
+    &= 2 r \int \frac{\sin(r x)}{r x} \, d\mu(x)
+\end{align*}
+\end{proof}
+
+
+\begin{lemma}\label{lem:charFun_bound_small}
+\leanok
+\lean{ProbabilityTheory.measure_Icc_le_charFun}
 \uses{def:charFun}
 For $\mu$ a probability measure on $\mathbb{R}$ and $r > 0$,
 \begin{align*}
-\mu \left\{x \mid |x| \ge r\right\}
-&\le \frac{r}{2} \int_{-2/r}^{2/r} (1 - \hat{\mu}(t))dt
-\: , \\
 \mu [-r, r]
 &\le 2 r \int_{-1/r}^{1/r} |\hat{\mu}(t)| dt
 \: .
@@ -95,12 +130,46 @@ TODO
 \end{proof}
 
 
+\begin{lemma}\label{lem:charFun_bound_large}
+\leanok
+\lean{ProbabilityTheory.measure_abs_ge_le_charFun}
+\uses{def:charFun}
+For $\mu$ a probability measure on $\mathbb{R}$ and $r > 0$,
+\begin{align*}
+\mu \left\{x \mid |x| \ge r\right\}
+&\le \frac{r}{2} \int_{-2/r}^{2/r} (1 - \hat{\mu}(t))dt
+\: .
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+\uses{lem:integral_charFun}
+We will use Lemma~\ref{lem:integral_charFun} with $r$ replaced by $2/r$.
+\begin{align*}
+    \frac{r}{2} \int_{-2/r}^{2/r} (1 - \hat{\mu}(t))dt
+    &= 2 - \frac{r}{2} \int_{-2/r}^{2/r} \hat{\mu}(t)dt
+    \\
+    &= 2 - 2 \int \frac{\sin(2 x / r)}{2 x / r} \, d\mu(x)
+    \\
+    &= 2 \int \left(1 - \frac{\sin(2 x / r)}{2 x / r}\right) \, d\mu(x)
+    \\
+    &\ge 2 \int_{|x| \ge r} \left(1 - \frac{\sin(2 x / r)}{2 x / r}\right) \, d\mu(x)
+    \\
+    &\ge \mu\{x \mid |x| \ge r\}
+    \: .
+\end{align*}
+In the end we used that $\sin x \le x /2$ for $x \ge 2$.
+\end{proof}    
+
+
 \begin{lemma}\label{lem:abs_sub_charFun}
+\leanok
+\lean{ProbabilityTheory.abs_sub_charFun_le}
 \uses{def:charFun}
 Let $X$ be a random variable with law $\mu$. Then for any $s, t$,
 \begin{align*}
 \vert \hat{\mu}(s) - \hat{\mu}(t) \vert
-\le 2 \mathbb{E}\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
+\le 2 \mu\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
 \: .
 \end{align*}
 \end{lemma}
@@ -108,12 +177,12 @@ Let $X$ be a random variable with law $\mu$. Then for any $s, t$,
 \begin{proof}
 \begin{align*}
 \vert \hat{\mu}(s) - \hat{\mu}(t) \vert
-&= \vert \mathbb{E}\left[e^{isX} - e^{itX}\right] \vert
+&= \vert \mu\left[e^{isX} - e^{itX}\right] \vert
 \\
-&\le \mathbb{E}\left[\vert e^{isX} - e^{itX} \vert\right]
+&\le \mu\left[\vert e^{isX} - e^{itX} \vert\right]
 \\
-&= \mathbb{E}\left[\vert 1 - e^{i(t - s)X} \vert\right]
-\le 2 \mathbb{E}\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
+&= \mu\left[\vert 1 - e^{i(t - s)X} \vert\right]
+\le 2 \mu\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
 \: .
 \end{align*}
 \end{proof}
@@ -133,26 +202,6 @@ The Gaussian distribution $\mathcal N(m, \sigma^2)$ has characteristic function 
 
 \section{Convergence of characteristic functions and weak convergence of measures}
 
-\begin{lemma}\label{lem:tight_iff_charFun_equiContinuous}
-\uses{def:tight}
-A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $(\hat{\mu}_a)$ is equi-continuous at 0.
-\end{lemma}
-
-\begin{proof}\uses{lem:charFun_bound, lem:abs_sub_charFun}
-TODO
-\end{proof}
-
-
-\begin{lemma}\label{lem:tight_of_tendsto_charFun}
-\uses{def:weak_cvg_measure}
-Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0, then $(\mu_n)$ is tight.
-\end{lemma}
-
-\begin{proof}\uses{lem:tight_iff_charFun_equiContinuous}
-TODO
-\end{proof}
-
-Remark: the finite dimension is necessary. Counterexample: $\ell^2$ with $\mu_n$ the law of $X_n = \sum_{k=1}^n \zeta_k e_k$ where $e_k = (0, \ldots, 0, 1, 0 \ldots)$ and the $\zeta_k$ are i.i.d. $\mathcal N(0,1)$. Then $\hat{\mu}_n(t) \to e^{- \Vert t \Vert^2 / 2}$ for all $t \in \ell^2$ but $(\mu_n)$ is not tight (todo: why?).
 
 \begin{lemma}\label{lem:eq_M_of_eq_charFun}
 If two probability measures $\mu, \nu$ have same characteristic function, then for all exponential polynomial $f \in \mathcal M$, $\mu[f] = \nu[f]$.
@@ -163,7 +212,7 @@ If two probability measures $\mu, \nu$ have same characteristic function, then f
 
 
 \begin{lemma}\label{lem:ext_charFun}
-Two finite measures on a TODO space are equal iff they have the same characteristic function.
+Two finite measures on a complete separable metric space are equal iff they have the same characteristic function.
 \end{lemma}
 
 \begin{proof}\uses{lem:separating_expPoly, lem:eq_M_of_eq_charFun}
@@ -173,7 +222,55 @@ The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\
 \end{proof}
 
 
-\begin{theorem}[Convergence of characteristic functions and weak convergence of measures]\label{thm:charFun_tendsto_iff_measure_tendsto}
+\begin{lemma}\label{lem:tight_iff_charFun_equicontinuous}
+\leanok
+\lean{isTightMeasureSet_iff_equicontinuousAt_charFun}
+\uses{def:tight}
+A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $(\hat{\mu}_a)$ is equicontinuous at 0.
+\end{lemma}
+
+\begin{proof}\uses{lem:charFun_bound_small, lem:charFun_bound_large, lem:abs_sub_charFun}
+TODO: equicontinuous implies tight.
+
+For the other direction, by Lemma~\ref{lem:abs_sub_charFun}, for all $a$,
+\begin{align*}
+    \vert \hat{\mu}_a(s) - \hat{\mu}_a(t) \vert
+    \le 2 \mu_a\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
+    \: .
+\end{align*}
+Since $(\mu_a)$ is tight, the right-hand side converges to 0 as $s - t \to 0$ uniformly in $a$.
+We obtain equicontinuity at 0 of the family $(\hat{\mu}_a)$.
+\end{proof}
+
+
+\begin{lemma}\label{lem:tight_of_tendsto_charFun}
+\leanok
+\lean{isTightMeasureSet_of_tendsto_charFun}
+\uses{def:weak_cvg_measure, def:tight}
+Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0, then $(\mu_n)$ is tight.
+\end{lemma}
+
+\begin{proof}\uses{lem:charFun_bound_large}
+By Lemma~\ref{lem:charFun_bound_large} and dominated convergence, for all $a \in \mathbb{R}^d$ and $r > 0$,
+\begin{align*}
+    \lim_{n \to +\infty} \mu_n \left\{x \mid |\langle a, x\rangle| \ge r\right\}
+    &\le \lim_{n \to +\infty} \frac{r}{2} \int_{-2/r}^{2/r} (1 - \hat{\mu}_n(\langle a, t\rangle))dt
+    \\
+    &= \frac{r}{2} \int_{-2/r}^{2/r} (1 - f(\langle a, t\rangle))dt
+\end{align*}
+The right-hand side converges to 0 as $r \to +\infty$ by continuity of $f$ at 0.
+This shows that the family is tight.
+\end{proof}
+
+Remark: the finite dimension is necessary.
+Counterexample: $\ell^2$ with $\mu_n$ the law of $X_n = \sum_{k=1}^n \zeta_k e_k$ where $e_k = (0, \ldots, 0, 1, 0 \ldots)$ and the $\zeta_k$ are i.i.d. $\mathcal N(0,1)$.
+Then $\hat{\mu}_n(t) \to e^{- \Vert t \Vert^2 / 2}$ for all $t \in \ell^2$ but $(\mu_n)$ is not tight.
+
+
+\begin{theorem}[Convergence of characteristic functions and weak convergence of measures]
+\label{thm:charFun_tendsto_iff_measure_tendsto}
+\leanok
+\lean{MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun}
 Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.
 \end{theorem}
 
@@ -182,5 +279,5 @@ For all $t$, $x \mapsto e^{i \langle t, x \rangle}$ is a bounded continuous func
 
 Let's now prove the other direction.
 If the characteristic functions converge pointwise, we get from Lemma~\ref{lem:tight_of_tendsto_charFun} that the family of measures is tight. 
-Then apply Lemma~\ref{lem:cvg_of_separating} to the subalbegra $\mathcal M$: it suffices to show that $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal M$. This is obtained with Lemma~\ref{lem:eq_M_of_eq_charFun}.
+Then apply Lemma~\ref{lem:cvg_of_separating} to the subalgebra $\mathcal M$: it suffices to show that $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal M$. This is obtained with Lemma~\ref{lem:eq_M_of_eq_charFun}.
 \end{proof}

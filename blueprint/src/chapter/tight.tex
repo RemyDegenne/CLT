@@ -78,6 +78,7 @@ The closure of a tight set of measures is tight.
 
 \begin{theorem}[Prokhorov's theorem]\label{thm:prokhorov}
 \notready
+\lean{isTightMeasureSet_iff_isCompact_closure}
 Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$. Then the following are equivalent:
 \begin{enumerate}
 	\item $S$ is tight.
@@ -92,6 +93,8 @@ Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$
 \end{proof}
 
 \begin{lemma}\label{lem:relatively_compact_of_tight}
+\leanok
+\lean{isCompact_closure_of_isTightMeasureSet}
 Let $E$ be a metric space and let $S \subseteq \mathcal P(E)$ be tight. Then the closure of $S$ is compact.
 \end{lemma}
 

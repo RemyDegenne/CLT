@@ -62,7 +62,8 @@ theorem fourierIntegral_probFourierChar_eq_integral_exp {V : Type _} [AddCommGro
     (μ : Measure V) (f : V → E) (w : W) :
     VectorFourier.fourierIntegral probFourierChar μ L f w =
       ∫ v : V, exp (↑(L v w) * I) • f v ∂μ := by
-  simp_rw [VectorFourier.fourierIntegral, Circle.smul_def, probFourierChar_apply, ofReal_neg, neg_neg]
+  simp_rw [VectorFourier.fourierIntegral, Circle.smul_def, probFourierChar_apply, ofReal_neg,
+    neg_neg]
 
 end Character
 
@@ -85,7 +86,8 @@ lemma charFun_eq_fourierIntegral (μ : Measure E) (t : E) :
 
 /-- Relate `charFun` to the "standard" Fourier integral defined by `Real.fourierChar`. -/
 lemma charFun_eq_fourierIntegral' (μ : Measure E) (t : E) :
-    charFun μ t = VectorFourier.fourierIntegral Real.fourierChar μ sesqFormOfInner 1 (-(2 * π)⁻¹ • t) := by
+    charFun μ t = VectorFourier.fourierIntegral Real.fourierChar μ
+      sesqFormOfInner 1 (-(2 * π)⁻¹ • t) := by
   have h : (2 : ℂ) * π ≠ 0 := by simp [Real.pi_ne_zero]
   simp only [charFun, real_smul, VectorFourier.fourierIntegral, Real.fourierChar, neg_smul, map_neg,
     _root_.map_smul, smul_eq_mul, neg_neg, AddChar.coe_mk, ← mul_assoc, Pi.one_apply,
@@ -138,7 +140,8 @@ lemma charFun_conv (μ ν : Measure E) [IsFiniteMeasure μ] [IsFiniteMeasure ν]
     apply (measurable_id.const_inner.smul_const I).aestronglyMeasurable
 
 /--
-The characteristic function of the sum of `n` i.i.d. variables with characteristic function `f` is `f ^ n`.
+The characteristic function of the sum of `n` i.i.d. variables with characteristic function `f` is
+`f ^ n`.
 
 We express this in terms of the pushforward of $P^{\otimes n}$ by summation.
 

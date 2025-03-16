@@ -108,33 +108,48 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
     rw [Nat.cast_le] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
   simp_rw [funext (charFun_eq_fourierIntegral' μ), smul_eq_mul]
-  sorry -- todo: fix the proof below. It broke after a mathlib bump
-  -- rw [iteratedDeriv_const_smul]
-  -- · dsimp only
-  --   rw [h, iteratedDeriv, iteratedFDeriv_fourierIntegral _ hint']
-  --   · rw [fourierIntegral_continuousMultilinearMap_apply]
-  --     · unfold fourierIntegral Real.fourierChar Circle.exp
-  --       simp only [ContinuousMap.coe_mk, ofReal_mul, ofReal_ofNat, neg_mul,
-  --         ContinuousLinearMap.toLinearMap₂_apply, ContinuousLinearMap.mul_apply', mul_neg, neg_neg,
-  --         AddChar.coe_mk, ofReal_inv, fourierPowSMulRight_apply, mul_one, Finset.prod_const,
-  --         Finset.card_univ, Fintype.card_fin, Pi.one_apply, real_smul, ofReal_pow, smul_eq_mul,
-  --         Circle.smul_def, ofReal_neg]
-  --       simp_rw [mul_left_comm (exp _), integral_mul_left]
-  --       have : (2 : ℂ) * π ≠ 0 := by simp [Real.pi_ne_zero]
-  --       field_simp
-  --       ring_nf
-  --       rw [mul_assoc]
-  --       congr
-  --       · ext; congr 2; ring
-  --       · rw [← mul_pow]; norm_num
-  --     · exact Real.continuous_fourierChar
-  --     · apply integrable_fourierPowSMulRight
-  --       · simpa
-  --       · exact aestronglyMeasurable_one
-  --   · exact aestronglyMeasurable_one
-  --   · rfl
-  -- · rw [h]
-  --   apply contDiff_fourierIntegral _ hint'
+  rw [iteratedDeriv_comp_const_smul]
+  · dsimp only
+    simp only [mul_inv_rev, neg_mul]
+    rw [h, iteratedDeriv, iteratedFDeriv_fourierIntegral _ hint']
+    · rw [fourierIntegral_continuousMultilinearMap_apply]
+      · unfold fourierIntegral Real.fourierChar Circle.exp
+        simp only [ContinuousMap.coe_mk, ofReal_mul, ofReal_ofNat, neg_mul,
+          ContinuousLinearMap.toLinearMap₂_apply, ContinuousLinearMap.mul_apply', mul_neg, neg_neg,
+          AddChar.coe_mk, ofReal_inv, fourierPowSMulRight_apply, mul_one, Finset.prod_const,
+          Finset.card_univ, Fintype.card_fin, Pi.one_apply, real_smul, ofReal_pow, smul_eq_mul,
+          Circle.smul_def, ofReal_neg]
+        simp_rw [mul_left_comm (exp _), integral_mul_left]
+        have : (2 : ℂ) * π ≠ 0 := by simp [Real.pi_ne_zero]
+        calc (-((↑π)⁻¹ * 2⁻¹)) ^ n
+          * ((-(2 * ↑π * I)) ^ n * ∫ a, cexp (2 * ↑π * (↑a * ((↑π)⁻¹ * 2⁻¹ * ↑t)) * I) * ↑a ^ n ∂μ)
+        _ = I ^ n * ∫ a, cexp (2 * ↑π * (↑a * ((↑π)⁻¹ * 2⁻¹ * ↑t)) * I) * ↑a ^ n ∂μ := by
+          rw [← mul_assoc]
+          congr
+          rw [← mul_pow]
+          ring_nf
+          -- ⊢ ↑π ^ n * (↑π)⁻¹ ^ n * I ^ n = I ^ n
+          rw [inv_pow, mul_inv_cancel₀, one_mul]
+          norm_cast
+          positivity
+        _ = I ^ n * ∫ x, ↑x ^ n * cexp (↑t * ↑x * I) ∂μ := by
+          simp_rw [mul_comm ((_ : ℂ) ^ n)]
+          congr with x
+          congr 2
+          ring_nf
+          congr 2
+          -- ⊢ ↑π * ↑x * (↑π)⁻¹ = ↑x
+          rw [mul_comm, ← mul_assoc, inv_mul_cancel₀, one_mul]
+          norm_cast
+          positivity
+      · exact Real.continuous_fourierChar
+      · apply integrable_fourierPowSMulRight
+        · simpa
+        · exact aestronglyMeasurable_one
+    · exact aestronglyMeasurable_one
+    · rfl
+  · rw [h]
+    apply contDiff_fourierIntegral _ hint'
 
 theorem iteratedDeriv_charFun_zero {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
     iteratedDeriv n (charFun μ) 0 = I ^ n * ∫ x, x ^ n ∂μ := by

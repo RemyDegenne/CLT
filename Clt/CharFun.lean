@@ -170,14 +170,14 @@ lemma integral_exp_Icc {r : ℝ} (hr : 0 ≤ r) :
     ∫ t in (-r)..r, cexp (t * I) = 2 * Real.sin r := by
   sorry
 
-lemma integral_one_sub_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
-    ∫ t in (-r)..r, 1 - charFun μ t = 2 * r * ∫ x, (1 - Real.sin (r * x) / (r * x)) ∂μ := by
+lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
+    ∫ t in (-r)..r, charFun μ t = 2 * r * ∫ x, Real.sin (r * x) / (r * x) ∂μ := by
   sorry
 
 lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     (μ {x | r < |x|}).toReal
       ≤ 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
-  have h := integral_one_sub_charFun (r := 2 * r⁻¹) (μ := μ) (by positivity)
+  have h := integral_charFun_Icc (r := 2 * r⁻¹) (μ := μ) (by positivity)
   sorry
 
 lemma measure_Icc_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :

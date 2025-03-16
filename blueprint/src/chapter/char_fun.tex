@@ -59,7 +59,7 @@ $\hat{\mu}(-t) = \overline{\hat{\mu}(t)}$.
 \leanok
 \lean{ProbabilityTheory.charFun_map_smul}
 \uses{def:charFun}
-For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_X(at)$.
+For $a \in \mathbb{R}$ and $X$ a random variable with law $\mu$, the characteristic function of $a X$ is $t \mapsto \hat{\mu}(at)$.
 \end{lemma}
 
 \begin{proof}\leanok
@@ -70,10 +70,46 @@ For $a \in \mathbb{R}$, the characteristic function of $a X$ is $t \mapsto \phi_
 \leanok
 \lean{ProbabilityTheory.charFun_conv}
 \uses{def:charFun}
-If two random variables $X, Y : \Omega \to S$ are independent, then $X+Y$ has characteristic function $\phi_{X+Y} = \phi_X \phi_Y$. 
+If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are independent, then $X+Y$ has characteristic function $\hat{\mu} + \hat{\nu}$. 
 \end{lemma}
 
 \begin{proof}\leanok
+\end{proof}
+
+
+\begin{lemma}\label{lem:integral_exp_I}
+\leanok
+\lean{ProbabilityTheory.integral_exp_Icc}
+\begin{align*}
+    \int_{-r}^r e^{i t} \, d t = 2 \sin r \: .
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+\end{proof}
+
+
+\begin{lemma}\label{lem:integral_charFun}
+\leanok
+\lean{ProbabilityTheory.integral_charFun_Icc}
+\begin{align*}
+    \int_{-r}^r \hat{\mu}(t) dt = 2 r \int \frac{\sin(r x)}{r x} \, d\mu(x)
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+\uses{lem:integral_exp_I}
+We will use Fubini's theorem to exchange the order of integration.
+\begin{align*}
+    \int_{-r}^r \hat{\mu}(t) \, dt
+    &= \int_{-r}^r \int e^{i t x} \, d\mu(x) \, dt
+    \\
+    &= \int \left( \int_{-r}^r e^{i t x} \, dt \right) \, d\mu(x)
+    \\
+    &= \int 2 \frac{\sin(r x)}{x} \, d\mu(x)
+    \\
+    &= 2 r \int \frac{\sin(r x)}{r x} \, d\mu(x)
+\end{align*}
 \end{proof}
 
 
@@ -107,7 +143,22 @@ For $\mu$ a probability measure on $\mathbb{R}$ and $r > 0$,
 \end{lemma}
 
 \begin{proof}
-TODO
+\uses{lem:integral_charFun}
+We will use Lemma~\ref{lem:integral_charFun} with $r$ replaced by $2/r$.
+\begin{align*}
+    \frac{r}{2} \int_{-2/r}^{2/r} (1 - \hat{\mu}(t))dt
+    &= 2 - \frac{r}{2} \int_{-2/r}^{2/r} \hat{\mu}(t)dt
+    \\
+    &= 2 - 2 \int \frac{\sin(2 x / r)}{2 x / r} \, d\mu(x)
+    \\
+    &= 2 \int \left(1 - \frac{\sin(2 x / r)}{2 x / r}\right) \, d\mu(x)
+    \\
+    &\ge 2 \int_{|x| \ge r} \left(1 - \frac{\sin(2 x / r)}{2 x / r}\right) \, d\mu(x)
+    \\
+    &\ge \mu\{x \mid |x| \ge r\}
+    \: .
+\end{align*}
+In the end we used that $\sin x \le x /2$ for $x \ge 2$.
 \end{proof}    
 
 
@@ -118,7 +169,7 @@ TODO
 Let $X$ be a random variable with law $\mu$. Then for any $s, t$,
 \begin{align*}
 \vert \hat{\mu}(s) - \hat{\mu}(t) \vert
-\le 2 \mathbb{E}\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
+\le 2 \mu\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
 \: .
 \end{align*}
 \end{lemma}
@@ -126,12 +177,12 @@ Let $X$ be a random variable with law $\mu$. Then for any $s, t$,
 \begin{proof}
 \begin{align*}
 \vert \hat{\mu}(s) - \hat{\mu}(t) \vert
-&= \vert \mathbb{E}\left[e^{isX} - e^{itX}\right] \vert
+&= \vert \mu\left[e^{isX} - e^{itX}\right] \vert
 \\
-&\le \mathbb{E}\left[\vert e^{isX} - e^{itX} \vert\right]
+&\le \mu\left[\vert e^{isX} - e^{itX} \vert\right]
 \\
-&= \mathbb{E}\left[\vert 1 - e^{i(t - s)X} \vert\right]
-\le 2 \mathbb{E}\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
+&= \mu\left[\vert 1 - e^{i(t - s)X} \vert\right]
+\le 2 \mu\left[ \left\vert (s - t) X\right\vert \wedge 1\right]
 \: .
 \end{align*}
 \end{proof}
@@ -161,7 +212,7 @@ If two probability measures $\mu, \nu$ have same characteristic function, then f
 
 
 \begin{lemma}\label{lem:ext_charFun}
-Two finite measures on a TODO space are equal iff they have the same characteristic function.
+Two finite measures on a complete separable metric space are equal iff they have the same characteristic function.
 \end{lemma}
 
 \begin{proof}\uses{lem:separating_expPoly, lem:eq_M_of_eq_charFun}

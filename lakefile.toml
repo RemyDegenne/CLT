@@ -17,6 +17,7 @@ weak.linter.style.multiGoal = true
 weak.linter.style.setOption = true
 pp.unicode.fun = true
 autoImplicit = false
+relaxedAutoImplicit = false
 
 [moreserveroptions]
 linter.docPrime = false
@@ -40,8 +41,6 @@ git = "https://github.com/leanprover-community/mathlib4.git"
 [[require]]
 name = "checkdecls"
 git = "https://github.com/PatrickMassot/checkdecls.git"
-rev = "master"
 
 [[lean_lib]]
 name = "Clt"
-moreLeanArgs = ["-Dpp.unicode.fun=true", "-DautoImplicit=false", "-DrelaxedAutoImplicit=false"]

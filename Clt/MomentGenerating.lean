@@ -66,8 +66,8 @@ lemma integrable_norm_pow_antitone {α} [MeasurableSpace α]
     p.cast_nonneg q.cast_nonneg hpq <;> rw [Real.rpow_natCast]
 
 theorem iteratedDerivWithin_eq_iteratedDeriv
-    {𝕜 : Type u} [NontriviallyNormedField 𝕜]
-    {E : Type uE} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    {𝕜 E : Type*} [NontriviallyNormedField 𝕜]
+    [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     {s : Set 𝕜} {f : 𝕜 → E} {x : 𝕜} {n : ℕ}
     (hs : UniqueDiffOn 𝕜 s) (h : ContDiffAt 𝕜 (↑n) f x) (hx : x ∈ s) :
     iteratedDerivWithin n f s x = iteratedDeriv n f x := by
@@ -122,7 +122,6 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
           Finset.card_univ, Fintype.card_fin, Pi.one_apply, real_smul, ofReal_pow, smul_eq_mul,
           Circle.smul_def, ofReal_neg]
         simp_rw [mul_left_comm (exp _), integral_mul_left]
-        have : (2 : ℂ) * π ≠ 0 := by simp [Real.pi_ne_zero]
         calc (-((↑π)⁻¹ * 2⁻¹)) ^ n
           * ((-(2 * ↑π * I)) ^ n * ∫ a, cexp (2 * ↑π * (↑a * ((↑π)⁻¹ * 2⁻¹ * ↑t)) * I) * ↑a ^ n ∂μ)
         _ = I ^ n * ∫ a, cexp (2 * ↑π * (↑a * ((↑π)⁻¹ * 2⁻¹ * ↑t)) * I) * ↑a ^ n ∂μ := by

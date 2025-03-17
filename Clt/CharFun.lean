@@ -116,9 +116,8 @@ lemma charFun_map_smul (μ : Measure E) (r : ℝ) (t : E) :
   unfold charFun
   rw [integral_map]
   · simp_rw [inner_smul_right, ← real_inner_smul_left]
-  · apply aemeasurable_id.const_smul
-  · apply continuous_exp.comp_aestronglyMeasurable
-    apply (measurable_id.const_inner.smul_const I).aestronglyMeasurable
+  · fun_prop
+  · exact Measurable.aestronglyMeasurable <| by fun_prop
 
 lemma charFun_map_mul (μ : Measure ℝ) (r : ℝ) (t : ℝ) :
     charFun (μ.map (r * ·)) t = charFun μ (r * t) :=
@@ -132,12 +131,10 @@ lemma charFun_conv (μ ν : Measure E) [IsFiniteMeasure μ] [IsFiniteMeasure ν]
   rw [integral_map, integral_prod]
   · simp_rw [inner_add_right, add_smul, exp_add, integral_mul_left, integral_mul_right]
   · apply (integrable_const (1 : ℝ)).mono
-    · apply continuous_exp.comp_aestronglyMeasurable
-      apply (measurable_add.const_inner.smul_const I).aestronglyMeasurable
+    · exact Measurable.aestronglyMeasurable <| by fun_prop
     · simp
-  · exact measurable_add.aemeasurable
-  · apply continuous_exp.comp_aestronglyMeasurable
-    apply (measurable_id.const_inner.smul_const I).aestronglyMeasurable
+  · fun_prop
+  · exact Measurable.aestronglyMeasurable <| by fun_prop
 
 /--
 The characteristic function of the sum of `n` i.i.d. variables with characteristic function `f` is

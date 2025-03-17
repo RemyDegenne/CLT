@@ -23,6 +23,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 /-- Peano's form of Taylor's theorem (c/f formulations in Mathlib.Analysis.Calculus.Taylor)
 The general form should have some more general `hf` (using `ContDiff*`).
 The resulting form might be different from this one below.
+
+This is already proven in Mathlib PR #19796: https://github.com/leanprover-community/mathlib4/pull/19796.
 -/
 theorem taylor_mean_remainder_peano {f : ℝ → E}
     {x₀ : ℝ} {n : ℕ} (hf : ContDiff ℝ n f) :

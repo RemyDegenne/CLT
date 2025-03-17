@@ -28,6 +28,8 @@ lemma tendsto_sqrt_atTop : Tendsto (√·) atTop atTop := by
   simp_rw [Real.sqrt_eq_rpow]
   exact tendsto_rpow_atTop (by norm_num)
 
+namespace ProbabilityTheory
+
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {X : ℕ → Ω → ℝ}
 
 /-- From PFR -/
@@ -120,3 +122,5 @@ theorem central_limit (hX : ∀ n, Measurable (X n))
     simp [mul_pow, mul_comm, ← ofReal_pow]
     ring
   · ext; apply one_div
+
+end ProbabilityTheory

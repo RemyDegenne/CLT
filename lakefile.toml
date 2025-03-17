@@ -1,0 +1,46 @@
+name = "clt"
+defaultTargets = ["Clt"]
+
+[leanoptions]
+weak.linter.docPrime = false
+weak.linter.hashCommand = true
+weak.linter.oldObtain = true
+weak.linter.refine = true
+weak.linter.style.cdot = true
+weak.linter.style.dollarSyntax = true
+weak.linter.style.header = true
+weak.linter.style.lambdaSyntax = true
+weak.linter.style.longLine = true
+weak.linter.style.longFile = 1500
+weak.linter.style.missingEnd = true
+weak.linter.style.multiGoal = true
+weak.linter.style.setOption = true
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+
+[moreserveroptions]
+linter.docPrime = false
+linter.hashCommand = true
+linter.oldObtain = true
+linter.refine = true
+linter.style.cdot = true
+linter.style.dollarSyntax = true
+linter.style.header = true
+linter.style.lambdaSyntax = true
+linter.style.longLine = true
+linter.style.longFile = 1500
+linter.style.missingEnd = true
+linter.style.multiGoal = true
+linter.style.setOption = true
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+
+[[lean_lib]]
+name = "Clt"

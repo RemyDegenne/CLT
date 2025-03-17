@@ -70,7 +70,7 @@ For $a \in \mathbb{R}$ and $X$ a random variable with law $\mu$, the characteris
 \leanok
 \lean{ProbabilityTheory.charFun_conv}
 \uses{def:charFun}
-If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are independent, then $X+Y$ has characteristic function $\hat{\mu} + \hat{\nu}$. 
+If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are independent, then $X+Y$ has characteristic function $\hat{\mu} + \hat{\nu}$.
 \end{lemma}
 
 \begin{proof}\leanok
@@ -159,7 +159,7 @@ We will use Lemma~\ref{lem:integral_charFun} with $r$ replaced by $2/r$.
     \: .
 \end{align*}
 In the end we used that $\sin x \le x /2$ for $x \ge 2$.
-\end{proof}    
+\end{proof}
 
 
 \begin{lemma}\label{lem:abs_sub_charFun}
@@ -212,6 +212,8 @@ If two probability measures $\mu, \nu$ have same characteristic function, then f
 
 
 \begin{lemma}\label{lem:ext_charFun}
+\leanok
+\lean{MeasureTheory.ProbabilityMeasure.ext_of_charFun_eq}
 Two finite measures on a complete separable metric space are equal iff they have the same characteristic function.
 \end{lemma}
 
@@ -278,6 +280,6 @@ Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with c
 For all $t$, $x \mapsto e^{i \langle t, x \rangle}$ is a bounded continuous function. Hence by the definition of convergence in distribution, $\mu_n \xrightarrow{w} \mu \implies \hat{\mu}_n(t) \to \hat{\mu}(t)$ for all $t$.
 
 Let's now prove the other direction.
-If the characteristic functions converge pointwise, we get from Lemma~\ref{lem:tight_of_tendsto_charFun} that the family of measures is tight. 
+If the characteristic functions converge pointwise, we get from Lemma~\ref{lem:tight_of_tendsto_charFun} that the family of measures is tight.
 Then apply Lemma~\ref{lem:cvg_of_separating} to the subalgebra $\mathcal M$: it suffices to show that $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal M$. This is obtained with Lemma~\ref{lem:eq_M_of_eq_charFun}.
 \end{proof}

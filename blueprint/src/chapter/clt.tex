@@ -5,7 +5,7 @@
 \lean{iteratedDeriv_charFun}
 \uses{def:charFun}
 Let $X$ be a real random variable with characteristic function $\phi$ with $\mathbb{E}[\vert X \vert^n] < \infty$ and let $k \le n$.
-Then the $k$\textsuperscript{th} derivative of $\phi$ is 
+Then the $k$\textsuperscript{th} derivative of $\phi$ is
 $\phi^{(k)}(t) = \mathbb{E}[i X]^k e^{i t X}$ \: .
 \end{lemma}
 
@@ -13,6 +13,29 @@ $\phi^{(k)}(t) = \mathbb{E}[i X]^k e^{i t X}$ \: .
 \uses{lem:charFun_contDiff}
 \end{proof}
 
+\begin{lemma}[Peano form of Taylor's theorem]\label{lem:taylor_peano}
+\leanok
+\lean{taylor_mean_remainder_peano}
+For a $n$-times continuously differentiable function $f : \mathbb{R} \to E$, for any $x_0\in\mathbb{R}$,
+\begin{align*}
+f(x) - \sum_{i=0}^n\frac{f^{(i)}(x_0)}{i!}(x-x_0)^i = o((x - x_0)^k)
+\: .
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+This is proven in mathlib PR: \href{https://github.com/leanprover-community/mathlib4/pull/19796}{\#19796}.
+\end{proof}
+
+\begin{lemma}\label{lem:iIndepFun_iff_pi_map_eq_map}
+\leanok
+\lean{ProbabilityTheory.iIndepFun_iff_pi_map_eq_map}
+A finite collection of random variables are independent iff their joint law is the product of their respective laws.
+\end{lemma}
+
+\begin{proof}
+This is proven in PFR: \href{https://teorth.github.io/pfr/docs/PFR/Mathlib/Probability/Independence/Basic.html#ProbabilityTheory.iIndepFun_iff_pi_map_eq_map}{link}.
+\end{proof}
 
 \begin{lemma}\label{lem:charFun_taylor}
 \leanok
@@ -25,20 +48,29 @@ Let $X$ be a real random variable with characteristic function $\phi$, with $\ma
 \end{lemma}
 
 \begin{proof}\leanok
-\uses{lem:deriv_charFun}
+\uses{lem:deriv_charFun, lem:taylor_peano}
 \end{proof}
 
+\begin{lemma}\label{lem:tendsto_one_plus_div_pow_exp}
+\leanok
+\lean{tendsto_one_plus_div_pow_exp'}
+For $t\in\mathbb{R}$, $\lim_{n\to\infty}(1+t/n+o(1/n))^n=\exp(t)$ (where the little-$o$ term may be complex).
+\end{lemma}
+
+\begin{proof}
+TODO
+\end{proof}
 
 \begin{theorem}[Central limit theorem]\label{clt}
     \leanok
-    \lean{central_limit}
+    \lean{ProbabilityTheory.central_limit}
 Let $X_1, X_2, \ldots$ be i.i.d. real random variables with mean 0 and variance 1, and let $Z$ be a random variable with law $\mathcal N(0,1)$. Then
 \begin{align*}
 \frac{1}{\sqrt{n}}\sum_{k=1}^n X_k \xrightarrow{d} Z \: .
 \end{align*}
 \end{theorem}
 
-\begin{proof}\uses{lem:charFun_smul, lem:charFun_add_of_indep, thm:charFun_tendsto_iff_measure_tendsto, lem:charFun_taylor, lem:gaussian_charFun}
+\begin{proof}\uses{lem:charFun_smul, lem:charFun_add_of_indep, thm:charFun_tendsto_iff_measure_tendsto, lem:charFun_taylor, lem:gaussian_charFun, lem:tendsto_one_plus_div_pow_exp, lem:iIndepFun_iff_pi_map_eq_map}
 \leanok
 Let $S_n = \frac{1}{\sqrt{n}}\sum_{k=1}^n X_k$. Let $\phi$ be the characteristic function of $X_k$. By Lemma~\ref{lem:charFun_smul} and~\ref{lem:charFun_add_of_indep}, the characteristic function of $S_n$ is $\phi_n(t) = (\phi(n^{-1/2}t))^n$.
 

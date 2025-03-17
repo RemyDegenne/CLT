@@ -22,7 +22,7 @@ variable {V : Type*} [SeminormedAddCommGroup V] [Module ℝ V] [InnerProductSpac
     [MeasurableSpace V] [BorelSpace V] [CompleteSpace V] [SecondCountableTopology V]
 
 /-- This is already proven in Mathlib#19761, for FiniteMeasure -/
-theorem ProbabilityMeasure.ext_of_charFun_eq (μ ν : ProbabilityMeasure V)
+theorem MeasureTheory.ProbabilityMeasure.ext_of_charFun_eq (μ ν : ProbabilityMeasure V)
     (h : charFun (μ : Measure V) = charFun ν) :
     μ = ν := by
   sorry

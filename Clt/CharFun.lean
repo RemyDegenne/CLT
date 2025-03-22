@@ -7,6 +7,7 @@ import Mathlib.Analysis.Fourier.FourierTransform
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 import Mathlib.MeasureTheory.Group.Convolution
 import Mathlib.Probability.Notation
+import Mathlib
 
 /-!
 # Characteristic function of a measure
@@ -75,6 +76,12 @@ variable {E : Type*} [MeasurableSpace E]
 
 /-- The characteristic function of a measure. -/
 def charFun [Inner ℝ E] (μ : Measure E) (t : E) : ℂ := ∫ x, exp (⟪t, x⟫ • I) ∂μ
+
+lemma charFun_apply [Inner ℝ E] {μ : Measure E} (t : E) :
+    charFun μ t = ∫ x, exp (⟪t, x⟫ * I) ∂μ := rfl
+
+lemma charFunReal_apply {μ : Measure ℝ} {t : ℝ} :
+    charFun μ t = ∫ x, exp (x * t * I) ∂μ := by simp [charFun_apply]
 
 variable [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
@@ -166,19 +173,119 @@ lemma sin_le_half {x : ℝ} (hx : 2 ≤ x) : Real.sin x ≤ x / 2 :=
       ≤ 1 := Real.sin_le_one x
     _ ≤ x / 2 := by linarith
 
-lemma integral_exp_Icc {r : ℝ} (hr : 0 ≤ r) :
-    ∫ t in (-r)..r, cexp (t * I) = 2 * Real.sin r := by
-  sorry
+lemma integral_exp_Icc (r : ℝ) : ∫ t in (-r)..r, cexp (t * I) = 2 * Real.sin r := by
+  simp_rw [mul_comm _ I]
+  rw [integral_exp_mul_complex]
+  swap; · simp
+  simp only [ofReal_neg, mul_neg, div_I, ofReal_sin]
+  simp_rw [mul_comm I, ← neg_mul]
+  simp only [exp_mul_I, cos_neg, sin_neg, add_sub_add_left_eq_sub, neg_sub, sub_mul]
+  simp_rw [mul_assoc]
+  simp [two_mul]
+
+lemma intervalIntegrable_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {a b : ℝ} :
+    IntervalIntegrable (charFun μ) ℙ a b := by
+  refine IntervalIntegrable.mono_fun' (g := fun _ ↦ 1) (by simp) ?_ (ae_of_all _ fun x ↦ ?_)
+  · sorry
+  · exact norm_charFun_le_one μ x
 
 lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
-    ∫ t in (-r)..r, charFun μ t = 2 * r * ∫ x, Real.sin (r * x) / (r * x) ∂μ := by
-  sorry
+    ∫ t in -r..r, charFun μ t
+      = 2 * r * ∫ x, if x = 0 then 1 else Real.sin (r * x) / (r * x) ∂μ := by
+  have h_int r : Integrable (Function.uncurry fun (x y : ℝ) ↦ cexp (y * x * I))
+      ((volume.restrict (Set.Ioc (-r) r)).prod μ) := by
+    -- integrable since bounded and the measure is finite
+    rw [← integrable_norm_iff]
+    swap; · exact Measurable.aestronglyMeasurable <| by fun_prop
+    suffices (fun a => ‖Function.uncurry (fun (x y : ℝ) ↦ cexp (y * x * I)) a‖) = fun _ ↦ 1 by
+      rw [this]
+      fun_prop
+    ext p
+    rw [← Prod.mk.eta (p := p)]
+    norm_cast
+    simp only [Function.uncurry_apply_pair, norm_exp_ofReal_mul_I]
+  calc ∫ t in -r..r, charFun μ t
+  _ = ∫ x in -r..r, ∫ y, cexp (y * x * I) ∂μ := by simp_rw [charFunReal_apply]
+  _ = ∫ y, ∫ x in Set.Ioc (-r) r, cexp (y * x * I) ∂volume ∂μ
+      - ∫ y, ∫ x in Set.Ioc r (-r), cexp (y * x * I) ∂volume ∂μ := by
+    rw [intervalIntegral]
+    congr 1
+    · rw [integral_integral_swap]
+      exact h_int r
+    · rw [integral_integral_swap]
+      convert h_int (-r)
+      simp
+  _ = ∫ y, ∫ x in (-r)..r, cexp (y * x * I) ∂volume ∂μ:= by
+    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (↑y * ↑x * I)‖ ≤ 2 * |a| := by
+      refine (norm_integral_le_integral_norm _).trans ?_
+      norm_cast
+      simp_rw [norm_exp_ofReal_mul_I]
+      simp only [integral_const, MeasurableSet.univ, Measure.restrict_apply, Set.univ_inter,
+        Real.volume_Ioc, sub_neg_eq_add, smul_eq_mul, mul_one]
+      sorry
+    rw [← integral_sub]
+    · congr
+    · refine Integrable.mono' (integrable_const (2 * |r|)) ?_ (ae_of_all _ fun y ↦ h_le y r)
+      sorry
+    · refine Integrable.mono' (integrable_const (2 * |r|)) ?_ (ae_of_all _ fun y ↦ ?_)
+      · sorry
+      · convert h_le y (-r) using 2 <;> simp
+  _ = ∫ y, if y = 0 then 2 * (r : ℂ)
+      else y⁻¹ * ∫ x in (-(y * r))..(y * r), cexp (x * I) ∂volume ∂μ := by
+    congr with y
+    by_cases hy : y = 0
+    · simp [hy, two_mul]
+    simp only [hy, ↓reduceIte, ofReal_inv]
+    have h := intervalIntegral.integral_comp_smul_deriv (E := ℂ) (a := -r) (b := r)
+      (f := fun x ↦ y * x) (f' := fun _ ↦ y) (g := fun x ↦ cexp (x * I)) ?_ (by fun_prop)
+      (by fun_prop)
+    swap
+    · intro x hx
+      simp only
+      simp_rw [mul_comm y]
+      exact hasDerivAt_mul_const _
+    simp only [Function.comp_apply, ofReal_mul, real_smul, intervalIntegral.integral_const_mul,
+      mul_neg] at h
+    rw [← h, ← mul_assoc]
+    norm_cast
+    simp [inv_mul_cancel₀ hy]
+  _ = ∫ x, 2 * (r : ℂ) * if x = 0 then 1 else Real.sin (r * x) / (r * x) ∂μ := by
+    congr with y
+    by_cases hy : y = 0
+    · simp [hy]
+    simp only [hy, ↓reduceIte, ofReal_inv, ofReal_div, ofReal_sin, ofReal_mul]
+    rw [integral_exp_Icc]
+    norm_cast
+    field_simp
+    ring_nf
+  _ = ∫ x, 2 * r * if x = 0 then 1 else Real.sin (r * x) / (r * x) ∂μ := by
+    norm_cast
+    exact integral_complex_ofReal
+  _ = 2 * r * ∫ x, if x = 0 then 1 else Real.sin (r * x) / (r * x) ∂μ := by
+    norm_cast
+    rw [← integral_mul_left]
 
 lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     (μ {x | r < |x|}).toReal
       ≤ 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
-  have h := integral_charFun_Icc (r := 2 * r⁻¹) (μ := μ) (by positivity)
-  sorry
+  calc (μ {x | r < |x|}).toReal
+  _ = (μ {x | 2 < |2 * r⁻¹ * x|}).toReal := by
+    congr with x
+    simp only [Set.mem_setOf_eq, abs_mul, Nat.abs_ofNat]
+    rw [abs_of_nonneg (a := r⁻¹) (by positivity), mul_assoc, ← inv_mul_lt_iff₀ (by positivity),
+      inv_mul_cancel₀ (by positivity), lt_inv_mul_iff₀ (by positivity), mul_one]
+  _ ≤ 2⁻¹ * r *
+      ‖2 * (r : ℂ)⁻¹ + 2 * r⁻¹ -
+        2 * (2 * r⁻¹) * ∫ x, if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ‖ := by
+    sorry
+  _ = 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
+    have h := integral_charFun_Icc (r := 2 * r⁻¹) (μ := μ) (by positivity)
+    rw [intervalIntegral.integral_sub intervalIntegrable_const intervalIntegrable_charFun]
+    simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, real_smul, ofReal_add,
+      ofReal_mul, ofReal_ofNat, ofReal_inv, mul_one, ge_iff_le]
+    rw [integral_charFun_Icc (by positivity)]
+    push_cast
+    rfl
 
 lemma measure_Icc_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     (μ (Set.Icc (-r) r)).toReal ≤ 2 * r * ∫ t in (- r⁻¹)..(r⁻¹), ‖charFun μ t‖ := by

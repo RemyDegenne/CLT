@@ -48,32 +48,6 @@ lemma RCLike.lipschitzWith_im {𝕜 : Type*} [RCLike 𝕜] :
   _ = ‖im (x - y)‖ₑ := by rw [ AddMonoidHom.map_sub im x y]
   _ ≤ ‖x - y‖ₑ := by rw [enorm_le_iff_norm_le]; exact norm_im_le_norm (x - y)
 
-theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_forall_integral_complex_tendsto
-    {γ Ω : Type*} {F : Filter γ} {mΩ : MeasurableSpace Ω} [TopologicalSpace Ω]
-    [OpensMeasurableSpace Ω]
-    {μs : γ → ProbabilityMeasure Ω} {μ : ProbabilityMeasure Ω} :
-    Tendsto μs F (𝓝 μ) ↔
-      ∀ f : Ω →ᵇ ℂ,
-        Tendsto (fun i ↦ ∫ ω, f ω ∂(μs i : Measure Ω)) F (𝓝 (∫ ω, f ω ∂(μ : Measure Ω))) := by
-  rw [ProbabilityMeasure.tendsto_iff_forall_integral_tendsto]
-  refine ⟨fun h f ↦ ?_, fun h f ↦ ?_⟩
-  · rw [← integral_re_add_im (integrable μ f)]
-    simp_rw [← integral_re_add_im (integrable (μs _) f)]
-    refine Tendsto.add ?_ ?_
-    · specialize h (f.comp re RCLike.lipschitzWith_re)
-      simp only [re_to_complex, Complex.coe_algebraMap]
-      simp only [comp_apply, re_to_complex] at h
-      exact Tendsto.comp (continuous_ofReal.tendsto _) h
-    · specialize h (f.comp im RCLike.lipschitzWith_im)
-      simp only [im_to_complex, Complex.coe_algebraMap]
-      simp only [comp_apply, im_to_complex] at h
-      exact (Tendsto.comp (continuous_ofReal.tendsto _) h).mul_const _
-  · specialize h ((ofRealAm (K := ℂ)).compLeftContinuousBounded ℝ lipschitzWith_ofReal f)
-    simp only [AlgHom.compLeftContinuousBounded_apply_apply, ofRealAm_coe,
-      Complex.coe_algebraMap] at h
-    simp_rw [integral_complex_ofReal] at h
-    exact tendsto_ofReal_iff.mp h
-
 lemma RCLike.isUniformEmbedding_ofReal {𝕜 : Type*} [RCLike 𝕜] :
     IsUniformEmbedding ((↑) : ℝ → 𝕜) :=
   ofRealLI.isometry.isUniformEmbedding

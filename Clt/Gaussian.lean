@@ -21,13 +21,14 @@ namespace ProbabilityTheory
 variable (μ : ℝ) (v : ℝ≥0) {t : ℝ}
 
 theorem charFun_gaussianReal : charFun (gaussianReal μ v) t = exp (t * μ * I - v * t ^ 2 / 2) := by
-  unfold charFun gaussianReal
+  simp_rw [charFun_apply_real]
+  unfold gaussianReal
   split_ifs with hv
   · simp only [RCLike.inner_apply, conj_trivial, real_smul, ofReal_mul, integral_dirac, hv,
       NNReal.coe_zero, ofReal_zero, zero_mul, zero_div, sub_zero]
     rw [mul_comm (μ : ℂ)]
   calc
-    _ = ∫ x, (gaussianPDFReal μ v x).toNNReal • cexp (inner t x • I) ∂ℙ :=
+    _ = ∫ x, (gaussianPDFReal μ v x).toNNReal • cexp (x * t * I) ∂ℙ :=
       integral_withDensity_eq_integral_smul (measurable_gaussianPDFReal μ v).real_toNNReal _
     _ = ∫ x, gaussianPDFReal μ v x * cexp (t * x * I) ∂ℙ := by
       congr with x

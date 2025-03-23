@@ -5,6 +5,7 @@ Authors: Thomas Zhu, Rémy Degenne
 -/
 import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
 import Clt.Tight
+import Clt.MomentGenerating
 
 /-!
 Inverting the characteristic function
@@ -28,6 +29,16 @@ theorem MeasureTheory.ProbabilityMeasure.ext_of_charFun_eq (μ ν : ProbabilityM
   sorry
 
 end FromMathlibPR19761
+
+-- lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints :
+
+lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun {μ : ℕ → ProbabilityMeasure ℝ}
+    {μ₀ : ProbabilityMeasure ℝ}
+    (h : ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t))) :
+    Tendsto μ atTop (𝓝 μ₀) := by
+  have h_tight : IsTightMeasureSet (α := ℝ) {μ n | n} :=
+    isTightMeasureSet_of_tendsto_charFun (by fun_prop) h
+  sorry
 
 /--
 The Lévy continuity theorem https://en.wikipedia.org/wiki/L%C3%A9vy%27s_continuity_theorem.

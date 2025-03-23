@@ -173,6 +173,22 @@ lemma sin_le_half {x : ℝ} (hx : 2 ≤ x) : Real.sin x ≤ x / 2 :=
       ≤ 1 := Real.sin_le_one x
     _ ≤ x / 2 := by linarith
 
+lemma sin_div_le_inv_abs (x : ℝ) : Real.sin x / x ≤ |x|⁻¹ := by
+  rcases lt_trichotomy x 0 with hx | rfl | hx
+  · rw [abs_of_nonpos hx.le, ← one_div, le_div_iff₀, div_eq_mul_inv]
+    · ring_nf
+      rw [mul_assoc, mul_inv_cancel₀ hx.ne, mul_one, neg_le]
+      exact Real.neg_one_le_sin x
+    · simpa using hx
+  · simp
+  · rw [abs_of_nonneg hx.le, div_eq_mul_inv, mul_inv_le_iff₀ hx, inv_mul_cancel₀ hx.ne']
+    exact Real.sin_le_one x
+
+lemma sin_div_le_half {x : ℝ} (hx : 2 ≤ |x|) : Real.sin x / x ≤ 2⁻¹ :=
+  calc Real.sin x / x
+    _ ≤ |x|⁻¹ := sin_div_le_inv_abs x
+    _ ≤ 2⁻¹ := by rwa [inv_le_inv₀ (by positivity) (by positivity)]
+
 lemma integral_exp_Icc (r : ℝ) : ∫ t in (-r)..r, cexp (t * I) = 2 * Real.sin r := by
   simp_rw [mul_comm _ I]
   rw [integral_exp_mul_complex]
@@ -274,7 +290,29 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
     simp only [Set.mem_setOf_eq, abs_mul, Nat.abs_ofNat]
     rw [abs_of_nonneg (a := r⁻¹) (by positivity), mul_assoc, ← inv_mul_lt_iff₀ (by positivity),
       inv_mul_cancel₀ (by positivity), lt_inv_mul_iff₀ (by positivity), mul_one]
-  _ ≤ 2⁻¹ * r *
+  _ = ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 ∂μ := by simp
+  _ = 2 * ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 2⁻¹ ∂μ := by
+    rw [← integral_mul_left]
+    congr with _
+    rw [mul_inv_cancel₀ (by positivity)]
+  _ ≤ 2 *
+      ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 - if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ := by
+    gcongr (2 : ℝ) * ?_
+    refine setIntegral_mono_on ?_ ?_ ?_ fun x hx ↦ ?_
+    · exact Integrable.integrableOn <| by fun_prop
+    · sorry
+    · sorry
+    · have h_le := sin_div_le_half (x := 2 * r⁻¹ * x) (le_of_lt hx)
+      sorry
+  _ ≤ 2 *
+      ∫ x, 1 - if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ := by
+    gcongr
+    sorry
+  _ ≤ 2 *
+      ‖∫ x, 1 - if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ‖ := by
+    gcongr
+    exact Real.le_norm_self _
+  _ = 2⁻¹ * r *
       ‖2 * (r : ℂ)⁻¹ + 2 * r⁻¹ -
         2 * (2 * r⁻¹) * ∫ x, if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ‖ := by
     sorry

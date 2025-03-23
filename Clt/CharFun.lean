@@ -326,7 +326,6 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
         2 * (2 * r⁻¹) * ∫ x, if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ‖ := by
     sorry
   _ = 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
-    have h := integral_charFun_Icc (r := 2 * r⁻¹) (μ := μ) (by positivity)
     rw [intervalIntegral.integral_sub intervalIntegrable_const intervalIntegrable_charFun]
     simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, real_smul, ofReal_add,
       ofReal_mul, ofReal_ofNat, ofReal_inv, mul_one, ge_iff_le]

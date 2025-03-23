@@ -105,7 +105,7 @@ lemma charFun_eq_fourierIntegral' (μ : Measure E) (t : E) :
 @[simp]
 lemma charFun_zero (μ : Measure E) [IsProbabilityMeasure μ] : charFun μ 0 = 1 := by
   simp only [charFun, inner_zero_left, zero_smul, exp_zero, integral_const, measure_univ,
-    ENNReal.one_toReal, one_smul]
+    ENNReal.toReal_one, one_smul]
 
 lemma charFun_neg (μ : Measure E) (t : E) : charFun μ (-t) = conj (charFun μ t) := by
   simp [charFun, ← integral_conj, ← exp_conj]
@@ -113,7 +113,7 @@ lemma charFun_neg (μ : Measure E) (t : E) : charFun μ (-t) = conj (charFun μ 
 lemma norm_charFun_le_one (μ : Measure E) [IsProbabilityMeasure μ] (t : E) : ‖charFun μ t‖ ≤ 1 := by
   rw [charFun_eq_fourierIntegral]
   refine (VectorFourier.norm_fourierIntegral_le_integral_norm _ _ _ _ _).trans_eq ?_
-  simp only [Pi.one_apply, norm_one, integral_const, measure_univ, ENNReal.one_toReal, smul_eq_mul,
+  simp only [Pi.one_apply, norm_one, integral_const, measure_univ, ENNReal.toReal_one, smul_eq_mul,
     mul_one]
 
 variable [BorelSpace E] [SecondCountableTopology E]

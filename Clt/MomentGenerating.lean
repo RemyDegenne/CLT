@@ -83,6 +83,7 @@ The `n`th derivative of `charFun μ`.
 The proof uses results on iterated derivatives of the Fourier transform.
 -/
 
+@[fun_prop]
 theorem contDiff_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
     ContDiff ℝ n (charFun μ) := by
   have h : sesqFormOfInner = (ContinuousLinearMap.mul ℝ ℝ).toLinearMap₂ := by ext; rfl
@@ -95,6 +96,7 @@ theorem contDiff_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
   apply (VectorFourier.contDiff_fourierIntegral _ hint').comp
   exact contDiff_const_smul _
 
+@[fun_prop]
 lemma continuous_charFun : Continuous (charFun μ) := by
   rw [← contDiff_zero (𝕜 := ℝ)]
   refine contDiff_charFun ?_

@@ -130,7 +130,8 @@ lemma expPoly_separatesPoints : ((expPoly E).map (toContinuousFunₐ E)).Separat
     exact hxy_ne (ext_inner_left ℝ h)
   obtain ⟨r, hr_ne⟩ : ∃ r : ℝ,
       cexp (((inner (r • v) x : ℝ) : ℂ) * I) ≠ cexp (((inner (r • v) y : ℝ) : ℂ) * I) := by
-    simp_rw [inner_smul_left, RCLike.conj_to_real, ofReal_mul, ne_eq, Complex.exp_eq_exp_iff_exists_int]
+    simp_rw [inner_smul_left, RCLike.conj_to_real, ofReal_mul, ne_eq,
+      Complex.exp_eq_exp_iff_exists_int]
     -- use (inner v x - inner v y)⁻¹ would suffice, if we knew pi was irrational (#6718)
     use √2 * Real.pi * (inner v x - inner v y)⁻¹
     push_neg

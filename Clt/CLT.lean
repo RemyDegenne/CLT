@@ -109,7 +109,7 @@ theorem central_limit (hX : ∀ n, Measurable (X n))
   have littleO : _ =o[atTop] fun k ↦ _ := (taylor_charFun hint).comp_tendsto t_mul_inv_sqrt
   simp only [Nat.reduceAdd, ofReal_inv, ofReal_natCast, mul_pow, Finset.sum_range_succ,
     Finset.range_one, Finset.sum_singleton, Nat.factorial_zero, Nat.cast_one, inv_one, pow_zero,
-    mul_one, integral_const, measure_univ, ENNReal.one_toReal, smul_eq_mul, ofReal_one,
+    mul_one, integral_const, measure_univ, ENNReal.toReal_one, smul_eq_mul, ofReal_one,
     Nat.factorial_one, pow_one, one_mul, Nat.factorial_two, Nat.cast_ofNat, I_sq, mul_neg, neg_mul,
     Function.comp_apply, inv_pow, Nat.cast_nonneg, Real.sq_sqrt] at littleO
 

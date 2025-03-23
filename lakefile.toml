@@ -1,7 +1,7 @@
 name = "clt"
 defaultTargets = ["Clt"]
 
-[leanoptions]
+[leanOptions]
 weak.linter.docPrime = false
 weak.linter.hashCommand = true
 weak.linter.oldObtain = true
@@ -19,7 +19,7 @@ pp.unicode.fun = true
 autoImplicit = false
 relaxedAutoImplicit = false
 
-[moreserveroptions]
+[moreServerOptions]
 linter.docPrime = false
 linter.hashCommand = true
 linter.oldObtain = true

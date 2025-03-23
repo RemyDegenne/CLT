@@ -199,12 +199,6 @@ lemma integral_exp_Icc (r : ℝ) : ∫ t in (-r)..r, cexp (t * I) = 2 * Real.sin
   simp_rw [mul_assoc]
   simp [two_mul]
 
-lemma intervalIntegrable_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {a b : ℝ} :
-    IntervalIntegrable (charFun μ) ℙ a b := by
-  refine IntervalIntegrable.mono_fun' (g := fun _ ↦ 1) (by simp) ?_ (ae_of_all _ fun x ↦ ?_)
-  · sorry
-  · exact norm_charFun_le_one μ x
-
 lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     ∫ t in -r..r, charFun μ t
       = 2 * r * ∫ x, if x = 0 then 1 else Real.sin (r * x) / (r * x) ∂μ := by
@@ -242,10 +236,14 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     · congr
     · refine Integrable.mono' (integrable_const (ENNReal.ofReal (r + r)).toReal) ?_
         (ae_of_all _ fun y ↦ h_le y r)
-      sorry
+      refine StronglyMeasurable.aestronglyMeasurable ?_
+      refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (y * x * I)) ?_
+      exact Measurable.stronglyMeasurable (by fun_prop)
     · refine Integrable.mono' (integrable_const (ENNReal.ofReal (-r + -r)).toReal) ?_
         (ae_of_all _ fun y ↦ ?_)
-      · sorry
+      · refine StronglyMeasurable.aestronglyMeasurable ?_
+        refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (y * x * I)) ?_
+        exact Measurable.stronglyMeasurable (by fun_prop)
       · convert h_le y (-r) using 2
         simp
   _ = ∫ y, if y = 0 then 2 * (r : ℂ)
@@ -282,6 +280,12 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
   _ = 2 * r * ∫ x, if x = 0 then 1 else Real.sin (r * x) / (r * x) ∂μ := by
     norm_cast
     rw [← integral_mul_left]
+
+lemma intervalIntegrable_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {a b : ℝ} :
+    IntervalIntegrable (charFun μ) ℙ a b := by
+  refine IntervalIntegrable.mono_fun' (g := fun _ ↦ 1) (by simp) ?_ (ae_of_all _ fun x ↦ ?_)
+  · sorry
+  · exact norm_charFun_le_one μ x
 
 lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     (μ {x | r < |x|}).toReal

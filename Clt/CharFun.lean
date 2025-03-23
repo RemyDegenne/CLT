@@ -382,6 +382,28 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
     push_cast
     rfl
 
+lemma measure_abs_inner_ge_le_charFun {μ : Measure E} [IsProbabilityMeasure μ] {a : E}
+    {r : ℝ} (hr : 0 < r) :
+    (μ {x | r < |⟪a, x⟫|}).toReal
+      ≤ 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ (t • a)‖ := by
+  let μ' : Measure ℝ := μ.map (fun x ↦ ⟪a, x⟫)
+  have : IsProbabilityMeasure μ' := isProbabilityMeasure_map (by fun_prop)
+  have h := measure_abs_ge_le_charFun (μ := μ') hr
+  convert h with x
+  · unfold μ'
+    rw [Measure.map_apply]
+    · simp
+    · fun_prop
+    · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)
+  · unfold μ'
+    -- todo: extract lemma
+    simp_rw [charFun_apply, inner_smul_left]
+    simp only [conj_trivial, ofReal_mul, RCLike.inner_apply]
+    rw [integral_map]
+    · simp_rw [mul_comm (x : ℂ)]
+    · fun_prop
+    · exact Measurable.aestronglyMeasurable <| by fun_prop
+
 lemma measure_Icc_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     (μ (Set.Icc (-r) r)).toReal ≤ 2 * r * ∫ t in (- r⁻¹)..(r⁻¹), ‖charFun μ t‖ := by
   sorry

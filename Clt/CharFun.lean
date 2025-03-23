@@ -80,7 +80,7 @@ def charFun [Inner ℝ E] (μ : Measure E) (t : E) : ℂ := ∫ x, exp (⟪t, x�
 lemma charFun_apply [Inner ℝ E] {μ : Measure E} (t : E) :
     charFun μ t = ∫ x, exp (⟪t, x⟫ * I) ∂μ := rfl
 
-lemma charFunReal_apply {μ : Measure ℝ} {t : ℝ} :
+lemma charFun_apply_real {μ : Measure ℝ} {t : ℝ} :
     charFun μ t = ∫ x, exp (x * t * I) ∂μ := by simp [charFun_apply]
 
 variable [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -98,8 +98,8 @@ lemma measurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E]
 
 lemma charFun_eq_fourierIntegral (μ : Measure E) (t : E) :
     charFun μ t = VectorFourier.fourierIntegral probFourierChar μ sesqFormOfInner 1 t := by
-  simp only [charFun, real_smul, fourierIntegral_probFourierChar_eq_integral_exp, Pi.one_apply,
-    smul_eq_mul, mul_one]
+  simp only [charFun_apply, real_smul, fourierIntegral_probFourierChar_eq_integral_exp,
+    Pi.one_apply, smul_eq_mul, mul_one]
   congr
 
 /-- Relate `charFun` to the "standard" Fourier integral defined by `Real.fourierChar`. -/
@@ -107,19 +107,18 @@ lemma charFun_eq_fourierIntegral' (μ : Measure E) (t : E) :
     charFun μ t = VectorFourier.fourierIntegral Real.fourierChar μ
       sesqFormOfInner 1 (-(2 * π)⁻¹ • t) := by
   have h : (2 : ℂ) * π ≠ 0 := by simp [Real.pi_ne_zero]
-  simp only [charFun, real_smul, VectorFourier.fourierIntegral, Real.fourierChar, neg_smul, map_neg,
-    _root_.map_smul, smul_eq_mul, neg_neg, AddChar.coe_mk, ← mul_assoc, Pi.one_apply,
+  simp only [charFun_apply, real_smul, VectorFourier.fourierIntegral, Real.fourierChar, neg_smul,
+    map_neg, _root_.map_smul, smul_eq_mul, neg_neg, AddChar.coe_mk, ← mul_assoc, Pi.one_apply,
     Circle.smul_def, Circle.coe_exp, ofReal_mul, ofReal_ofNat, ofReal_inv, mul_inv_cancel₀ h,
     one_mul, mul_one]
   congr
 
 @[simp]
 lemma charFun_zero (μ : Measure E) [IsProbabilityMeasure μ] : charFun μ 0 = 1 := by
-  simp only [charFun, inner_zero_left, zero_smul, exp_zero, integral_const, measure_univ,
-    ENNReal.toReal_one, one_smul]
+  simp [charFun_apply]
 
 lemma charFun_neg (μ : Measure E) (t : E) : charFun μ (-t) = conj (charFun μ t) := by
-  simp [charFun, ← integral_conj, ← exp_conj]
+  simp [charFun_apply, ← integral_conj, ← exp_conj]
 
 lemma norm_charFun_le_one (μ : Measure E) [IsProbabilityMeasure μ] (t : E) : ‖charFun μ t‖ ≤ 1 := by
   rw [charFun_eq_fourierIntegral]
@@ -131,8 +130,7 @@ variable [BorelSpace E] [SecondCountableTopology E]
 
 lemma charFun_map_smul (μ : Measure E) (r : ℝ) (t : E) :
     charFun (μ.map (r • ·)) t = charFun μ (r • t) := by
-  unfold charFun
-  rw [integral_map]
+  rw [charFun_apply, charFun_apply, integral_map]
   · simp_rw [inner_smul_right, ← real_inner_smul_left]
   · fun_prop
   · exact Measurable.aestronglyMeasurable <| by fun_prop
@@ -145,9 +143,12 @@ lemma charFun_map_mul (μ : Measure ℝ) (r : ℝ) (t : ℝ) :
 is the product of the respective characteristic functions. -/
 lemma charFun_conv (μ ν : Measure E) [IsFiniteMeasure μ] [IsFiniteMeasure ν] (t : E) :
     charFun (μ ∗ ν) t = charFun μ t * charFun ν t := by
-  unfold charFun Measure.conv
+  simp_rw [charFun_apply]
+  unfold Measure.conv
   rw [integral_map, integral_prod]
-  · simp_rw [inner_add_right, add_smul, exp_add, integral_mul_left, integral_mul_right]
+  · simp_rw [inner_add_right]
+    push_cast
+    simp_rw [add_mul, exp_add, integral_mul_left, integral_mul_right]
   · apply (integrable_const (1 : ℝ)).mono
     · exact Measurable.aestronglyMeasurable <| by fun_prop
     · simp
@@ -167,7 +168,7 @@ We express this in terms of the pushforward of $P^{\otimes n}$ by summation.
 lemma charFun_map_sum_pi_const (μ : Measure E) [IsFiniteMeasure μ] (n : ℕ) (t : E) :
     charFun ((Measure.pi fun (_ : Fin n) ↦ μ).map fun x ↦ ∑ i, x i) t = charFun μ t ^ n := by
   induction' n with n ih
-  · simp [Measure.map_const, charFun]
+  · simp [Measure.map_const, charFun_apply]
   · rw [pow_succ', ← ih, ← charFun_conv]
     congr 1
     have h := (measurePreserving_piFinSuccAbove (fun (_ : Fin (n + 1)) ↦ μ) 0).map_eq
@@ -237,7 +238,7 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     norm_cast
     simp only [Function.uncurry_apply_pair, norm_exp_ofReal_mul_I]
   calc ∫ t in -r..r, charFun μ t
-  _ = ∫ x in -r..r, ∫ y, cexp (y * x * I) ∂μ := by simp_rw [charFunReal_apply]
+  _ = ∫ x in -r..r, ∫ y, cexp (y * x * I) ∂μ := by simp_rw [charFun_apply_real]
   _ = ∫ y, ∫ x in Set.Ioc (-r) r, cexp (y * x * I) ∂volume ∂μ
       - ∫ y, ∫ x in Set.Ioc r (-r), cexp (y * x * I) ∂volume ∂μ := by
     rw [intervalIntegral]

@@ -133,7 +133,7 @@ theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun {μ : ℕ �
       ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
   refine ⟨fun h t ↦ ?_, tendsto_of_tendsto_charFun⟩
   rw [ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto ℂ] at h
-  simp_rw [charFunReal_apply]
+  simp_rw [charFun_apply_real]
   -- we need `(x : ℝ) ↦ Complex.exp (x * t * I)` as a `ℝ →ᵇ ℂ` to apply `h`
   let expb : ℝ →ᵇ ℂ :=
   { toFun := fun x ↦ Complex.exp (x * t * I),

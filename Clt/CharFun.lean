@@ -232,20 +232,22 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
       convert h_int (-r)
       simp
   _ = ∫ y, ∫ x in (-r)..r, cexp (y * x * I) ∂volume ∂μ:= by
-    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (↑y * ↑x * I)‖ ≤ 2 * |a| := by
-      refine (norm_integral_le_integral_norm _).trans ?_
+    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (↑y * ↑x * I)‖
+        ≤ (ENNReal.ofReal (a + a)).toReal := by
+      refine (norm_integral_le_integral_norm _).trans_eq ?_
       norm_cast
       simp_rw [norm_exp_ofReal_mul_I]
-      simp only [integral_const, MeasurableSet.univ, Measure.restrict_apply, Set.univ_inter,
-        Real.volume_Ioc, sub_neg_eq_add, smul_eq_mul, mul_one]
-      sorry
+      simp
     rw [← integral_sub]
     · congr
-    · refine Integrable.mono' (integrable_const (2 * |r|)) ?_ (ae_of_all _ fun y ↦ h_le y r)
+    · refine Integrable.mono' (integrable_const (ENNReal.ofReal (r + r)).toReal) ?_
+        (ae_of_all _ fun y ↦ h_le y r)
       sorry
-    · refine Integrable.mono' (integrable_const (2 * |r|)) ?_ (ae_of_all _ fun y ↦ ?_)
+    · refine Integrable.mono' (integrable_const (ENNReal.ofReal (-r + -r)).toReal) ?_
+        (ae_of_all _ fun y ↦ ?_)
       · sorry
-      · convert h_le y (-r) using 2 <;> simp
+      · convert h_le y (-r) using 2
+        simp
   _ = ∫ y, if y = 0 then 2 * (r : ℂ)
       else y⁻¹ * ∫ x in (-(y * r))..(y * r), cexp (x * I) ∂volume ∂μ := by
     congr with y
@@ -295,12 +297,15 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
     rw [← integral_mul_left]
     congr with _
     rw [mul_inv_cancel₀ (by positivity)]
-  _ ≤ 2 *
-      ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 - if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ := by
+  _ ≤ 2 * ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 - if x = 0 then 1
+      else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ := by
     gcongr (2 : ℝ) * ?_
     refine setIntegral_mono_on ?_ ?_ ?_ fun x hx ↦ ?_
     · exact Integrable.integrableOn <| by fun_prop
-    · sorry
+    · refine Integrable.mono' (g := fun _ ↦ 1) ?_ ?_ ?_
+      · sorry
+      · sorry
+      · sorry
     · sorry
     · have h_le := sin_div_le_half (x := 2 * r⁻¹ * x) (le_of_lt hx)
       sorry

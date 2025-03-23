@@ -85,6 +85,17 @@ lemma charFunReal_apply {μ : Measure ℝ} {t : ℝ} :
 
 variable [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
+lemma stronglyMeasurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E]
+    {μ : Measure E} [SFinite μ] :
+    StronglyMeasurable (charFun μ) :=
+  StronglyMeasurable.integral_prod_left <| Measurable.stronglyMeasurable (by fun_prop)
+
+@[fun_prop]
+lemma measurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E]
+    {μ : Measure E} [SFinite μ] :
+    Measurable (charFun μ) :=
+  stronglyMeasurable_charFun.measurable
+
 lemma charFun_eq_fourierIntegral (μ : Measure E) (t : E) :
     charFun μ t = VectorFourier.fourierIntegral probFourierChar μ sesqFormOfInner 1 t := by
   simp only [charFun, real_smul, fourierIntegral_probFourierChar_eq_integral_exp, Pi.one_apply,
@@ -172,6 +183,17 @@ lemma sin_le_half {x : ℝ} (hx : 2 ≤ x) : Real.sin x ≤ x / 2 :=
   calc Real.sin x
       ≤ 1 := Real.sin_le_one x
     _ ≤ x / 2 := by linarith
+
+lemma abs_sin_div_le_one (x : ℝ) : |Real.sin x / x| ≤ 1 := by
+  rw [abs_div]
+  refine div_le_of_le_mul₀ (abs_nonneg _) zero_le_one ?_
+  rw [one_mul]
+  exact Real.abs_sin_le_abs
+
+lemma sin_div_le_one (x : ℝ) : Real.sin x / x ≤ 1 := by
+  have h := abs_sin_div_le_one x
+  rw [abs_le] at h
+  exact h.2
 
 lemma sin_div_le_inv_abs (x : ℝ) : Real.sin x / x ≤ |x|⁻¹ := by
   rcases lt_trichotomy x 0 with hx | rfl | hx
@@ -284,12 +306,24 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
 lemma intervalIntegrable_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {a b : ℝ} :
     IntervalIntegrable (charFun μ) ℙ a b := by
   refine IntervalIntegrable.mono_fun' (g := fun _ ↦ 1) (by simp) ?_ (ae_of_all _ fun x ↦ ?_)
-  · sorry
+  · exact Measurable.aestronglyMeasurable <| by fun_prop
   · exact norm_charFun_le_one μ x
+
+lemma integrable_sin_div_const_mul {μ : Measure ℝ} [IsFiniteMeasure μ] (r : ℝ) :
+    Integrable (fun x ↦ if x = 0 then 1 else Real.sin (r * x) / (r * x)) μ := by
+    refine Integrable.mono' (g := fun _ ↦ 1) (integrable_const _) ?_ <| ae_of_all _ fun x ↦ ?_
+    · exact (Measurable.ite (by simp) (by fun_prop) (by fun_prop)).aestronglyMeasurable
+    · split_ifs with h
+      · norm_num
+      rw [Real.norm_eq_abs]
+      exact abs_sin_div_le_one (r * x)
 
 lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     (μ {x | r < |x|}).toReal
       ≤ 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
+  have h_int :
+      Integrable (fun x ↦ if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x)) μ :=
+    integrable_sin_div_const_mul _
   calc (μ {x | r < |x|}).toReal
   _ = (μ {x | 2 < |2 * r⁻¹ * x|}).toReal := by
     congr with x
@@ -304,19 +338,26 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
   _ ≤ 2 * ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 - if x = 0 then 1
       else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ := by
     gcongr (2 : ℝ) * ?_
-    refine setIntegral_mono_on ?_ ?_ ?_ fun x hx ↦ ?_
+    refine setIntegral_mono_on ?_ ((integrable_const _).sub h_int).integrableOn ?_ fun x hx ↦ ?_
     · exact Integrable.integrableOn <| by fun_prop
-    · refine Integrable.mono' (g := fun _ ↦ 1) ?_ ?_ ?_
-      · sorry
-      · sorry
-      · sorry
-    · sorry
+    · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)
     · have h_le := sin_div_le_half (x := 2 * r⁻¹ * x) (le_of_lt hx)
-      sorry
-  _ ≤ 2 *
-      ∫ x, 1 - if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ := by
+      have hx_ne : x ≠ 0 := by
+        intro hx0
+        simp only [hx0, Set.mem_setOf_eq, mul_zero, abs_zero] at hx
+        linarith
+      simp only [hx_ne, ↓reduceIte, ge_iff_le]
+      rw [le_sub_iff_add_le, ← le_sub_iff_add_le']
+      norm_num
+      rw [one_div]
+      exact sin_div_le_half (le_of_lt hx)
+  _ ≤ 2 * ∫ x, 1 - if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ := by
     gcongr
-    sorry
+    refine setIntegral_le_integral ((integrable_const _).sub h_int) <| ae_of_all _ fun x ↦ ?_
+    simp only [Pi.zero_apply, sub_nonneg]
+    split_ifs with h
+    · exact le_rfl
+    · exact sin_div_le_one (2 * r⁻¹ * x)
   _ ≤ 2 *
       ‖∫ x, 1 - if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ‖ := by
     gcongr
@@ -324,7 +365,14 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
   _ = 2⁻¹ * r *
       ‖2 * (r : ℂ)⁻¹ + 2 * r⁻¹ -
         2 * (2 * r⁻¹) * ∫ x, if x = 0 then 1 else Real.sin (2 * r⁻¹ * x) / (2 * r⁻¹ * x) ∂μ‖ := by
-    sorry
+    norm_cast
+    rw [← two_mul, mul_assoc 2, ← mul_sub, norm_mul, Real.norm_ofNat, ← mul_assoc,
+      ← mul_one_sub, norm_mul, Real.norm_of_nonneg (r := 2 * r⁻¹) (by positivity), ← mul_assoc]
+    congr
+    · ring_nf
+      rw [mul_inv_cancel₀ (by positivity), one_mul]
+    · rw [integral_sub (integrable_const _) h_int]
+      simp
   _ = 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
     rw [intervalIntegral.integral_sub intervalIntegrable_const intervalIntegrable_charFun]
     simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, real_smul, ofReal_add,

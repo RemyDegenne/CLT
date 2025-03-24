@@ -46,7 +46,7 @@ lemma tendsto_measure_norm_gt_of_isTightMeasureSet
 section FiniteDimensional
 
 lemma isTightMeasureSet_of_tendsto_measure_norm_gt [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    {S : Set (Measure E)} (h : Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0)) :
+    {S : Set (Measure E)} (h : Tendsto (fun r : ℝ ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0)) :
     IsTightMeasureSet S := by
   rw [IsTightMeasureSet_iff_exists_isCompact_measure_compl_le]
   intro ε hε
@@ -61,8 +61,7 @@ lemma isTightMeasureSet_of_tendsto_measure_norm_gt [NormedSpace ℝ E] [FiniteDi
 
 lemma isTightMeasureSet_iff_tendsto_measure_norm_gt [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     (S : Set (Measure E)) :
-    IsTightMeasureSet S
-      ↔ Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0) :=
+    IsTightMeasureSet S ↔ Tendsto (fun r : ℝ ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0) :=
   ⟨tendsto_measure_norm_gt_of_isTightMeasureSet, isTightMeasureSet_of_tendsto_measure_norm_gt⟩
 
 lemma tendsto_iSup_of_tendsto_limsup {u : ℕ → ℝ → ℝ≥0∞}
@@ -135,15 +134,72 @@ lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt [BorelSpace E]
 
 lemma isTightMeasureSet_of_forall_basis_tendsto
     [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] {S : Set (Measure E)}
-    (h : ∀ i, Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < |⟪Module.finBasis ℝ E i, x⟫|})
+    (h : ∀ i, Tendsto (fun r : ℝ ↦ ⨆ μ ∈ S, μ {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|})
       atTop (𝓝 0)) :
     IsTightMeasureSet S := by
+  rcases subsingleton_or_nontrivial E with hE | hE
+  · simp only [IsTightMeasureSet, cocompact_eq_bot, smallSets_bot]
+    convert tendsto_pure_nhds (a := ∅) _
+    simp
   refine isTightMeasureSet_of_tendsto_measure_norm_gt ?_
-  sorry
+  have h_rank : (0 : ℝ) < Module.finrank ℝ E := by
+    simp only [Nat.cast_pos, Module.finrank_pos_iff]
+    infer_instance
+  have h_le : (fun r ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖})
+      ≤ fun r ↦ ∑ i, ⨆ μ ∈ S,
+        μ {x | r / √(Module.finrank ℝ E) < |⟪stdOrthonormalBasis ℝ E i, x⟫|} := by
+    intro r
+    calc ⨆ μ ∈ S, μ {x | r < ‖x‖}
+    _ ≤ ⨆ μ ∈ S,
+        μ (⋃ i, {x : E | r / √(Module.finrank ℝ E) < |⟪stdOrthonormalBasis ℝ E i, x⟫|}) := by
+      gcongr
+      intro x hx
+      simp only [Set.mem_setOf_eq, Set.mem_iUnion] at hx ⊢
+      simp_rw [norm_eq_sqrt_real_inner,
+        ← OrthonormalBasis.sum_inner_mul_inner (stdOrthonormalBasis ℝ E) x x,
+        real_inner_comm x, ← pow_two] at hx
+      by_contra! h_le
+      refine lt_irrefl r ?_
+      have hr : 0 ≤ r := by
+        suffices 0 ≤ r / √(Module.finrank ℝ E) by
+          rw [div_nonneg_iff] at this
+          simpa [not_le.mpr (Real.sqrt_pos.mpr h_rank)] using this
+        exact (abs_nonneg _).trans (h_le ⟨0, by simpa using h_rank⟩)
+      calc r
+      _ < √(∑ i, inner x ((stdOrthonormalBasis ℝ E) i) ^ 2) := hx
+      _ ≤ √(∑ _ : Fin (Module.finrank ℝ E), r ^ 2 / Module.finrank ℝ E) := by
+        gcongr with i
+        have h_le_i : |inner ((stdOrthonormalBasis ℝ E) i) x| ≤ |r / √(Module.finrank ℝ E)| :=
+          (h_le i).trans (le_abs_self _)
+        rw [real_inner_comm _ x]
+        refine (sq_le_sq.mpr h_le_i).trans_eq ?_
+        ring_nf
+        rw [inv_pow, Real.sq_sqrt (by positivity)]
+      _ = r := by
+        simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul,
+          Nat.cast_nonneg, Real.sqrt_mul, Real.sqrt_div']
+        rw [Real.sqrt_sq hr]
+        rw [mul_div_cancel₀]
+        positivity
+    _ ≤ ⨆ μ ∈ S, ∑ i,
+        μ {x : E | r / √(Module.finrank ℝ E) < |⟪stdOrthonormalBasis ℝ E i, x⟫|} := by
+      gcongr with μ hμS
+      exact measure_iUnion_fintype_le μ _
+    _ ≤ ∑ i, ⨆ μ ∈ S, μ {x | r / √(Module.finrank ℝ E) < |⟪stdOrthonormalBasis ℝ E i, x⟫|} := by
+      refine iSup_le fun μ ↦ (iSup_le fun hμS ↦ ?_)
+      gcongr with i
+      exact le_biSup (fun μ ↦ μ {x | r / √(Module.finrank ℝ E) < |⟪stdOrthonormalBasis ℝ E i, x⟫|})
+        hμS
+  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_ (fun _ ↦ zero_le') h_le
+  have : ∑ i : Fin (Module.finrank ℝ E), (0 : ℝ≥0∞) = 0 := by simp
+  rw [← this]
+  refine tendsto_finset_sum Finset.univ fun i _ ↦ ?_
+  refine (h i).comp ?_
+  exact Tendsto.atTop_div_const (by positivity) tendsto_id
 
 lemma isTightMeasureSet_of_forall_basis_tendsto_limsup [BorelSpace E]
     [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]
-    (h : ∀ i, Tendsto (fun (r : ℝ) ↦ limsup (fun n ↦ μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|})
+    (h : ∀ i, Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|})
       atTop) atTop (𝓝 0)) :
     IsTightMeasureSet {μ n | n} := by
   sorry

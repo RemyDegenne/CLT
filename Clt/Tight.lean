@@ -12,7 +12,7 @@ import Clt.Prokhorov
 -/
 
 open MeasureTheory ProbabilityTheory Filter
-open scoped ENNReal Topology RealInnerProductSpace
+open scoped ENNReal NNReal Topology RealInnerProductSpace
 
 variable {E ι : Type*} {mE : MeasurableSpace E} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   {μ : ι → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
@@ -31,8 +31,9 @@ lemma isTightMeasureSet_iff_equicontinuousAt_charFun :
   ⟨equicontinuousAt_charFun_zero_of_isTightMeasureSet,
     isTightMeasureSet_of_equicontinuousAt_charFun⟩
 
-lemma isTightMeasureSet_of_tendsto_measure_norm_gt [BorelSpace E] [SecondCountableTopology E]
-    [FiniteDimensional ℝ E]
+variable [FiniteDimensional ℝ E]
+
+lemma isTightMeasureSet_of_tendsto_measure_norm_gt
     {S : Set (Measure E)} (h : Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0)) :
     IsTightMeasureSet S := by
   rw [IsTightMeasureSet_iff_exists_isCompact_measure_compl_le]
@@ -46,25 +47,19 @@ lemma isTightMeasureSet_of_tendsto_measure_norm_gt [BorelSpace E] [SecondCountab
   ext
   simp
 
-lemma isTightMeasureSet_of_forall_basis_tendsto [BorelSpace E] [SecondCountableTopology E]
-    [FiniteDimensional ℝ E]
-    {S : Set (Measure E)} (h_prob : ∀ μ ∈ S, IsProbabilityMeasure μ)
+lemma isTightMeasureSet_of_forall_basis_tendsto {S : Set (Measure E)}
     (h : ∀ i, Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < |⟪Module.finBasis ℝ E i, x⟫|})
       atTop (𝓝 0)) :
     IsTightMeasureSet S := by
   refine isTightMeasureSet_of_tendsto_measure_norm_gt ?_
   sorry
 
-lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt [BorelSpace E] [SecondCountableTopology E]
-    [FiniteDimensional ℝ E]
-    {μ : ℕ → Measure E}
+lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt {μ : ℕ → Measure E}
     (h : Tendsto (fun (r : ℝ) ↦ limsup (fun n ↦ μ n {x | r < ‖x‖}) atTop) atTop (𝓝 0)) :
     IsTightMeasureSet {μ n | n} := by
   sorry
 
-lemma isTightMeasureSet_of_forall_basis_tendsto_limsup [BorelSpace E] [SecondCountableTopology E]
-    [FiniteDimensional ℝ E]
-    {μ : ℕ → Measure E} [∀ n, IsProbabilityMeasure (μ n)]
+lemma isTightMeasureSet_of_forall_basis_tendsto_limsup {μ : ℕ → Measure E}
     (h : ∀ i, Tendsto (fun (r : ℝ) ↦ limsup (fun n ↦ μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|})
       atTop) atTop (𝓝 0)) :
     IsTightMeasureSet {μ n | n} := by
@@ -73,8 +68,7 @@ lemma isTightMeasureSet_of_forall_basis_tendsto_limsup [BorelSpace E] [SecondCou
 /-- Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions
 $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0,
 then $(\mu_n)$ is tight. -/
-lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E] [SecondCountableTopology E]
-    [FiniteDimensional ℝ E]
+lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E]
     {μ : ℕ → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
     {f : E → ℂ} (hf : ContinuousAt f 0) (hf_meas : Measurable f)
     (h : ∀ t, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (f t))) :
@@ -87,55 +81,62 @@ lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E] [SecondCountableTopolo
     have h_ofReal r : limsup (fun n ↦ μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}) atTop
         = ENNReal.ofReal
           (limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop) := by
-      sorry
+      rw [ENNReal.limsup_toReal_eq (b := 1)]
+      · rw [ENNReal.ofReal_toReal]
+        refine ne_of_lt ?_
+        calc limsup (fun n ↦ (μ n) {x | r < |inner ((Module.finBasis ℝ E) i) x|}) atTop
+        _ ≤ 1 := by
+          refine limsup_le_of_le ?_ ?_
+          · exact IsCoboundedUnder.of_frequently_ge <| .of_forall fun _ ↦ zero_le'
+          · exact .of_forall fun _ ↦ prob_le_one
+        _ < ⊤ := by simp
+      · simp
+      · exact .of_forall fun _ ↦ prob_le_one
     simp_rw [h_ofReal]
     rw [← ENNReal.ofReal_zero]
     exact ENNReal.tendsto_ofReal this
   have h_le_4 n r (hr : 0 < r) :
       2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖ ≤ 4 := by
+    have hr' : -(2 * r⁻¹) ≤ 2 * r⁻¹ := by rw [neg_le_self_iff]; positivity
     calc 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖
     _ ≤ 2⁻¹ * r
         * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖ := by
       simp only [neg_mul, intervalIntegrable_const]
       gcongr
-      rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
-      · exact norm_integral_le_integral_norm _
-      · rw [neg_le_self_iff]; positivity
-      · rw [neg_le_self_iff]; positivity
+      rw [intervalIntegral.integral_of_le hr', intervalIntegral.integral_of_le hr']
+      exact norm_integral_le_integral_norm _
     _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, 2 := by
       gcongr
-      rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
-      rotate_left
-      · rw [neg_le_self_iff]; positivity
-      · rw [neg_le_self_iff]; positivity
+      rw [intervalIntegral.integral_of_le hr', intervalIntegral.integral_of_le hr']
       refine integral_mono_of_nonneg ?_ (by fun_prop) ?_
       · exact ae_of_all _ fun _ ↦ by positivity
-      · refine ae_of_all _ fun x ↦ ?_
-        calc ‖1 - charFun (μ n) (x • Module.finBasis ℝ E i)‖
-        _ ≤ ‖(1 : ℂ)‖ + ‖charFun (μ n) (x • Module.finBasis ℝ E i)‖ := norm_sub_le _ _
-        _ ≤ 1 + 1 := by simp [norm_charFun_le_one]
-        _ = 2 := by norm_num
+      · refine ae_of_all _ fun x ↦ norm_one_sub_charFun_le_two
     _ ≤ 4 := by
       simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, smul_eq_mul]
       ring_nf
       rw [mul_inv_cancel₀ hr.ne', one_mul]
   -- We introduce an upper bound for the limsup.
+  -- This is where we use the fact that `charFun (μ n)` converges to `f`.
   have h_limsup_le r (hr : 0 < r) :
       limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop
         ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖ := by
-    -- This is where we use the fact that `charFun (μ n)` converges to `f`
     calc limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop
     _ ≤ limsup (fun n ↦ 2⁻¹ * r
         * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖) atTop := by
       refine limsup_le_limsup (.of_forall fun n ↦ h_le n r hr) ?_ ?_
-      · refine ⟨0, fun _ ↦ ?_⟩
-        simp only [eventually_map, eventually_atTop, ge_iff_le, forall_exists_index]
-        exact fun n hn ↦ ENNReal.toReal_nonneg.trans (hn n le_rfl)
+      · exact IsCoboundedUnder.of_frequently_ge <| .of_forall fun _ ↦ ENNReal.toReal_nonneg
       · refine ⟨4, ?_⟩
         simp only [eventually_map, eventually_atTop, ge_iff_le]
         exact ⟨0, fun n _ ↦ h_le_4 n r hr⟩
-    _ ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖ := by
-      sorry
+    _ = 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖ := by
+      refine ((Tendsto.norm ?_).const_mul _).limsup_eq
+      simp only [neg_mul, intervalIntegrable_const]
+      have hr' : -(2 * r⁻¹) ≤ 2 * r⁻¹ := by rw [neg_le_self_iff]; positivity
+      simp_rw [intervalIntegral.integral_of_le hr']
+      refine tendsto_integral_of_dominated_convergence (fun _ ↦ 2) ?_ (by fun_prop) ?_ ?_
+      · exact fun _ ↦ Measurable.aestronglyMeasurable <| by fun_prop
+      · exact fun _ ↦ ae_of_all _ fun _ ↦ norm_one_sub_charFun_le_two
+      · exact ae_of_all _ fun x ↦ tendsto_const_nhds.sub (h _)
   -- It suffices to show that the upper bound tends to 0.
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds
     (h := fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖)
@@ -168,6 +169,7 @@ lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E] [SecondCountableTopolo
     exact Basis.ne_zero (Module.finBasis ℝ E) i
   refine ⟨4 * δ⁻¹ * ‖Module.finBasis ℝ E i‖, fun r hrδ ↦ ?_⟩
   have hr : 0 < r := lt_of_lt_of_le (by positivity) hrδ
+  have hr' : -(2 * r⁻¹) ≤ 2 * r⁻¹ := by rw [neg_le_self_iff]; positivity
   have h_le_Ioc x (hx : x ∈ Set.Ioc (-(2 * r⁻¹)) (2 * r⁻¹)) :
       ‖1 - f (x • Module.finBasis ℝ E i)‖ ≤ ε / 4 := by
     refine (hδ_lt ?_).le
@@ -194,16 +196,11 @@ lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E] [SecondCountableTopolo
   calc 2⁻¹ * r * ‖∫ t in -(2 * r⁻¹)..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖
   _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - f (t • Module.finBasis ℝ E i)‖ := by
     gcongr
-    rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
-    · exact norm_integral_le_integral_norm _
-    · rw [neg_le_self_iff]; positivity
-    · rw [neg_le_self_iff]; positivity
+    rw [intervalIntegral.integral_of_le hr', intervalIntegral.integral_of_le hr']
+    exact norm_integral_le_integral_norm _
   _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ε / 4 := by
     gcongr
-    rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
-    rotate_left
-    · rw [neg_le_self_iff]; positivity
-    · rw [neg_le_self_iff]; positivity
+    rw [intervalIntegral.integral_of_le hr', intervalIntegral.integral_of_le hr']
     refine integral_mono_ae ?_ (by fun_prop) ?_
     · refine Integrable.mono' (integrable_const (ε / 4)) ?_ ?_
       · exact Measurable.aestronglyMeasurable <| by fun_prop

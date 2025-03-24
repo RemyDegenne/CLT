@@ -126,6 +126,13 @@ lemma norm_charFun_le_one (μ : Measure E) [IsProbabilityMeasure μ] (t : E) : �
   simp only [Pi.one_apply, norm_one, integral_const, measure_univ, ENNReal.toReal_one, smul_eq_mul,
     mul_one]
 
+lemma norm_one_sub_charFun_le_two {μ : Measure E} [IsProbabilityMeasure μ] {x : E} :
+    ‖1 - charFun μ x‖ ≤ 2 :=
+  calc ‖1 - charFun μ x‖
+  _ ≤ ‖(1 : ℂ)‖ + ‖charFun μ x‖ := norm_sub_le _ _
+  _ ≤ 1 + 1 := by simp [norm_charFun_le_one]
+  _ = 2 := by norm_num
+
 lemma intervalIntegrable_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {a b : ℝ} :
     IntervalIntegrable (charFun μ) ℙ a b := by
   refine IntervalIntegrable.mono_fun' (g := fun _ ↦ 1) (by simp) ?_ (ae_of_all _ fun x ↦ ?_)

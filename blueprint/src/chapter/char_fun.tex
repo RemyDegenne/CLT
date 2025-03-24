@@ -137,7 +137,7 @@ TODO
 \uses{def:charFun}
 For $\mu$ a probability measure on $\mathbb{R}$ and $r > 0$,
 \begin{align*}
-\mu \left\{x \mid |x| \ge r\right\}
+\mu \left\{x \mid |x| > r\right\}
 &\le \frac{r}{2} \int_{-2/r}^{2/r} (1 - \hat{\mu}(t))dt
 \: .
 \end{align*}
@@ -157,12 +157,29 @@ We will use Lemma~\ref{lem:integral_charFun} with $r$ replaced by $2/r$.
     \\
     &\ge 2 \int_{|x| \ge r} \left(1 - \frac{\sin(2 x / r)}{2 x / r}\right) \, d\mu(x)
     \\
-    &\ge \mu\{x \mid |x| \ge r\}
+    &\ge \mu\{x \mid |x| > r\}
     \: .
 \end{align*}
 In the end we used that $\sin x \le x /2$ for $x \ge 2$.
 \end{proof}
 
+
+\begin{lemma}\label{lem:charFun_bound_inner}
+\leanok
+\lean{ProbabilityTheory.measure_abs_inner_ge_le_charFun}
+\uses{def:charFun}
+For $\mu$ a probability measure on an inner product space $E$ and $r > 0$, $a \in E$,
+\begin{align*}
+\mu \left\{x \mid \vert\langle a, x\rangle\vert > r\right\}
+&\le \frac{r}{2} \int_{-2/r}^{2/r} (1 - \hat{\mu}(t \cdot a))dt
+\: .
+\end{align*}
+\end{lemma}
+
+\begin{proof}\uses{lem:charFun_bound_large}
+\leanok
+TODO (see code)
+\end{proof}
 
 \begin{lemma}\label{lem:abs_sub_charFun}
 \leanok
@@ -233,7 +250,7 @@ The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\
 A family of measures $(\mu_a)$ on a finite dimensional inner product space is tight iff the family of functions $(\hat{\mu}_a)$ is equicontinuous at 0.
 \end{lemma}
 
-\begin{proof}\uses{lem:charFun_bound_small, lem:charFun_bound_large, lem:abs_sub_charFun}
+\begin{proof}\uses{lem:charFun_bound_small, lem:charFun_bound_inner, lem:abs_sub_charFun}
 TODO: equicontinuous implies tight.
 
 For the other direction, by Lemma~\ref{lem:abs_sub_charFun}, for all $a$,
@@ -254,8 +271,9 @@ We obtain equicontinuity at 0 of the family $(\hat{\mu}_a)$.
 Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0, then $(\mu_n)$ is tight.
 \end{lemma}
 
-\begin{proof}\uses{lem:charFun_bound_large}
-By Lemma~\ref{lem:charFun_bound_large} and dominated convergence, for all $a \in \mathbb{R}^d$ and $r > 0$,
+\begin{proof}\uses{lem:charFun_bound_inner, lem:isTightMeasureSet_of_basis}
+\leanok
+By Lemma~\ref{lem:charFun_bound_inner} and dominated convergence, for all $a \in \mathbb{R}^d$ and $r > 0$,
 \begin{align*}
     \lim_{n \to +\infty} \mu_n \left\{x \mid |\langle a, x\rangle| \ge r\right\}
     &\le \lim_{n \to +\infty} \frac{r}{2} \int_{-2/r}^{2/r} (1 - \hat{\mu}_n(\langle a, t\rangle))dt

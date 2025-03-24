@@ -14,26 +14,38 @@ import Clt.Prokhorov
 open MeasureTheory ProbabilityTheory Filter
 open scoped ENNReal NNReal Topology RealInnerProductSpace
 
-variable {E ι : Type*} {mE : MeasurableSpace E} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  {μ : ι → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
+variable {E : Type*} {mE : MeasurableSpace E} [NormedAddCommGroup E]
 
-lemma equicontinuousAt_charFun_zero_of_isTightMeasureSet (hμ : IsTightMeasureSet {μ i | i}) :
-    EquicontinuousAt (fun i ↦ charFun (μ i)) 0 := by
-  sorry
+lemma tendsto_measure_norm_gt_of_isTightMeasureSet
+    {S : Set (Measure E)} (hS : IsTightMeasureSet S) :
+    Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0) := by
+  rw [IsTightMeasureSet_iff_exists_isCompact_measure_compl_le] at hS
+  rw [ENNReal.tendsto_atTop_zero]
+  intro ε hε
+  obtain ⟨K, hK_compact, h⟩ := hS ε hε
+  rcases Set.eq_empty_or_nonempty K with rfl | hK_nonempty
+  · simp only [Set.compl_empty] at h
+    refine ⟨0, fun _ _ ↦ ?_⟩
+    simp only [iSup_le_iff]
+    exact fun μ hμS ↦ (measure_mono (Set.subset_univ _)).trans (h μ hμS)
+  obtain ⟨r, h_subset⟩ : ∃ r, K ⊆ {x | ‖x‖ ≤ r} := by
+    obtain ⟨xmax, _, hxmax⟩ : ∃ x ∈ K, IsMaxOn (fun x ↦ ‖x‖) K x :=
+      hK_compact.exists_isMaxOn (f := fun x : E ↦ ‖x‖) hK_nonempty (by fun_prop)
+    exact ⟨‖xmax‖, fun x hxK ↦ hxmax hxK⟩
+  refine ⟨r, fun u hu ↦ ?_⟩
+  simp only [iSup_le_iff]
+  intro μ hμS
+  refine (measure_mono ?_).trans (h μ hμS)
+  simp_rw [← not_le]
+  refine Set.compl_subset_compl.mp ?_
+  simp only [compl_compl, not_le]
+  refine h_subset.trans fun x ↦ ?_
+  simp only [Set.mem_setOf_eq, Set.mem_compl_iff, not_lt]
+  exact fun hx ↦ hx.trans hu
 
-lemma isTightMeasureSet_of_equicontinuousAt_charFun
-    (hμ : EquicontinuousAt (fun i ↦ charFun (μ i)) 0) :
-    IsTightMeasureSet {μ i | i} := by
-  sorry
+section FiniteDimensional
 
-lemma isTightMeasureSet_iff_equicontinuousAt_charFun :
-    IsTightMeasureSet {μ i | i} ↔ EquicontinuousAt (fun i ↦ charFun (μ i)) 0 :=
-  ⟨equicontinuousAt_charFun_zero_of_isTightMeasureSet,
-    isTightMeasureSet_of_equicontinuousAt_charFun⟩
-
-variable [FiniteDimensional ℝ E]
-
-lemma isTightMeasureSet_of_tendsto_measure_norm_gt
+lemma isTightMeasureSet_of_tendsto_measure_norm_gt [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {S : Set (Measure E)} (h : Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0)) :
     IsTightMeasureSet S := by
   rw [IsTightMeasureSet_iff_exists_isCompact_measure_compl_le]
@@ -47,20 +59,90 @@ lemma isTightMeasureSet_of_tendsto_measure_norm_gt
   ext
   simp
 
-lemma isTightMeasureSet_of_forall_basis_tendsto {S : Set (Measure E)}
+lemma isTightMeasureSet_iff_tendsto_measure_norm_gt [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    (S : Set (Measure E)) :
+    IsTightMeasureSet S
+      ↔ Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0) :=
+  ⟨tendsto_measure_norm_gt_of_isTightMeasureSet, isTightMeasureSet_of_tendsto_measure_norm_gt⟩
+
+lemma tendsto_iSup_of_tendsto_limsup {u : ℕ → ℝ → ℝ≥0∞}
+    (h_all : ∀ n, Tendsto (u n) atTop (𝓝 0))
+    (h_tendsto : Tendsto (fun r : ℝ ↦ limsup (fun n ↦ u n r) atTop) atTop (𝓝 0))
+    (h_anti : ∀ n, Antitone (u n)) :
+    Tendsto (fun r : ℝ ↦ ⨆ n, u n r) atTop (𝓝 0) := by
+  simp_rw [ENNReal.tendsto_atTop_zero] at h_tendsto h_all ⊢
+  intro ε hε
+  by_cases hε_top : ε = ∞
+  · refine ⟨0, fun _ _ ↦ by simp [hε_top]⟩
+  simp only [gt_iff_lt, ge_iff_le] at h_tendsto h_all hε
+  obtain ⟨r, h⟩ := h_tendsto (ε / 2) (ENNReal.half_pos hε.ne')
+  have h' x (hx : r ≤ x) y (hy : ε / 2 < y) : ∀ᶠ n in atTop, u n x < y := by
+    specialize h x hx
+    rw [limsup_le_iff] at h
+    exact h y hy
+  replace h' : ∀ x, r ≤ x → ∀ᶠ n in atTop, u n x < ε :=
+    fun x hx ↦ h' x hx ε (ENNReal.half_lt_self hε.ne' hε_top)
+  simp only [eventually_atTop, ge_iff_le] at h'
+  obtain ⟨N, h⟩ := h' r le_rfl
+  replace h_all : ∀ ε > 0, ∀ n, ∃ N, ∀ n_1 ≥ N, u n n_1 ≤ ε := fun ε hε n ↦ h_all n ε hε
+  choose rs hrs using h_all ε hε
+  refine ⟨r ⊔ ⨆ n : Finset.range N, rs n, fun v hv ↦ ?_⟩
+  simp only [Set.mem_setOf_eq, iSup_exists, iSup_le_iff, forall_apply_eq_imp_iff]
+  intro n
+  by_cases hn : n < N
+  · refine hrs n v ?_
+    calc rs n
+    _ = rs (⟨n, by simp [hn]⟩ : Finset.range N) := rfl
+    _ ≤ ⨆ n : Finset.range N, rs n := by
+      refine le_ciSup (f := fun (x : Finset.range N) ↦ rs x) ?_ (⟨n, by simp [hn]⟩ : Finset.range N)
+      exact Finite.bddAbove_range _
+    _ ≤ r ⊔ ⨆ n : Finset.range N, rs n := le_max_right _ _
+    _ ≤ v := hv
+  · have hn_le : N ≤ n := not_lt.mp hn
+    specialize h n hn_le
+    refine (h_anti n ?_).trans h.le
+    calc r
+    _ ≤ r ⊔ ⨆ n : Finset.range N, rs n := le_max_left _ _
+    _ ≤ v := hv
+
+lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt [BorelSpace E]
+    [NormedSpace ℝ E] [FiniteDimensional ℝ E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]
+    (h : Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < ‖x‖}) atTop) atTop (𝓝 0)) :
+    IsTightMeasureSet {μ n | n} := by
+  refine isTightMeasureSet_of_tendsto_measure_norm_gt ?_
+  convert tendsto_iSup_of_tendsto_limsup (fun n ↦ ?_) h fun n u v huv ↦ ?_ with y
+  · apply le_antisymm
+    · simp only [Set.mem_setOf_eq, iSup_exists, iSup_le_iff, forall_apply_eq_imp_iff]
+      intro n
+      exact le_iSup (fun i ↦ μ i {x | y < ‖x‖}) n
+    · simp only [Set.mem_setOf_eq, iSup_exists, iSup_le_iff]
+      intro n
+      calc μ n {x | y < ‖x‖}
+      _ ≤ ⨆ i, ⨆ (_ : μ i = μ n), μ i {x | y < ‖x‖} := le_biSup (fun i ↦ μ i {x | y < ‖x‖}) rfl
+      _ = ⨆ i, ⨆ (_ : μ i = μ n), μ n {x | y < ‖x‖} := by
+        convert rfl using 4 with m hm
+        rw [hm]
+      _ ≤ ⨆ μ', ⨆ i, ⨆ (_ : μ i = μ'), μ' {x | y < ‖x‖} :=
+        le_iSup (fun μ' ↦ ⨆ i, ⨆ (_ : μ i = μ'), μ' {x | y < ‖x‖}) (μ n)
+  · have h_tight : IsTightMeasureSet {μ n} :=
+      isTightMeasureSet_singleton_of_innerRegularWRT
+        (innerRegular_isCompact_isClosed_measurableSet_of_finite (μ n))
+    rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h_tight
+    simpa using h_tight
+  · refine measure_mono fun x hx ↦ ?_
+    simp only [Set.mem_setOf_eq] at hx ⊢
+    exact huv.trans_lt hx
+
+lemma isTightMeasureSet_of_forall_basis_tendsto
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] {S : Set (Measure E)}
     (h : ∀ i, Tendsto (fun (r : ℝ) ↦ ⨆ μ ∈ S, μ {x | r < |⟪Module.finBasis ℝ E i, x⟫|})
       atTop (𝓝 0)) :
     IsTightMeasureSet S := by
   refine isTightMeasureSet_of_tendsto_measure_norm_gt ?_
   sorry
 
-lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt {μ : ℕ → Measure E}
-    (h : Tendsto (fun (r : ℝ) ↦ limsup (fun n ↦ μ n {x | r < ‖x‖}) atTop) atTop (𝓝 0)) :
-    IsTightMeasureSet {μ n | n} := by
-  refine isTightMeasureSet_of_tendsto_measure_norm_gt ?_
-  sorry
-
-lemma isTightMeasureSet_of_forall_basis_tendsto_limsup {μ : ℕ → Measure E}
+lemma isTightMeasureSet_of_forall_basis_tendsto_limsup [BorelSpace E]
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]
     (h : ∀ i, Tendsto (fun (r : ℝ) ↦ limsup (fun n ↦ μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|})
       atTop) atTop (𝓝 0)) :
     IsTightMeasureSet {μ n | n} := by
@@ -69,7 +151,8 @@ lemma isTightMeasureSet_of_forall_basis_tendsto_limsup {μ : ℕ → Measure E}
 /-- Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions
 $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0,
 then $(\mu_n)$ is tight. -/
-lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E]
+lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+    [BorelSpace E]
     {μ : ℕ → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
     {f : E → ℂ} (hf : ContinuousAt f 0) (hf_meas : Measurable f)
     (h : ∀ t, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (f t))) :
@@ -214,3 +297,25 @@ lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E]
     ring_nf
     rw [mul_inv_cancel₀ hr.ne', one_mul]
   _ < ε := by simp [hε]
+
+end FiniteDimensional
+
+variable {ι : Type*} [InnerProductSpace ℝ E] {μ : ι → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
+
+section EquicontinuousAt
+
+lemma equicontinuousAt_charFun_zero_of_isTightMeasureSet (hμ : IsTightMeasureSet {μ i | i}) :
+    EquicontinuousAt (fun i ↦ charFun (μ i)) 0 := by
+  sorry
+
+lemma isTightMeasureSet_of_equicontinuousAt_charFun
+    (hμ : EquicontinuousAt (fun i ↦ charFun (μ i)) 0) :
+    IsTightMeasureSet {μ i | i} := by
+  sorry
+
+lemma isTightMeasureSet_iff_equicontinuousAt_charFun :
+    IsTightMeasureSet {μ i | i} ↔ EquicontinuousAt (fun i ↦ charFun (μ i)) 0 :=
+  ⟨equicontinuousAt_charFun_zero_of_isTightMeasureSet,
+    isTightMeasureSet_of_equicontinuousAt_charFun⟩
+
+end EquicontinuousAt

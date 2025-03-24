@@ -6,17 +6,44 @@ A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there ex
 \end{definition}
 
 
+\begin{lemma}\label{lem:isTightMeasureSet_iff_norm}
+\uses{def:tight}
+\leanok
+\lean{isTightMeasureSet_iff_tendsto_measure_norm_gt}
+Let $S$ be a set of measures on a finite-dimensional normed space $E$. 
+Then $S$ is tight iff $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\Vert x \Vert > r\} = 0$.
+\end{lemma}
+
+\begin{proof}\leanok
+
+\end{proof}
+	
+
+\begin{lemma}\label{lem:isTightMeasureSet_of_sup_basis}
+\uses{def:tight}
+\leanok
+\lean{isTightMeasureSet_of_forall_basis_tendsto}
+Let $S$ be a set of measures on a finite-dimensional normed space $E$. 
+Let $b_1, \ldots, b_k$ be an orthonormal basis of $E$.
+If for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\vert\langle b_i, x\rangle\vert > r\} = 0$, then the set $S$ is tight.
+\end{lemma}
+
+\begin{proof}\leanok
+\uses{lem:isTightMeasureSet_iff_norm}
+\end{proof}
+
+
 \begin{lemma}\label{lem:isTightMeasureSet_of_basis}
 \uses{def:tight}
 \leanok
 \lean{isTightMeasureSet_of_forall_basis_tendsto_limsup}
 Let $(\mu_n)_{n \in \mathbb{N}}$ be a sequence of measures on a finite-dimensional normed space $E$. 
-Let $b_1, \ldots, b_k$ be a basis of $E$.
-If for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\mu\{\vert\langle b_i, x\rangle\vert > r\} = 0$, then the set $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
+Let $b_1, \ldots, b_k$ be an orthonormal basis of $E$.
+If for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\limsup_{n \to \infty} \mu_n\{\vert\langle b_i, x\rangle\vert > r\} = 0$, then the set $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
 \end{lemma}
 
-\begin{proof}
-
+\begin{proof}\leanok
+\uses{lem:isTightMeasureSet_of_sup_basis}
 \end{proof}
 
 

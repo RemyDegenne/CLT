@@ -199,10 +199,40 @@ lemma isTightMeasureSet_of_forall_basis_tendsto
 
 lemma isTightMeasureSet_of_forall_basis_tendsto_limsup [BorelSpace E]
     [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]
-    (h : ∀ i, Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|})
+    (h : ∀ i, Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|})
       atTop) atTop (𝓝 0)) :
     IsTightMeasureSet {μ n | n} := by
-  sorry
+  refine isTightMeasureSet_of_forall_basis_tendsto fun i ↦ ?_
+  convert tendsto_iSup_of_tendsto_limsup (fun n ↦ ?_) (h i) fun n u v huv ↦ ?_ with y
+  · apply le_antisymm
+    · simp only [Set.mem_setOf_eq, iSup_exists, iSup_le_iff, forall_apply_eq_imp_iff]
+      intro n
+      exact le_iSup (fun j ↦ μ j {x | y < |⟪stdOrthonormalBasis ℝ E i, x⟫|}) n
+    · simp only [Set.mem_setOf_eq, iSup_exists, iSup_le_iff]
+      intro n
+      calc μ n {x | y < |⟪stdOrthonormalBasis ℝ E i, x⟫|}
+      _ ≤ ⨆ j, ⨆ (_ : μ j = μ n), μ j {x | y < |⟪stdOrthonormalBasis ℝ E i, x⟫|} :=
+          le_biSup (fun j ↦ μ j {x | y < |⟪stdOrthonormalBasis ℝ E i, x⟫|}) rfl
+      _ = ⨆ j, ⨆ (_ : μ j = μ n), μ n {x | y < |⟪stdOrthonormalBasis ℝ E i, x⟫|} := by
+        convert rfl using 4 with m hm
+        rw [hm]
+      _ ≤ ⨆ μ', ⨆ j, ⨆ (_ : μ j = μ'), μ' {x | y < |⟪stdOrthonormalBasis ℝ E i, x⟫|} :=
+        le_iSup (fun μ' ↦ ⨆ j, ⨆ (_ : μ j = μ'), μ' {x | y < |⟪stdOrthonormalBasis ℝ E i, x⟫|})
+          (μ n)
+  · have h_tight : IsTightMeasureSet {(μ n).map (fun x ↦ ⟪stdOrthonormalBasis ℝ E i, x⟫)} :=
+      isTightMeasureSet_singleton_of_innerRegularWRT
+        (innerRegular_isCompact_isClosed_measurableSet_of_finite _)
+    rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h_tight
+    have h_map r : (μ n).map (fun x ↦ inner ((stdOrthonormalBasis ℝ E) i) x) {x | r < |x|}
+        = μ n {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|} := by
+      rw [Measure.map_apply]
+      · simp
+      · fun_prop
+      · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)
+    simpa [h_map] using h_tight
+  · refine measure_mono fun x hx ↦ ?_
+    simp only [Set.mem_setOf_eq] at hx ⊢
+    exact huv.trans_lt hx
 
 /-- Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions
 $(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0,
@@ -214,17 +244,18 @@ lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDime
     (h : ∀ t, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (f t))) :
     IsTightMeasureSet {μ i | i} := by
   refine isTightMeasureSet_of_forall_basis_tendsto_limsup fun i ↦ ?_
-  have h_le n r := measure_abs_inner_ge_le_charFun (μ := μ n) (a := Module.finBasis ℝ E i) (r := r)
+  have h_le n r := measure_abs_inner_ge_le_charFun (μ := μ n)
+    (a := stdOrthonormalBasis ℝ E i) (r := r)
   suffices Tendsto (fun (r : ℝ) ↦
-        limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop)
+        limsup (fun n ↦ (μ n {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|}).toReal) atTop)
       atTop (𝓝 0) by
-    have h_ofReal r : limsup (fun n ↦ μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}) atTop
+    have h_ofReal r : limsup (fun n ↦ μ n {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|}) atTop
         = ENNReal.ofReal
-          (limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop) := by
+          (limsup (fun n ↦ (μ n {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|}).toReal) atTop) := by
       rw [ENNReal.limsup_toReal_eq (b := 1)]
       · rw [ENNReal.ofReal_toReal]
         refine ne_of_lt ?_
-        calc limsup (fun n ↦ (μ n) {x | r < |inner ((Module.finBasis ℝ E) i) x|}) atTop
+        calc limsup (fun n ↦ (μ n) {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|}) atTop
         _ ≤ 1 := by
           refine limsup_le_of_le ?_ ?_
           · exact IsCoboundedUnder.of_frequently_ge <| .of_forall fun _ ↦ zero_le'
@@ -236,11 +267,12 @@ lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDime
     rw [← ENNReal.ofReal_zero]
     exact ENNReal.tendsto_ofReal this
   have h_le_4 n r (hr : 0 < r) :
-      2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖ ≤ 4 := by
+      2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹,
+        1 - charFun (μ n) (t • stdOrthonormalBasis ℝ E i)‖ ≤ 4 := by
     have hr' : -(2 * r⁻¹) ≤ 2 * r⁻¹ := by rw [neg_le_self_iff]; positivity
-    calc 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖
+    calc 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • stdOrthonormalBasis ℝ E i)‖
     _ ≤ 2⁻¹ * r
-        * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖ := by
+        * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - charFun (μ n) (t • stdOrthonormalBasis ℝ E i)‖ := by
       simp only [neg_mul, intervalIntegrable_const]
       gcongr
       rw [intervalIntegral.integral_of_le hr', intervalIntegral.integral_of_le hr']
@@ -258,17 +290,17 @@ lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDime
   -- We introduce an upper bound for the limsup.
   -- This is where we use the fact that `charFun (μ n)` converges to `f`.
   have h_limsup_le r (hr : 0 < r) :
-      limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop
-        ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖ := by
-    calc limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop
+      limsup (fun n ↦ (μ n {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|}).toReal) atTop
+        ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • stdOrthonormalBasis ℝ E i)‖ := by
+    calc limsup (fun n ↦ (μ n {x | r < |⟪stdOrthonormalBasis ℝ E i, x⟫|}).toReal) atTop
     _ ≤ limsup (fun n ↦ 2⁻¹ * r
-        * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖) atTop := by
+        * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • stdOrthonormalBasis ℝ E i)‖) atTop := by
       refine limsup_le_limsup (.of_forall fun n ↦ h_le n r hr) ?_ ?_
       · exact IsCoboundedUnder.of_frequently_ge <| .of_forall fun _ ↦ ENNReal.toReal_nonneg
       · refine ⟨4, ?_⟩
         simp only [eventually_map, eventually_atTop, ge_iff_le]
         exact ⟨0, fun n _ ↦ h_le_4 n r hr⟩
-    _ = 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖ := by
+    _ = 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • stdOrthonormalBasis ℝ E i)‖ := by
       refine ((Tendsto.norm ?_).const_mul _).limsup_eq
       simp only [neg_mul, intervalIntegrable_const]
       have hr' : -(2 * r⁻¹) ≤ 2 * r⁻¹ := by rw [neg_le_self_iff]; positivity
@@ -279,7 +311,7 @@ lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDime
       · exact ae_of_all _ fun x ↦ tendsto_const_nhds.sub (h _)
   -- It suffices to show that the upper bound tends to 0.
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds
-    (h := fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖)
+    (h := fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • stdOrthonormalBasis ℝ E i)‖)
     ?_ ?_ ?_
   rotate_left
   · filter_upwards [eventually_gt_atTop 0] with r hr
@@ -291,8 +323,8 @@ lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDime
   · filter_upwards [eventually_gt_atTop 0] with r hr using h_limsup_le r hr
   -- We now show that the upper bound tends to 0.
   -- This will follow from the fact that `f` is continuous at `0`.
-  -- `⊢ Tendsto (fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖)`
-  --    `atTop (𝓝 0)`
+  -- `⊢ Tendsto (fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹,`
+  --    `1 - f (t • stdOrthonormalBasis ℝ E i)‖) atTop (𝓝 0)`
   have hf_tendsto := hf.tendsto
   rw [Metric.tendsto_nhds_nhds] at hf_tendsto
   rw [Metric.tendsto_atTop]
@@ -304,23 +336,24 @@ lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDime
   simp_rw [abs_of_nonneg (norm_nonneg _)]
   obtain ⟨δ, hδ, hδ_lt⟩ : ∃ δ, 0 < δ ∧ ∀ ⦃x : E⦄, ‖x‖ < δ → ‖1 - f x‖ < ε / 4 :=
     hf_tendsto (ε / 4) (by positivity)
-  have h_norm_basis_pos : 0 < ‖Module.finBasis ℝ E i‖ := by
+  have h_norm_basis_pos : 0 < ‖stdOrthonormalBasis ℝ E i‖ := by
     simp only [norm_pos_iff, ne_eq]
-    exact Basis.ne_zero (Module.finBasis ℝ E) i
-  refine ⟨4 * δ⁻¹ * ‖Module.finBasis ℝ E i‖, fun r hrδ ↦ ?_⟩
+    rw [← OrthonormalBasis.coe_toBasis]
+    exact Basis.ne_zero (stdOrthonormalBasis ℝ E).toBasis i
+  refine ⟨4 * δ⁻¹ * ‖stdOrthonormalBasis ℝ E i‖, fun r hrδ ↦ ?_⟩
   have hr : 0 < r := lt_of_lt_of_le (by positivity) hrδ
   have hr' : -(2 * r⁻¹) ≤ 2 * r⁻¹ := by rw [neg_le_self_iff]; positivity
   have h_le_Ioc x (hx : x ∈ Set.Ioc (-(2 * r⁻¹)) (2 * r⁻¹)) :
-      ‖1 - f (x • Module.finBasis ℝ E i)‖ ≤ ε / 4 := by
+      ‖1 - f (x • stdOrthonormalBasis ℝ E i)‖ ≤ ε / 4 := by
     refine (hδ_lt ?_).le
     rw [norm_smul]
-    calc ‖x‖ * ‖Module.finBasis ℝ E i‖
-    _ ≤ 2 * r⁻¹ * ‖Module.finBasis ℝ E i‖ := by
+    calc ‖x‖ * ‖stdOrthonormalBasis ℝ E i‖
+    _ ≤ 2 * r⁻¹ * ‖stdOrthonormalBasis ℝ E i‖ := by
       gcongr
       simp only [Real.norm_eq_abs, abs_le]
       simp only [Set.mem_Ioc] at hx
       exact ⟨hx.1.le, hx.2⟩
-    _ < δ * ‖Module.finBasis ℝ E i‖⁻¹ * ‖Module.finBasis ℝ E i‖ := by
+    _ < δ * ‖stdOrthonormalBasis ℝ E i‖⁻¹ * ‖stdOrthonormalBasis ℝ E i‖ := by
       rw [mul_lt_mul_right h_norm_basis_pos, ← lt_div_iff₀' (by positivity),
         inv_lt_comm₀ hr (by positivity)]
       refine lt_of_lt_of_le ?_ hrδ
@@ -330,11 +363,10 @@ lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDime
       norm_num
     _ ≤ δ := by
       rw [mul_assoc, inv_mul_cancel₀, mul_one]
-      simp only [ne_eq, norm_eq_zero]
-      exact Basis.ne_zero (Module.finBasis ℝ E) i
+      exact h_norm_basis_pos.ne'
   rw [abs_of_nonneg hr.le]
-  calc 2⁻¹ * r * ‖∫ t in -(2 * r⁻¹)..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖
-  _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - f (t • Module.finBasis ℝ E i)‖ := by
+  calc 2⁻¹ * r * ‖∫ t in -(2 * r⁻¹)..2 * r⁻¹, 1 - f (t • stdOrthonormalBasis ℝ E i)‖
+  _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - f (t • stdOrthonormalBasis ℝ E i)‖ := by
     gcongr
     rw [intervalIntegral.integral_of_le hr', intervalIntegral.integral_of_le hr']
     exact norm_integral_le_integral_norm _

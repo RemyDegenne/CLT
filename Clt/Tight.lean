@@ -91,11 +91,52 @@ lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E] [SecondCountableTopolo
     simp_rw [h_ofReal]
     rw [← ENNReal.ofReal_zero]
     exact ENNReal.tendsto_ofReal this
+  have h_le_4 n r (hr : 0 < r) :
+      2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖ ≤ 4 := by
+    calc 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖
+    _ ≤ 2⁻¹ * r
+        * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖ := by
+      simp only [neg_mul, intervalIntegrable_const]
+      gcongr
+      rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
+      · exact norm_integral_le_integral_norm _
+      · rw [neg_le_self_iff]; positivity
+      · rw [neg_le_self_iff]; positivity
+    _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, 2 := by
+      gcongr
+      rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
+      rotate_left
+      · rw [neg_le_self_iff]; positivity
+      · rw [neg_le_self_iff]; positivity
+      refine integral_mono_of_nonneg ?_ (by fun_prop) ?_
+      · exact ae_of_all _ fun _ ↦ by positivity
+      · refine ae_of_all _ fun x ↦ ?_
+        calc ‖1 - charFun (μ n) (x • Module.finBasis ℝ E i)‖
+        _ ≤ ‖(1 : ℂ)‖ + ‖charFun (μ n) (x • Module.finBasis ℝ E i)‖ := norm_sub_le _ _
+        _ ≤ 1 + 1 := by simp [norm_charFun_le_one]
+        _ = 2 := by norm_num
+    _ ≤ 4 := by
+      simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, smul_eq_mul]
+      ring_nf
+      rw [mul_inv_cancel₀ hr.ne', one_mul]
+  -- We introduce an upper bound for the limsup.
   have h_limsup_le r (hr : 0 < r) :
       limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop
-      ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖ := by
+        ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖ := by
     -- This is where we use the fact that `charFun (μ n)` converges to `f`
-    sorry
+    calc limsup (fun n ↦ (μ n {x | r < |⟪Module.finBasis ℝ E i, x⟫|}).toReal) atTop
+    _ ≤ limsup (fun n ↦ 2⁻¹ * r
+        * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖) atTop := by
+      refine limsup_le_limsup (.of_forall fun n ↦ h_le n r hr) ?_ ?_
+      · refine ⟨0, fun _ ↦ ?_⟩
+        simp only [eventually_map, eventually_atTop, ge_iff_le, forall_exists_index]
+        exact fun n hn ↦ ENNReal.toReal_nonneg.trans (hn n le_rfl)
+      · refine ⟨4, ?_⟩
+        simp only [eventually_map, eventually_atTop, ge_iff_le]
+        exact ⟨0, fun n _ ↦ h_le_4 n r hr⟩
+    _ ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖ := by
+      sorry
+  -- It suffices to show that the upper bound tends to 0.
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds
     (h := fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖)
     ?_ ?_ ?_
@@ -104,39 +145,13 @@ lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E] [SecondCountableTopolo
     refine le_limsup_of_le ?_ fun u hu ↦ ?_
     · refine ⟨4, ?_⟩
       simp only [eventually_map, eventually_atTop, ge_iff_le]
-      refine ⟨0, fun n _ ↦ ?_⟩
-      refine (h_le n r hr).trans ?_
-      calc 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖
-      _ ≤ 2⁻¹ * r
-          * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖ := by
-        simp only [neg_mul, intervalIntegrable_const]
-        gcongr
-        rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
-        · exact norm_integral_le_integral_norm _
-        · rw [neg_le_self_iff]; positivity
-        · rw [neg_le_self_iff]; positivity
-      _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, 2 := by
-        gcongr
-        rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
-        rotate_left
-        · rw [neg_le_self_iff]; positivity
-        · rw [neg_le_self_iff]; positivity
-        refine integral_mono_of_nonneg ?_ (by fun_prop) ?_
-        · exact ae_of_all _ fun _ ↦ by positivity
-        · refine ae_of_all _ fun x ↦ ?_
-          calc ‖1 - charFun (μ n) (x • Module.finBasis ℝ E i)‖
-          _ ≤ ‖(1 : ℂ)‖ + ‖charFun (μ n) (x • Module.finBasis ℝ E i)‖ := norm_sub_le _ _
-          _ ≤ 1 + 1 := by simp [norm_charFun_le_one]
-          _ = 2 := by norm_num
-      _ ≤ 4 := by
-        simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, smul_eq_mul]
-        ring_nf
-        rw [mul_inv_cancel₀ hr.ne', one_mul]
+      exact ⟨0, fun n _ ↦ (h_le n r hr).trans (h_le_4 n r hr)⟩
     · exact ENNReal.toReal_nonneg.trans hu.exists.choose_spec
   · filter_upwards [eventually_gt_atTop 0] with r hr using h_limsup_le r hr
+  -- We now show that the upper bound tends to 0.
+  -- This will follow from the fact that `f` is continuous at `0`.
   -- `⊢ Tendsto (fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖)`
   --    `atTop (𝓝 0)`
-  -- This will follow from the fact that `f` is continuous at `0`.
   have hf_tendsto := hf.tendsto
   rw [Metric.tendsto_nhds_nhds] at hf_tendsto
   rw [Metric.tendsto_atTop]

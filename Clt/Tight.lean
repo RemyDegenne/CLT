@@ -102,11 +102,36 @@ lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E] [SecondCountableTopolo
   rotate_left
   · filter_upwards [eventually_gt_atTop 0] with r hr
     refine le_limsup_of_le ?_ fun u hu ↦ ?_
-    · refine ⟨2, ?_⟩
+    · refine ⟨4, ?_⟩
       simp only [eventually_map, eventually_atTop, ge_iff_le]
       refine ⟨0, fun n _ ↦ ?_⟩
       refine (h_le n r hr).trans ?_
-      sorry
+      calc 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖
+      _ ≤ 2⁻¹ * r
+          * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - charFun (μ n) (t • Module.finBasis ℝ E i)‖ := by
+        simp only [neg_mul, intervalIntegrable_const]
+        gcongr
+        rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
+        · exact norm_integral_le_integral_norm _
+        · rw [neg_le_self_iff]; positivity
+        · rw [neg_le_self_iff]; positivity
+      _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, 2 := by
+        gcongr
+        rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
+        rotate_left
+        · rw [neg_le_self_iff]; positivity
+        · rw [neg_le_self_iff]; positivity
+        refine integral_mono_of_nonneg ?_ (by fun_prop) ?_
+        · exact ae_of_all _ fun _ ↦ by positivity
+        · refine ae_of_all _ fun x ↦ ?_
+          calc ‖1 - charFun (μ n) (x • Module.finBasis ℝ E i)‖
+          _ ≤ ‖(1 : ℂ)‖ + ‖charFun (μ n) (x • Module.finBasis ℝ E i)‖ := norm_sub_le _ _
+          _ ≤ 1 + 1 := by simp [norm_charFun_le_one]
+          _ = 2 := by norm_num
+      _ ≤ 4 := by
+        simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, smul_eq_mul]
+        ring_nf
+        rw [mul_inv_cancel₀ hr.ne', one_mul]
     · exact ENNReal.toReal_nonneg.trans hu.exists.choose_spec
   · filter_upwards [eventually_gt_atTop 0] with r hr using h_limsup_le r hr
   -- `⊢ Tendsto (fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖)`
@@ -128,43 +153,42 @@ lemma isTightMeasureSet_of_tendsto_charFun [BorelSpace E] [SecondCountableTopolo
     exact Basis.ne_zero (Module.finBasis ℝ E) i
   refine ⟨4 * δ⁻¹ * ‖Module.finBasis ℝ E i‖, fun r hrδ ↦ ?_⟩
   have hr : 0 < r := lt_of_lt_of_le (by positivity) hrδ
+  have h_le_Ioc x (hx : x ∈ Set.Ioc (-(2 * r⁻¹)) (2 * r⁻¹)) :
+      ‖1 - f (x • Module.finBasis ℝ E i)‖ ≤ ε / 4 := by
+    refine (hδ_lt ?_).le
+    rw [norm_smul]
+    calc ‖x‖ * ‖Module.finBasis ℝ E i‖
+    _ ≤ 2 * r⁻¹ * ‖Module.finBasis ℝ E i‖ := by
+      gcongr
+      simp only [Real.norm_eq_abs, abs_le]
+      simp only [Set.mem_Ioc] at hx
+      exact ⟨hx.1.le, hx.2⟩
+    _ < δ * ‖Module.finBasis ℝ E i‖⁻¹ * ‖Module.finBasis ℝ E i‖ := by
+      rw [mul_lt_mul_right h_norm_basis_pos, ← lt_div_iff₀' (by positivity),
+        inv_lt_comm₀ hr (by positivity)]
+      refine lt_of_lt_of_le ?_ hrδ
+      ring_nf
+      rw [mul_comm δ⁻¹, inv_inv]
+      gcongr
+      norm_num
+    _ ≤ δ := by
+      rw [mul_assoc, inv_mul_cancel₀, mul_one]
+      simp only [ne_eq, norm_eq_zero]
+      exact Basis.ne_zero (Module.finBasis ℝ E) i
   rw [abs_of_nonneg hr.le]
   calc 2⁻¹ * r * ‖∫ t in -(2 * r⁻¹)..2 * r⁻¹, 1 - f (t • Module.finBasis ℝ E i)‖
   _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - f (t • Module.finBasis ℝ E i)‖ := by
     gcongr
     rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
-    rotate_left
+    · exact norm_integral_le_integral_norm _
     · rw [neg_le_self_iff]; positivity
     · rw [neg_le_self_iff]; positivity
-    exact norm_integral_le_integral_norm _
   _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ε / 4 := by
     gcongr
     rw [intervalIntegral.integral_of_le, intervalIntegral.integral_of_le]
     rotate_left
     · rw [neg_le_self_iff]; positivity
     · rw [neg_le_self_iff]; positivity
-    have h_le_Ioc x (hx : x ∈ Set.Ioc (-(2 * r⁻¹)) (2 * r⁻¹)) :
-        ‖1 - f (x • Module.finBasis ℝ E i)‖ ≤ ε / 4 := by
-      refine (hδ_lt ?_).le
-      rw [norm_smul]
-      calc ‖x‖ * ‖Module.finBasis ℝ E i‖
-      _ ≤ 2 * r⁻¹ * ‖Module.finBasis ℝ E i‖ := by
-        gcongr
-        simp only [Real.norm_eq_abs, abs_le]
-        simp only [Set.mem_Ioc] at hx
-        exact ⟨hx.1.le, hx.2⟩
-      _ < δ * ‖Module.finBasis ℝ E i‖⁻¹ * ‖Module.finBasis ℝ E i‖ := by
-        rw [mul_lt_mul_right h_norm_basis_pos, ← lt_div_iff₀' (by positivity),
-          inv_lt_comm₀ hr (by positivity)]
-        refine lt_of_lt_of_le ?_ hrδ
-        ring_nf
-        rw [mul_comm δ⁻¹, inv_inv]
-        gcongr
-        norm_num
-      _ ≤ δ := by
-        rw [mul_assoc, inv_mul_cancel₀, mul_one]
-        simp only [ne_eq, norm_eq_zero]
-        exact Basis.ne_zero (Module.finBasis ℝ E) i
     refine integral_mono_ae ?_ (by fun_prop) ?_
     · refine Integrable.mono' (integrable_const (ε / 4)) ?_ ?_
       · exact Measurable.aestronglyMeasurable <| by fun_prop

@@ -5,6 +5,21 @@
 A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there exists a compact set $K$ such that for all $\mu \in S$, $\mu(K^c) \le \varepsilon$.
 \end{definition}
 
+
+\begin{lemma}\label{lem:isTightMeasureSet_of_basis}
+\uses{def:tight}
+\leanok
+\lean{isTightMeasureSet_of_forall_basis_tendsto_limsup}
+Let $(\mu_n)_{n \in \mathbb{N}}$ be a sequence of measures on a finite-dimensional normed space $E$. 
+Let $b_1, \ldots, b_k$ be a basis of $E$.
+If for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\mu\{\vert\langle b_i, x\rangle\vert > r\} = 0$, then the set $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
+\end{lemma}
+
+\begin{proof}
+
+\end{proof}
+
+
 \begin{lemma}\label{lem:tight_of_cvg}
 \uses{def:tight}
 If $\mu_1, \mu_2, \ldots$ converge weakly to $\mu$, then $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
@@ -21,6 +36,7 @@ Fix $r > 0$ and let $f(x) = (1 - (r - \vert x \vert)_+)_+$ . $f$ is a bounded co
 As $r \to +\infty$, the last quantity tends to 0.
 \end{proof}
 
+
 \begin{lemma}\label{tight_iff_cvg_probability}
 \uses{def:tight, def:cvg_probability}
 For random variables $(X_i)_{i \in \mathbb{N}}$ (TODO in which kind of space?), the two following conditions are equivalent:
@@ -34,6 +50,7 @@ For random variables $(X_i)_{i \in \mathbb{N}}$ (TODO in which kind of space?), 
 
 \end{proof}
 
+
 \begin{lemma}\label{tight_closure}
 \uses{def:tight}
 The closure of a tight set of measures is tight.
@@ -41,6 +58,8 @@ The closure of a tight set of measures is tight.
 
 \begin{proof}
 \end{proof}
+
+
 
 \section{Prokhorov's theorem}
 
@@ -86,11 +105,9 @@ Let $E$ be a complete separable metric space and let $S \subseteq \mathcal P(E)$
 \end{enumerate}
 \end{theorem}
 
-\begin{proof}%\uses{lem:prokhorov_aux1, lem:ProbabilityMeasure_compact}
-% Lemma~\ref{lem:prokhorov_aux1} provides one direction.
-
-% TODO: proof of the other one.
+\begin{proof}
 \end{proof}
+
 
 \begin{lemma}\label{lem:relatively_compact_of_tight}
 \leanok

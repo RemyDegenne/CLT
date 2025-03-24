@@ -108,7 +108,7 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun {μ : ℕ → 
     (h : ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t))) :
     Tendsto μ atTop (𝓝 μ₀) := by
   have h_tight : IsTightMeasureSet (α := ℝ) {μ n | n} :=
-    isTightMeasureSet_of_tendsto_charFun (by fun_prop) h
+    isTightMeasureSet_of_tendsto_charFun (by fun_prop) (by fun_prop) h
   --refine tendsto_of_tight_of_separatesPoints h_tight ?_ ?_
   sorry
 

@@ -6,19 +6,15 @@
 A set $\mathcal F$ of functions $E \to F$ separates points in $E$ if for all $x, y \in E$ with $x \ne y$, there exists $f \in \mathcal F$ with $f(x) \ne f(y)$.
 \end{definition}
 
-\begin{definition}\label{def:separating}
-\lean{MeasureTheory.Separating} \leanok
-A set $\mathcal F$ of functions $E \to F$ is separating in $\mathcal P(E)$ if for all probability measures $\mu, \nu$ on $E$ with $\mu \ne \nu$, there exists $f \in \mathcal F$ with $\mu[f] \ne \nu[f]$.
-\end{definition}
-
 
 \begin{lemma}\label{lem:bounded_continuous_separating}
-\uses{def:separating}
-In a Borel space $E$, the set $C_b(E, \mathbb{C})$ of bounded continuous functions from $E$ to $\mathbb{C}$ is separating in $\mathcal P(E)$.
+\mathlibok
+\lean{MeasureTheory.ext_of_forall_integral_eq_of_IsFiniteMeasure}
+In a Borel space $E$, if two probability measures $\mu, \nu$ on $E$ are such that $\mu[f] = \nu[f]$ for all $f \in C_b(E, \mathbb{C})$, the set of bounded continuous functions from $E$ to $\mathbb{C}$, then $\mu = \nu$.
 \end{lemma}
 
-\begin{proof}
-The Mathlib lemma \texttt{MeasureTheory.FiniteMeasure.ext\_of\_forall\_lintegral\_eq} shows that $C_b(E, \mathbb{R}_+)$ is separating. Since $C_b(E, \mathbb{R}_{+}) \subseteq C_b(E, \mathbb{C})$, the larger set is also separating.
+\begin{proof}\leanok
+The Mathlib lemma \texttt{MeasureTheory.FiniteMeasure.ext\_of\_forall\_lintegral\_eq} shows that the result is true for $C_b(E, \mathbb{R}_+)$. Since $C_b(E, \mathbb{R}_{+}) \subseteq C_b(E, \mathbb{C})$, we get the result.
 \end{proof}
 
 
@@ -44,13 +40,14 @@ The monoid homomorphism can be lifted to a homomorphism of algebras from \texttt
 Let $\mathcal M$ be the set of these functions, which we call exponential polynomials.
 
 \begin{lemma}\label{lem:separates_points_expPoly}
-\lean{Clt.expPoly_separatesPoints} \leanok
-\uses{lem:starSubalgebra_expPoly}
+\uses{def:separates_points, lem:starSubalgebra_expPoly}
+\lean{Clt.expPoly_separatesPoints}
+\leanok
 The star-subalgebra $\mathcal M$ separates points.
 \end{lemma}
 
 \begin{proof}
-TODO
+TODO. Done in a Mathlib PR.
 \end{proof}
 
 
@@ -84,6 +81,7 @@ For any $f \in C_b(E, \mathbb{R})$ and a probability measure $\mu$,
 
 
 \begin{lemma}\label{lem:dist_integral_mulExpNegMulSq_comp_le}
+\uses{def:separates_points}
 \mathlibok
 \lean{dist_integral_mulExpNegMulSq_comp_le}
 Let $\mu, \nu$ be two finite measures in a standard Borel space $E$. Let $\mathcal{A}$ be a subalgebra of $C_b(E, \mathbb{R})$ that separates points.
@@ -99,29 +97,24 @@ If for all $g \in \mathcal A$, $\mu[g] = \nu[g]$, then for all $f \in C_b(E, \ma
 \end{proof}
 
 
-\begin{lemma}\label{lem:Cb_eq_of_separating}
-\uses{def:separates_points}
-Let $\mu, \nu$ be two finite measures in a standard Borel space $E$. Let $\mathcal{A}$ be a star-subalgebra of $C_b(E, \mathbb{k})$ that separates points, where $\mathbb{k}$ is $\mathbb{R}$ or $\mathbb{C}$.
-If for all $g \in \mathcal A$, $\mu[g] = \nu[g]$, then for all $f \in C_b(E, \mathbb{k})$, $\mu[f] = \nu[f]$.
-\end{lemma}
-
-\begin{proof}
-\uses{lem:introduce_exponential, lem:dist_integral_mulExpNegMulSq_comp_le}
-Proved in Mathlib PR \#19782
-\end{proof}
-
-
 \begin{theorem}[Subalgebras separating points]\label{thm:separating_starSubalgebra}
-Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points. Then $\mathcal A$ is separating in $\mathcal P(E)$.
+\mathlibok
+\lean{MeasureTheory.ext_of_forall_mem_subalgebra_integral_eq_of_polish}
+Let $E$ be a complete separable pseudo-metric space. Let $\mathcal A \subseteq C_b(E, \mathbb{C})$ be a star-subalgebra that separates points.
+Then if two probability measures $\mu, \nu$ of $E$ are such that $\mu[f] = \nu[f]$ for all $f \in \mathcal A$, then $\mu = \nu$.
 \end{theorem}
 
-\begin{proof}\uses{lem:bounded_continuous_separating, lem:Cb_eq_of_separating}
-Let $\mu$ and $\nu$ be two probability measures such that $\mu[f] = \nu[f]$ for all $f \in \mathcal A$. We want to prove that $\mu = \nu$. Since $C_b(E, \mathbb{C})$ is separating, it suffices to prove that for $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$. This is proved in Lemma~\ref{lem:Cb_eq_of_separating}
+\begin{proof}\uses{lem:bounded_continuous_separating, lem:introduce_exponential, lem:dist_integral_mulExpNegMulSq_comp_le}
+\leanok
+Let $\mu$ and $\nu$ be two probability measures such that $\mu[f] = \nu[f]$ for all $f \in \mathcal A$. We want to prove that $\mu = \nu$.
+By Lemma~\ref{lem:bounded_continuous_separating}, it suffices to prove that for all $g \in C_b(E, \mathbb{C})$, $\mu[g] = \nu[g]$.
+
+This is proved in Mathlib PR \#19782.
 \end{proof}
 
 
 \begin{lemma}\label{lem:separating_expPoly}
-The exponential polynomials $\mathcal M$ are separating.
+If two probability measures $\mu, \nu$ of an inner product space $E$ are such that $\mu[f] = \nu[f]$ for all exponential polynomials $f \in \mathcal M$, then $\mu = \nu$.
 \end{lemma}
 
 \begin{proof}\uses{thm:separating_starSubalgebra, lem:separates_points_expPoly}
@@ -132,12 +125,12 @@ Apply Theorem~\ref{thm:separating_starSubalgebra}, using Lemma~\ref{lem:separate
 \begin{lemma}\label{lem:cvg_of_separating}
 \leanok
 \lean{MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints}
-Let $\mathcal A$ be a separating subalgebra of $C_b(E, \mathbb{C})$. Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures, with $(\mu_n)$ tight. If for all $f \in \mathcal A$, $\mu_n[f] \to \mu[f]$, then $\mu_n \xrightarrow{w} \mu$.
+Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures, with $(\mu_n)$ tight. If for all $f \in \mathcal A$, $\mu_n[f] \to \mu[f]$, then $\mu_n \xrightarrow{w} \mu$.
 \end{lemma}
 
-\begin{proof}\uses{def:separating, lem:relatively_compact_of_tight}
+\begin{proof}\uses{lem:relatively_compact_of_tight, thm:separating_starSubalgebra}
 \leanok
 To show convergence to $\mu$, it suffices to show that every subsequence has a subsequence that converges to $\mu$ (\texttt{Filter.tendsto\_of\_subseq\_tendsto}).
 Since the family is tight, it is relatively compact by Prokhorov's theorem. We get that each subsequence has a converging subsequence.
-Let then $\mu'$ be a weak limit of $\mu_n$. We have $\mu_n[f] \to \mu'[f]$ and $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal A$, hence $\mu'[f] = \mu[f]$ for all $f \in \mathcal A$. Since $\mathcal A$ is separating, $\mathcal \mu' = \mu$.
+Let then $\mu'$ be a weak limit of $\mu_n$. We have $\mu_n[f] \to \mu'[f]$ and $\mu_n[f] \to \mu[f]$ for all $f \in \mathcal A$, hence $\mu'[f] = \mu[f]$ for all $f \in \mathcal A$. Since $\mathcal A$ separates points, $\mathcal \mu' = \mu$ by Theorem~\ref{thm:separating_starSubalgebra}.
 \end{proof}

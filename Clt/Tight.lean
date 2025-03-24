@@ -57,6 +57,7 @@ lemma isTightMeasureSet_of_forall_basis_tendsto {S : Set (Measure E)}
 lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt {μ : ℕ → Measure E}
     (h : Tendsto (fun (r : ℝ) ↦ limsup (fun n ↦ μ n {x | r < ‖x‖}) atTop) atTop (𝓝 0)) :
     IsTightMeasureSet {μ n | n} := by
+  refine isTightMeasureSet_of_tendsto_measure_norm_gt ?_
   sorry
 
 lemma isTightMeasureSet_of_forall_basis_tendsto_limsup {μ : ℕ → Measure E}

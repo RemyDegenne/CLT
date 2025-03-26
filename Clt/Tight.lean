@@ -385,7 +385,7 @@ lemma isTightMeasureSet_of_tendsto_charFun [InnerProductSpace ℝ E] [FiniteDime
   -- We now show that the upper bound tends to 0.
   -- This will follow from the fact that `f` is continuous at `0`.
   -- `⊢ Tendsto (fun r ↦ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹,`
-  --    `1 - f (t • b i)‖) atTop (𝓝 0)`
+  --    `1 - f (t • stdOrthonormalBasis ℝ E i)‖) atTop (𝓝 0)`
   have hf_tendsto := hf.tendsto
   rw [Metric.tendsto_nhds_nhds] at hf_tendsto
   rw [Metric.tendsto_atTop]

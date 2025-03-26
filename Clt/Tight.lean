@@ -83,6 +83,13 @@ lemma iSup_set_seq {E : Type*} {_ : MeasurableSpace E} (μ : ℕ → Measure E) 
     _ ≤ ⨆ μ', ⨆ i, ⨆ (_ : μ i = μ'), μ' s :=
       le_iSup (fun μ' ↦ ⨆ i, ⨆ (_ : μ i = μ'), μ' s) (μ n)
 
+lemma isTightMeasureSet_singleton {α : Type*} {mα : MeasurableSpace α}
+  [PseudoEMetricSpace α] [CompleteSpace α] [SecondCountableTopology α] [BorelSpace α]
+  {μ : Measure α} [IsFiniteMeasure μ] :
+    IsTightMeasureSet {μ} :=
+  isTightMeasureSet_singleton_of_innerRegularWRT
+    (innerRegular_isCompact_isClosed_measurableSet_of_finite _)
+
 variable {E : Type*} {mE : MeasurableSpace E} [NormedAddCommGroup E]
 
 lemma norm_le_mul_iSup_abs_inner {ι : Type*} [Fintype ι]
@@ -228,8 +235,7 @@ lemma isTightMeasureSet_of_forall_basis_tendsto [InnerProductSpace ℝ E] [Finit
 lemma isTightMeasureSet_iff_forall_basis_tendsto [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {S : Set (Measure E)} (b : OrthonormalBasis ι ℝ E) :
     IsTightMeasureSet S
-      ↔ ∀ i, Tendsto (fun r : ℝ ↦ ⨆ μ ∈ S, μ {x | r < |⟪b i, x⟫|})
-        atTop (𝓝 0) := by
+      ↔ ∀ i, Tendsto (fun r : ℝ ↦ ⨆ μ ∈ S, μ {x | r < |⟪b i, x⟫|}) atTop (𝓝 0) := by
   refine ⟨fun h i ↦ ?_, isTightMeasureSet_of_forall_basis_tendsto b⟩
   rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h (fun _ ↦ zero_le') ?_
@@ -249,15 +255,13 @@ lemma isTightMeasureSet_iff_forall_basis_tendsto [InnerProductSpace ℝ E] [Fini
 lemma isTightMeasureSet_of_forall_basis_tendsto_limsup [BorelSpace E]
     [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]
     (b : OrthonormalBasis ι ℝ E)
-    (h : ∀ i, Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < |⟪b i, x⟫|})
-      atTop) atTop (𝓝 0)) :
+    (h : ∀ i, Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < |⟪b i, x⟫|}) atTop) atTop (𝓝 0)) :
     IsTightMeasureSet {μ n | n} := by
   refine isTightMeasureSet_of_forall_basis_tendsto b fun i ↦ ?_
   convert tendsto_iSup_of_tendsto_limsup (fun n ↦ ?_) (h i) fun n u v huv ↦ ?_ with y
   · apply le_antisymm
     · simp only [Set.mem_setOf_eq, iSup_exists, iSup_le_iff, forall_apply_eq_imp_iff]
-      intro n
-      exact le_iSup (fun j ↦ μ j {x | y < |⟪b i, x⟫|}) n
+      exact fun n ↦ le_iSup (fun j ↦ μ j {x | y < |⟪b i, x⟫|}) n
     · simp only [Set.mem_setOf_eq, iSup_exists, iSup_le_iff]
       intro n
       calc μ n {x | y < |⟪b i, x⟫|}
@@ -269,19 +273,15 @@ lemma isTightMeasureSet_of_forall_basis_tendsto_limsup [BorelSpace E]
       _ ≤ ⨆ μ', ⨆ j, ⨆ (_ : μ j = μ'), μ' {x | y < |⟪b i, x⟫|} :=
         le_iSup (fun μ' ↦ ⨆ j, ⨆ (_ : μ j = μ'), μ' {x | y < |⟪b i, x⟫|}) (μ n)
   · have h_tight : IsTightMeasureSet {(μ n).map (fun x ↦ ⟪b i, x⟫)} :=
-      isTightMeasureSet_singleton_of_innerRegularWRT
-        (innerRegular_isCompact_isClosed_measurableSet_of_finite _)
+      isTightMeasureSet_singleton
     rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h_tight
     have h_map r : (μ n).map (fun x ↦ inner ((b) i) x) {x | r < |x|}
         = μ n {x | r < |⟪b i, x⟫|} := by
-      rw [Measure.map_apply]
+      rw [Measure.map_apply (by fun_prop)]
       · simp
-      · fun_prop
       · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)
     simpa [h_map] using h_tight
-  · refine measure_mono fun x hx ↦ ?_
-    simp only [Set.mem_setOf_eq] at hx ⊢
-    exact huv.trans_lt hx
+  · exact measure_mono fun x hx ↦ huv.trans_lt hx
 
 lemma isTightMeasureSet_iff_forall_basis_tendsto_limsup [BorelSpace E]
     [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]

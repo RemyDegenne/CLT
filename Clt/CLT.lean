@@ -32,14 +32,6 @@ namespace ProbabilityTheory
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {X : ℕ → Ω → ℝ}
 
-/-- From PFR -/
-theorem iIndepFun_iff_pi_map_eq_map {Ω : Type u_1} {_mΩ : MeasurableSpace Ω}
-    {μ : Measure Ω} {ι : Type*} {β : ι → Type*} [Fintype ι]
-    (f : ∀ x : ι, Ω → β x) [m : ∀ x : ι, MeasurableSpace (β x)]
-    [IsProbabilityMeasure μ] (hf : ∀ (x : ι), Measurable (f x)) :
-    iIndepFun f μ ↔ Measure.pi (fun i ↦ μ.map (f i)) = μ.map (fun ω i ↦ f i ω) := by
-  sorry
-
 abbrev stdGaussian : ProbabilityMeasure ℝ :=
   ⟨gaussianReal 0 1, inferInstance⟩
 
@@ -77,13 +69,14 @@ theorem central_limit (hX : ∀ n, Measurable (X n))
     · simp
     · simp
     · simpa
-  have pi_fin (n : ℕ) := (iIndepFun_iff_pi_map_eq_map _ fun i : Fin n ↦ hX i).mp (indep_fin n)
+  have pi_fin (n : ℕ) := (iIndepFun_iff_map_fun_eq_pi_map fun i : Fin n ↦ (hX i).aemeasurable).mp
+    (indep_fin n)
   have map_eq (n : ℕ) := (hident n).map_eq
 
   -- use existing results to rewrite the charFun
   simp_rw [ProbabilityMeasure.toMeasure_map, ofReal_zero, mul_zero, zero_mul, NNReal.coe_one,
     ofReal_one, one_mul, zero_sub, map_invSqrtMulSum P.toMeasure hX, charFun_map_mul,
-    ← pi_fin, map_eq, charFun_map_sum_pi_const]
+    pi_fin, map_eq, charFun_map_sum_pi_const]
 
   -- apply tendsto_one_plus_div_pow_exp'; suffices to show the base is (1 - t ^ 2 / 2n + o(1 / n))
   norm_cast

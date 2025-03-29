@@ -63,7 +63,7 @@ lemma tendsto_one_plus_div_cpow_cexp {f : ℕ → ℂ} (t : ℂ)
       have hg1 : ‖g n‖ < 1 := hg2.trans_lt (by norm_num)
       rw [norm_norm, norm_sub_rev]
       apply (norm_log_sub_logTaylor_le 1 hg1).trans
-      norm_num
+      norm_num only [Nat.reduceAdd, Nat.cast_one, norm_pow, norm_norm, one_mul]
       rw [div_le_iff₀ (by norm_num)]
       apply mul_le_mul_of_nonneg_left _ (sq_nonneg _)
       rw [inv_le_comm₀ (sub_pos_of_lt hg1) two_pos]

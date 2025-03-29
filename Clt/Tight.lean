@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rémy Degenne
 -/
 import Clt.CharFun
-import Clt.Prokhorov
 
 /-!
 # Tightness and characteristic functions
@@ -13,19 +12,6 @@ import Clt.Prokhorov
 
 open MeasureTheory ProbabilityTheory Filter
 open scoped ENNReal NNReal Topology RealInnerProductSpace
-
--- PR #23332
-@[simp]
-lemma Orthonormal.norm_eq_one {𝕜 E ι : Type*} [RCLike 𝕜]
-    [SeminormedAddCommGroup E] [InnerProductSpace 𝕜 E] {v : ι → E} {i : ι} (h : Orthonormal 𝕜 v) :
-    ‖v i‖ = 1 := h.1 i
-
--- PR #23332
-@[simp]
-lemma OrthonormalBasis.norm_eq_one {𝕜 E ι : Type*} [RCLike 𝕜]
-    [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [Fintype ι]
-    (b : OrthonormalBasis ι 𝕜 E) (i : ι) :
-    ‖b i‖ = 1 := b.orthonormal.1 i
 
 lemma tendsto_iSup_of_tendsto_limsup {u : ℕ → ℝ → ℝ≥0∞}
     (h_all : ∀ n, Tendsto (u n) atTop (𝓝 0))
@@ -117,51 +103,7 @@ lemma norm_le_mul_iSup_abs_inner {ι : Type*} [Fintype ι]
     rw [Real.sqrt_sq]
     exact le_ciSup_of_le (by simp) (Nonempty.some this) (by positivity)
 
-lemma tendsto_measure_norm_gt_of_isTightMeasureSet
-    {S : Set (Measure E)} (hS : IsTightMeasureSet S) :
-    Tendsto (fun r : ℝ ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0) := by
-  rw [IsTightMeasureSet_iff_exists_isCompact_measure_compl_le] at hS
-  rw [ENNReal.tendsto_atTop_zero]
-  intro ε hε
-  obtain ⟨K, hK_compact, h⟩ := hS ε hε
-  rcases Set.eq_empty_or_nonempty K with rfl | hK_nonempty
-  · simp only [Set.compl_empty] at h
-    refine ⟨0, fun _ _ ↦ ?_⟩
-    simp only [iSup_le_iff]
-    exact fun μ hμS ↦ (measure_mono (Set.subset_univ _)).trans (h μ hμS)
-  obtain ⟨r, h_subset⟩ : ∃ r, K ⊆ {x | ‖x‖ ≤ r} := by
-    obtain ⟨xmax, _, hxmax⟩ : ∃ x ∈ K, IsMaxOn (fun x ↦ ‖x‖) K x :=
-      hK_compact.exists_isMaxOn (f := fun x : E ↦ ‖x‖) hK_nonempty (by fun_prop)
-    exact ⟨‖xmax‖, fun x hxK ↦ hxmax hxK⟩
-  refine ⟨r, fun u hu ↦ iSup_le (fun μ ↦ iSup_le fun hμS ↦ ?_)⟩
-  refine (measure_mono ?_).trans (h μ hμS)
-  simp_rw [← not_le]
-  refine Set.compl_subset_compl.mp ?_
-  simp only [compl_compl, not_le]
-  refine h_subset.trans fun x ↦ ?_
-  simp only [Set.mem_setOf_eq, Set.mem_compl_iff, not_lt]
-  exact fun hx ↦ hx.trans hu
-
 section FiniteDimensional
-
-lemma isTightMeasureSet_of_tendsto_measure_norm_gt [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    {S : Set (Measure E)} (h : Tendsto (fun r : ℝ ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0)) :
-    IsTightMeasureSet S := by
-  rw [IsTightMeasureSet_iff_exists_isCompact_measure_compl_le]
-  intro ε hε
-  rw [ENNReal.tendsto_atTop_zero] at h
-  obtain ⟨r, h⟩ := h ε hε
-  specialize h r le_rfl
-  refine ⟨Metric.closedBall 0 r, isCompact_closedBall 0 r, ?_⟩
-  simp only [iSup_le_iff] at h
-  convert h using 4 with μ hμ
-  ext
-  simp
-
-lemma isTightMeasureSet_iff_tendsto_measure_norm_gt [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    (S : Set (Measure E)) :
-    IsTightMeasureSet S ↔ Tendsto (fun r : ℝ ↦ ⨆ μ ∈ S, μ {x | r < ‖x‖}) atTop (𝓝 0) :=
-  ⟨tendsto_measure_norm_gt_of_isTightMeasureSet, isTightMeasureSet_of_tendsto_measure_norm_gt⟩
 
 lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt [BorelSpace E]
     [NormedSpace ℝ E] [FiniteDimensional ℝ E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]

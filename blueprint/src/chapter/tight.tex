@@ -8,8 +8,8 @@ A set $S$ of measures on $\Omega$ is tight if for all $\varepsilon > 0$ there ex
 
 \begin{lemma}\label{lem:isTightMeasureSet_iff_norm}
 \uses{def:tight}
-\leanok
-\lean{isTightMeasureSet_iff_tendsto_measure_norm_gt}
+\mathlibok
+\lean{MeasureTheory.isTightMeasureSet_iff_tendsto_measure_norm_gt}
 Let $S$ be a set of measures on a finite-dimensional normed space $E$. 
 Then $S$ is tight iff $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\Vert x \Vert > r\} = 0$.
 \end{lemma}

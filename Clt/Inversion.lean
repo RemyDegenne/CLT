@@ -8,6 +8,7 @@ import Mathlib.MeasureTheory.Measure.FiniteMeasureExt
 import Clt.ExpPoly
 import Clt.Tight
 import Clt.MomentGenerating
+import Clt.Prokhorov
 
 /-!
 Inverting the characteristic function

@@ -127,11 +127,9 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
       fun_prop
   simp_rw [h_eq (μ _), h_eq μ₀]
   refine tendsto_finset_sum _ fun y hy ↦ Tendsto.const_mul _ ?_
-  convert h y <;> {
-      simp only [bilinFormOfRealInner_apply_apply, inner_apply, conj_trivial, probChar_apply,
-        Complex.ofReal_mul, charFun_apply]
-      congr with x
-      rw [mul_comm (y : ℂ)] }
+  simp only [bilinFormOfRealInner_apply_apply, inner_apply, conj_trivial]
+  simp_rw [← charFun_eq_integral_probChar]
+  exact h y
 
 lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun {μ : ℕ → ProbabilityMeasure ℝ}
     {μ₀ : ProbabilityMeasure ℝ}

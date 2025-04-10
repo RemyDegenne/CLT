@@ -21,7 +21,7 @@ Then $S$ is tight iff $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\Vert x \Vert >
 
 \begin{lemma}\label{lem:isTightMeasureSet_iff_sup_inner}
 \uses{def:tight}
-\leanok
+\mathlibok
 \lean{MeasureTheory.isTightMeasureSet_iff_inner_tendsto}
 Let $S$ be a set of measures on a finite-dimensional inner product space $E$.
 Then $S$ is tight iff for all $y \in E$, $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\vert\langle y, x\rangle\vert > r\} = 0$.

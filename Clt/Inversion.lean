@@ -109,14 +109,15 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
   exact hφ_tendsto g
 
 lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
-    {μ : ℕ → ProbabilityMeasure ℝ} {μ₀ : ProbabilityMeasure ℝ}
-    (h : ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)))
-    {g : ℝ →ᵇ ℂ}
+    {E : Type*} [MeasurableSpace E] [NormedAddCommGroup E] [InnerProductSpace ℝ E] [BorelSpace E]
+    {μ : ℕ → ProbabilityMeasure E} {μ₀ : ProbabilityMeasure E}
+    (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)))
+    {g : E →ᵇ ℂ}
     (hg : g ∈ charPoly continuous_probChar (L := bilinFormOfRealInner) continuous_inner) :
     Tendsto (fun n ↦ ∫ x, g x ∂(μ n)) atTop (𝓝 (∫ x, g x ∂μ₀)) := by
   rw [mem_charPoly] at hg
   obtain ⟨w, hw⟩ := hg
-  have h_eq (μ : Measure ℝ) (hμ : IsProbabilityMeasure μ) :
+  have h_eq (μ : Measure E) (hμ : IsProbabilityMeasure μ) :
       ∫ x, g x ∂μ = ∑ a ∈ w.support, w a * ∫ x, (probChar (bilinFormOfRealInner x a) : ℂ) ∂μ := by
     simp_rw [hw]
     rw [integral_finset_sum]
@@ -124,18 +125,22 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
       rw [integral_mul_left]
     · intro i hi
       refine Integrable.const_mul ?_ _
-      fun_prop
+      change Integrable (fun x ↦ char continuous_probChar (L := bilinFormOfRealInner)
+        continuous_inner i x) μ
+      exact BoundedContinuousFunction.integrable μ _
   simp_rw [h_eq (μ _), h_eq μ₀]
   refine tendsto_finset_sum _ fun y hy ↦ Tendsto.const_mul _ ?_
   simp only [bilinFormOfRealInner_apply_apply, inner_apply, conj_trivial]
-  simp_rw [← charFun_eq_integral_probChar]
+  simp_rw [real_inner_comm y, ← charFun_eq_integral_probChar]
   exact h y
 
-lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun {μ : ℕ → ProbabilityMeasure ℝ}
-    {μ₀ : ProbabilityMeasure ℝ}
-    (h : ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t))) :
+lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun
+    {E : Type*} [MeasurableSpace E] [NormedAddCommGroup E] [InnerProductSpace ℝ E] [BorelSpace E]
+    [CompleteSpace E] [SecondCountableTopology E] [FiniteDimensional ℝ E]
+    {μ : ℕ → ProbabilityMeasure E} {μ₀ : ProbabilityMeasure E}
+    (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t))) :
     Tendsto μ atTop (𝓝 μ₀) := by
-  have h_tight : IsTightMeasureSet (𝓧 := ℝ) {μ n | n} :=
+  have h_tight : IsTightMeasureSet (𝓧 := E) {μ n | n} :=
     isTightMeasureSet_of_tendsto_charFun (by fun_prop) (by fun_prop) h
   refine tendsto_of_tight_of_separatesPoints h_tight (𝕜 := ℂ)
     (A := charPoly continuous_probChar (L := bilinFormOfRealInner) continuous_inner) ?_ ?_

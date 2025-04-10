@@ -44,8 +44,8 @@ open scoped FourierTransform Real
 /-- The additive character of `ℝ` given by `fun x ↦ exp (- x * I)`. -/
 def probFourierChar : AddChar ℝ Circle where
   toFun x := .exp (-x)
-  map_zero_eq_one' := by beta_reduce; rw [neg_zero, Circle.exp_zero]
-  map_add_eq_mul' x y := by beta_reduce; rw [neg_add, Circle.exp_add]
+  map_zero_eq_one' := by rw [neg_zero, Circle.exp_zero]
+  map_add_eq_mul' x y := by rw [neg_add, Circle.exp_add]
 
 theorem probFourierChar_apply' (x : ℝ) : probFourierChar x = exp (↑(-x) * I) := rfl
 

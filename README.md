@@ -1,3 +1,3 @@
 Proof of the central limit theorem in Lean.
 
-Current status: WIP, and mostly inactive.
+Current status: we have a full proof of the CLT for real random variables if we assume Prokhorov's theorem.

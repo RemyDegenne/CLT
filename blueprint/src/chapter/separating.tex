@@ -48,8 +48,7 @@ Let $\mathcal M$ be the set of these functions, which we call exponential polyno
 The star-subalgebra $\mathcal M$ separates points.
 \end{lemma}
 
-\begin{proof}
-TODO. Done in a Mathlib PR.
+\begin{proof}\leanok
 \end{proof}
 
 
@@ -115,18 +114,10 @@ This is proved in Mathlib PR \#19782.
 \end{proof}
 
 
-\begin{lemma}\label{lem:separating_expPoly}
-If two probability measures $\mu, \nu$ of an inner product space $E$ are such that $\mu[f] = \nu[f]$ for all exponential polynomials $f \in \mathcal M$, then $\mu = \nu$.
-\end{lemma}
-
-\begin{proof}\uses{thm:separating_starSubalgebra, lem:separates_points_expPoly}
-Apply Theorem~\ref{thm:separating_starSubalgebra}, using Lemma~\ref{lem:separates_points_expPoly}.
-\end{proof}
-
-
 \begin{lemma}\label{lem:cvg_of_separating}
 \leanok
 \lean{MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints}
+\uses{def:weak_cvg_measure}
 Let $\mathcal A$ be a subalgebra of $C_b(E, \mathbb{C})$ that separates points. Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures, with $(\mu_n)$ tight. If for all $f \in \mathcal A$, $\mu_n[f] \to \mu[f]$, then $\mu_n \xrightarrow{w} \mu$.
 \end{lemma}
 

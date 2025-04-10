@@ -16,7 +16,7 @@ Inverting the characteristic function
 noncomputable section
 
 open Filter MeasureTheory ProbabilityTheory BoundedContinuousFunction Real RCLike
-open scoped Topology
+open scoped Topology RealInnerProductSpace
 
 section FromMathlibPR19761
 
@@ -62,8 +62,10 @@ lemma _root_.Filter.tendsto_ofReal_iff' {α 𝕜 : Type*} [RCLike 𝕜]
     Tendsto (fun x ↦ (f x : 𝕜)) l (𝓝 (x : 𝕜)) ↔ Tendsto f l (𝓝 x) :=
   RCLike.isUniformEmbedding_ofReal.isClosedEmbedding.tendsto_nhds_iff.symm
 
+variable (𝕜 : Type*) [RCLike 𝕜]
+
 theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto
-    {γ Ω : Type*} (𝕜 : Type*) [RCLike 𝕜]
+    {γ Ω : Type*}
     {F : Filter γ} {mΩ : MeasurableSpace Ω} [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
     {μs : γ → ProbabilityMeasure Ω} {μ : ProbabilityMeasure Ω} :
     Tendsto μs F (𝓝 μ) ↔
@@ -83,7 +85,7 @@ theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tend
     exact tendsto_ofReal_iff'.mp h
 
 lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
-    {E 𝕜 : Type*} [RCLike 𝕜] [MeasurableSpace E]
+    {E : Type*} [MeasurableSpace E]
     [MetricSpace E] [CompleteSpace E] [SecondCountableTopology E] [BorelSpace E]
     {μ : ℕ → ProbabilityMeasure E}
     (h_tight : IsTightMeasureSet {(μ n : Measure E) | n}) {μ₀ : ProbabilityMeasure E}
@@ -108,9 +110,11 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
   rw [ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto 𝕜] at hφ_tendsto
   exact hφ_tendsto g
 
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [MeasurableSpace E] [BorelSpace E]
+  {μ : ℕ → ProbabilityMeasure E} {μ₀ : ProbabilityMeasure E}
+
 lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
-    {E : Type*} [MeasurableSpace E] [NormedAddCommGroup E] [InnerProductSpace ℝ E] [BorelSpace E]
-    {μ : ℕ → ProbabilityMeasure E} {μ₀ : ProbabilityMeasure E}
     (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)))
     {g : E →ᵇ ℂ}
     (hg : g ∈ charPoly continuous_probChar (L := bilinFormOfRealInner) continuous_inner) :
@@ -135,9 +139,7 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
   exact h y
 
 lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun
-    {E : Type*} [MeasurableSpace E] [NormedAddCommGroup E] [InnerProductSpace ℝ E] [BorelSpace E]
     [CompleteSpace E] [SecondCountableTopology E] [FiniteDimensional ℝ E]
-    {μ : ℕ → ProbabilityMeasure E} {μ₀ : ProbabilityMeasure E}
     (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t))) :
     Tendsto μ atTop (𝓝 μ₀) := by
   have h_tight : IsTightMeasureSet (𝓧 := E) {μ n | n} :=
@@ -158,28 +160,14 @@ The => direction is much harder:
 * If `μs` is tight, then the statement follows in general
   * For each subsequence of `μs`, we need find a sub-subsequence that converges weakly to `μ`.
     This requires Prokhorov's theorem for relative compactness.
-* μs is tight in `ℝ^d` if their `charFun`s are equicontinuous at 0
-* This is in particular if they converge to a function continuous at 0
+* μs is tight in `ℝ^d` if their `charFun`s converge to a function continuous at 0
 
-This is stated in ℝ, instead of `ℝ^d` as in the blueprint (TODO).
 -/
-theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun {μ : ℕ → ProbabilityMeasure ℝ}
-    {μ₀ : ProbabilityMeasure ℝ} :
+theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun
+    [CompleteSpace E] [SecondCountableTopology E] [FiniteDimensional ℝ E] :
     Tendsto μ atTop (𝓝 μ₀) ↔
-      ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
+      ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
   refine ⟨fun h t ↦ ?_, tendsto_of_tendsto_charFun⟩
   rw [ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto ℂ] at h
-  simp_rw [charFun_apply_real]
-  -- we need `(x : ℝ) ↦ Complex.exp (x * t * I)` as a `ℝ →ᵇ ℂ` to apply `h`
-  let expb : ℝ →ᵇ ℂ :=
-  { toFun := fun x ↦ Complex.exp (x * t * I),
-    continuous_toFun := by fun_prop
-    map_bounded' := by
-      refine ⟨2, fun x y ↦ ?_⟩
-      simp only [I_to_complex]
-      calc dist _ _
-          ≤ (‖_‖ : ℝ) + ‖_‖ := dist_le_norm_add_norm _ _
-        _ ≤ 1 + 1 := add_le_add (by norm_cast; rw [Complex.norm_exp_ofReal_mul_I])
-            (by norm_cast; rw [Complex.norm_exp_ofReal_mul_I])
-        _ = 2 := by ring }
-  exact h expb
+  simp_rw [charFun_eq_integral_char]
+  exact h (char continuous_probChar (L := bilinFormOfRealInner) continuous_inner t)

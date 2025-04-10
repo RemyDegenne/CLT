@@ -90,14 +90,14 @@ def continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ :=
   (isBoundedBilinearMap_inner (𝕜 := ℝ)).toContinuousLinearMap
 
 @[simp]
-lemma sesqBilin_apply {x y : E} : continuousBilinFormOfInner x y = ⟪x, y⟫ := rfl
+lemma continuousBilinFormOfInner_apply {x y : E} : continuousBilinFormOfInner x y = ⟪x, y⟫ := rfl
 
 @[simp]
-lemma toLinearMap₂_sesqBilin :
+lemma toLinearMap₂_continuousBilinFormOfInner :
     ContinuousLinearMap.toLinearMap₂ (continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ)
       = sesqFormOfInner := by
   ext x y
-  simp only [ContinuousLinearMap.toLinearMap₂_apply, sesqBilin_apply]
+  simp only [ContinuousLinearMap.toLinearMap₂_apply, continuousBilinFormOfInner_apply]
   rw [real_inner_comm]
   symm
   exact sesqFormOfInner_apply_apply (E := E) (𝕜 := ℝ) x y
@@ -114,7 +114,7 @@ theorem contDiff_charFun
     rw [Nat.cast_le] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
   simp_rw [funext (charFun_eq_fourierIntegral' μ)]
-  rw [← toLinearMap₂_sesqBilin]
+  rw [← toLinearMap₂_continuousBilinFormOfInner]
   refine (VectorFourier.contDiff_fourierIntegral (L := continuousBilinFormOfInner) hint').comp ?_
   exact contDiff_const_smul _
 

@@ -19,13 +19,12 @@ Then $S$ is tight iff $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\Vert x \Vert >
 \end{proof}
 	
 
-\begin{lemma}\label{lem:isTightMeasureSet_iff_sup_basis}
+\begin{lemma}\label{lem:isTightMeasureSet_iff_sup_inner}
 \uses{def:tight}
 \leanok
-\lean{isTightMeasureSet_iff_forall_basis_tendsto}
-Let $S$ be a set of measures on a finite-dimensional inner product space $E$. 
-Let $b_1, \ldots, b_k$ be an orthonormal basis of $E$.
-The $S$ is tight iff for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\vert\langle b_i, x\rangle\vert > r\} = 0$.
+\lean{MeasureTheory.isTightMeasureSet_iff_inner_tendsto}
+Let $S$ be a set of measures on a finite-dimensional inner product space $E$.
+Then $S$ is tight iff for all $y \in E$, $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\vert\langle y, x\rangle\vert > r\} = 0$.
 \end{lemma}
 
 \begin{proof}\leanok
@@ -36,14 +35,13 @@ The $S$ is tight iff for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\sup
 \begin{lemma}\label{lem:isTightMeasureSet_iff_basis}
 \uses{def:tight}
 \leanok
-\lean{isTightMeasureSet_iff_forall_basis_tendsto_limsup}
+\lean{isTightMeasureSet_iff_tendsto_limsup_inner}
 Let $(\mu_n)_{n \in \mathbb{N}}$ be a sequence of measures on a finite-dimensional inner product space $E$. 
-Let $b_1, \ldots, b_k$ be an orthonormal basis of $E$.
-Then the set $\{\mu_n \mid n \in \mathbb{N}\}$ is tight iff for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\limsup_{n \to \infty} \mu_n\{\vert\langle b_i, x\rangle\vert > r\} = 0$.
+Then the set $\{\mu_n \mid n \in \mathbb{N}\}$ is tight iff for all $y \in E$, $\lim_{r \to +\infty}\limsup_{n \to \infty} \mu_n\{\vert\langle y, x\rangle\vert > r\} = 0$.
 \end{lemma}
 
 \begin{proof}\leanok
-\uses{lem:isTightMeasureSet_iff_sup_basis}
+\uses{lem:isTightMeasureSet_iff_sup_inner}
 \end{proof}
 
 

@@ -19,7 +19,8 @@ The Mathlib lemma \texttt{MeasureTheory.FiniteMeasure.ext\_of\_forall\_lintegral
 
 
 \begin{lemma}\label{lem:exp_character}
-\lean{Clt.expInnerMulI} \leanok
+\mathlibok
+\lean{BoundedContinuousFunction.charMonoidHom}
 $x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a monoid homomorphism from $(E,+)$ to $C_b(E, \mathbb{C})$.
 \end{lemma}
 
@@ -28,7 +29,8 @@ $x \mapsto (t \mapsto \exp(i \langle t, x \rangle))$ is a monoid homomorphism fr
 
 
 \begin{lemma}\label{lem:starSubalgebra_expPoly}
-\lean{Clt.expPoly} \leanok
+\mathlibok
+\lean{BoundedContinuousFunction.charPoly}
 The functions of the form $x \mapsto \sum_{k=1}^n a_k e^{i\langle t_k, x\rangle}$ for $n \in \mathbb{N}$, $a_1, \ldots, a_n \in \mathbb{R}$ and $t_1, \ldots, t_n \in E$ are a star-subalgebra of $C_b(E, \mathbb{C})$. 
 \end{lemma}
 
@@ -41,8 +43,8 @@ Let $\mathcal M$ be the set of these functions, which we call exponential polyno
 
 \begin{lemma}\label{lem:separates_points_expPoly}
 \uses{def:separates_points, lem:starSubalgebra_expPoly}
-\lean{Clt.expPoly_separatesPoints}
-\leanok
+\mathlibok
+\lean{BoundedContinuousFunction.separatesPoints_charPoly}
 The star-subalgebra $\mathcal M$ separates points.
 \end{lemma}
 

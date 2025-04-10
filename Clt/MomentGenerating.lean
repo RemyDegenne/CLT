@@ -86,16 +86,16 @@ The proof uses results on iterated derivatives of the Fourier transform.
 -/
 
 noncomputable
-def sesqBilin : E →L[ℝ] E →L[ℝ] ℝ := (isBoundedBilinearMap_inner (𝕜 := ℝ)).toContinuousLinearMap
+def continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ :=
+  (isBoundedBilinearMap_inner (𝕜 := ℝ)).toContinuousLinearMap
 
 @[simp]
-lemma sesqBilin_apply {x y : E} : sesqBilin x y = ⟪x, y⟫ := by
-  rw [sesqBilin]
-  rfl
+lemma sesqBilin_apply {x y : E} : continuousBilinFormOfInner x y = ⟪x, y⟫ := rfl
 
 @[simp]
 lemma toLinearMap₂_sesqBilin :
-    ContinuousLinearMap.toLinearMap₂ (sesqBilin : E →L[ℝ] E →L[ℝ] ℝ) = sesqFormOfInner := by
+    ContinuousLinearMap.toLinearMap₂ (continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ)
+      = sesqFormOfInner := by
   ext x y
   simp only [ContinuousLinearMap.toLinearMap₂_apply, sesqBilin_apply]
   rw [real_inner_comm]
@@ -109,15 +109,13 @@ variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
 theorem contDiff_charFun
     {n : ℕ} (hint : Integrable (‖·‖ ^ n) μ) :
     ContDiff ℝ n (charFun μ) := by
-  have h : sesqFormOfInner = ContinuousLinearMap.toLinearMap₂ (E := E) sesqBilin := by
-    simp [sesqFormOfInner]
   have hint' (k : ℕ) (hk : k ≤ (n : ℕ∞)) : Integrable (fun x ↦ ‖x‖ ^ k * ‖(1 : E → ℂ) x‖) μ := by
     simp only [Pi.one_apply, norm_one, mul_one]
     rw [Nat.cast_le] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
   simp_rw [funext (charFun_eq_fourierIntegral' μ)]
-  rw [h]
-  refine (VectorFourier.contDiff_fourierIntegral (L := sesqBilin) hint').comp ?_
+  rw [← toLinearMap₂_sesqBilin]
+  refine (VectorFourier.contDiff_fourierIntegral (L := continuousBilinFormOfInner) hint').comp ?_
   exact contDiff_const_smul _
 
 @[fun_prop]

@@ -41,30 +41,14 @@ section Character
 
 open scoped FourierTransform Real
 
-/-- The additive character of `ℝ` given by `fun x ↦ exp (- x * I)`. -/
-def probFourierChar : AddChar ℝ Circle where
-  toFun x := .exp (-x)
-  map_zero_eq_one' := by rw [neg_zero, Circle.exp_zero]
-  map_add_eq_mul' x y := by rw [neg_add, Circle.exp_add]
-
-theorem probFourierChar_apply' (x : ℝ) : probFourierChar x = exp (↑(-x) * I) := rfl
-
-theorem probFourierChar_apply (x : ℝ) : probFourierChar x = exp (- ↑x * I) := by
-  simp only [probFourierChar_apply', ofReal_neg]
-
-@[continuity, fun_prop]
-theorem continuous_probFourierChar : Continuous probFourierChar :=
-  Circle.exp.continuous.comp continuous_neg
-
 variable {E : Type _} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
-theorem fourierIntegral_probFourierChar_eq_integral_exp {V : Type _} [AddCommGroup V] [Module ℝ V]
+theorem fourierIntegral_probChar_eq_integral_exp {V : Type _} [AddCommGroup V] [Module ℝ V]
     [MeasurableSpace V] {W : Type _} [AddCommGroup W] [Module ℝ W] (L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ)
     (μ : Measure V) (f : V → E) (w : W) :
-    VectorFourier.fourierIntegral probFourierChar μ L f w =
-      ∫ v : V, exp (↑(L v w) * I) • f v ∂μ := by
-  simp_rw [VectorFourier.fourierIntegral, Circle.smul_def, probFourierChar_apply, ofReal_neg,
-    neg_neg]
+    VectorFourier.fourierIntegral Real.probChar μ L f w =
+      ∫ v : V, exp (-↑(L v w) * I) • f v ∂μ := by
+  simp_rw [VectorFourier.fourierIntegral, Circle.smul_def, Real.probChar_apply, ofReal_neg]
 
 end Character
 
@@ -85,6 +69,15 @@ lemma charFun_apply_real {μ : Measure ℝ} {t : ℝ} :
 
 variable [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
+lemma charFun_eq_integral_char {μ : Measure E} {t : E} :
+    charFun μ t = ∫ v, BoundedContinuousFunction.char Real.continuous_probChar
+      (L := bilinFormOfRealInner) continuous_inner t v ∂μ := by
+  rw [charFun_apply]
+  congr with x
+  simp only [BoundedContinuousFunction.char_apply, bilinFormOfRealInner_apply_apply,
+    Real.probChar_apply]
+  rw [real_inner_comm]
+
 lemma stronglyMeasurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E]
     {μ : Measure E} [SFinite μ] :
     StronglyMeasurable (charFun μ) :=
@@ -97,9 +90,9 @@ lemma measurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E]
   stronglyMeasurable_charFun.measurable
 
 lemma charFun_eq_fourierIntegral (μ : Measure E) (t : E) :
-    charFun μ t = VectorFourier.fourierIntegral probFourierChar μ sesqFormOfInner 1 t := by
-  simp only [charFun_apply, real_smul, fourierIntegral_probFourierChar_eq_integral_exp,
-    Pi.one_apply, smul_eq_mul, mul_one]
+    charFun μ t = VectorFourier.fourierIntegral Real.probChar μ sesqFormOfInner 1 (-t) := by
+  simp only [charFun_apply, real_smul, fourierIntegral_probChar_eq_integral_exp,
+    Pi.one_apply, smul_eq_mul, mul_one, map_neg, ofReal_neg, neg_neg]
   congr
 
 /-- Relate `charFun` to the "standard" Fourier integral defined by `Real.fourierChar`. -/

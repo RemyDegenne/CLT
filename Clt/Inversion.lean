@@ -116,7 +116,22 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
     Tendsto (fun n ↦ ∫ x, g x ∂(μ n)) atTop (𝓝 (∫ x, g x ∂μ₀)) := by
   rw [mem_charPoly] at hg
   obtain ⟨w, hw⟩ := hg
-  sorry
+  have h_eq (μ : Measure ℝ) (hμ : IsProbabilityMeasure μ) :
+      ∫ x, g x ∂μ = ∑ a ∈ w.support, w a * ∫ x, (probChar (bilinFormOfRealInner x a) : ℂ) ∂μ := by
+    simp_rw [hw]
+    rw [integral_finset_sum]
+    · congr with y
+      rw [integral_mul_left]
+    · intro i hi
+      refine Integrable.const_mul ?_ _
+      fun_prop
+  simp_rw [h_eq (μ _), h_eq μ₀]
+  refine tendsto_finset_sum _ fun y hy ↦ Tendsto.const_mul _ ?_
+  convert h y <;> {
+      simp only [bilinFormOfRealInner_apply_apply, inner_apply, conj_trivial, probChar_apply,
+        Complex.ofReal_mul, charFun_apply]
+      congr with x
+      rw [mul_comm (y : ℂ)] }
 
 lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun {μ : ℕ → ProbabilityMeasure ℝ}
     {μ₀ : ProbabilityMeasure ℝ}

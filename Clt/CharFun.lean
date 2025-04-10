@@ -43,6 +43,13 @@ open scoped FourierTransform Real
 
 variable {E : Type _} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
+@[fun_prop]
+lemma integrable_probChar {μ : Measure ℝ} [IsProbabilityMeasure μ] (y : ℝ) :
+    Integrable (fun x ↦ (Real.probChar (y * x) : ℂ)) μ := by
+  rw [← integrable_norm_iff]
+  · simp
+  · exact Measurable.aestronglyMeasurable <| by fun_prop
+
 theorem fourierIntegral_probChar_eq_integral_exp {V : Type _} [AddCommGroup V] [Module ℝ V]
     [MeasurableSpace V] {W : Type _} [AddCommGroup W] [Module ℝ W] (L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ)
     (μ : Measure V) (f : V → E) (w : W) :

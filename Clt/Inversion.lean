@@ -5,7 +5,6 @@ Authors: Thomas Zhu, Rémy Degenne
 -/
 import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
 import Mathlib.MeasureTheory.Measure.FiniteMeasureExt
-import Clt.ExpPoly
 import Clt.Tight
 import Clt.MomentGenerating
 import Clt.Prokhorov
@@ -22,14 +21,19 @@ open scoped Topology
 section FromMathlibPR19761
 
 -- See Mathlib#19761, these conditions might change
-variable {V : Type*} [SeminormedAddCommGroup V] [Module ℝ V] [InnerProductSpace ℝ V]
+variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
     [MeasurableSpace V] [BorelSpace V] [CompleteSpace V] [SecondCountableTopology V]
 
 /-- This is already proven in Mathlib#19761, for FiniteMeasure -/
 theorem MeasureTheory.ProbabilityMeasure.ext_of_charFun_eq (μ ν : ProbabilityMeasure V)
     (h : charFun (μ : Measure V) = charFun ν) :
     μ = ν := by
-  sorry
+  rw [funext_iff] at h
+  simp_rw [charFun_eq_integral_char] at h
+  suffices (μ : Measure V) = ν by ext; rw [this]
+  refine ext_of_integral_char_eq continuous_probChar probChar_ne_one ?_ ?_ h
+  · exact fun v hv ↦ DFunLike.ne_iff.mpr ⟨v, inner_self_ne_zero.mpr hv⟩
+  · exact continuous_inner
 
 end FromMathlibPR19761
 
@@ -104,14 +108,40 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
   rw [ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto 𝕜] at hφ_tendsto
   exact hφ_tendsto g
 
+lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
+    {μ : ℕ → ProbabilityMeasure ℝ} {μ₀ : ProbabilityMeasure ℝ}
+    (h : ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)))
+    {g : ℝ →ᵇ ℂ}
+    (hg : g ∈ charPoly continuous_probChar (L := bilinFormOfRealInner) continuous_inner) :
+    Tendsto (fun n ↦ ∫ x, g x ∂(μ n)) atTop (𝓝 (∫ x, g x ∂μ₀)) := by
+  rw [mem_charPoly] at hg
+  obtain ⟨w, hw⟩ := hg
+  have h_eq (μ : Measure ℝ) (hμ : IsProbabilityMeasure μ) :
+      ∫ x, g x ∂μ = ∑ a ∈ w.support, w a * ∫ x, (probChar (bilinFormOfRealInner x a) : ℂ) ∂μ := by
+    simp_rw [hw]
+    rw [integral_finset_sum]
+    · congr with y
+      rw [integral_mul_left]
+    · intro i hi
+      refine Integrable.const_mul ?_ _
+      fun_prop
+  simp_rw [h_eq (μ _), h_eq μ₀]
+  refine tendsto_finset_sum _ fun y hy ↦ Tendsto.const_mul _ ?_
+  simp only [bilinFormOfRealInner_apply_apply, inner_apply, conj_trivial]
+  simp_rw [← charFun_eq_integral_probChar]
+  exact h y
+
 lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun {μ : ℕ → ProbabilityMeasure ℝ}
     {μ₀ : ProbabilityMeasure ℝ}
     (h : ∀ t : ℝ, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t))) :
     Tendsto μ atTop (𝓝 μ₀) := by
   have h_tight : IsTightMeasureSet (𝓧 := ℝ) {μ n | n} :=
     isTightMeasureSet_of_tendsto_charFun (by fun_prop) (by fun_prop) h
-  --refine tendsto_of_tight_of_separatesPoints h_tight ?_ ?_
-  sorry
+  refine tendsto_of_tight_of_separatesPoints h_tight (𝕜 := ℂ)
+    (A := charPoly continuous_probChar (L := bilinFormOfRealInner) continuous_inner) ?_ ?_
+  · refine separatesPoints_charPoly continuous_probChar probChar_ne_one _ ?_
+    exact fun v hv ↦ DFunLike.ne_iff.mpr ⟨v, inner_self_ne_zero.mpr hv⟩
+  · exact fun g ↦ tendsto_charPoly_of_tendsto_charFun h
 
 /--
 The Lévy continuity theorem https://en.wikipedia.org/wiki/L%C3%A9vy%27s_continuity_theorem.

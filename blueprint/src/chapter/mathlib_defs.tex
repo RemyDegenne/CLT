@@ -1,14 +1,14 @@
 \chapter{Convergence definitions}
 
-\begin{definition}[Convergence in probability]\label{def:cvg_probability}
-\mathlibok
-\lean{MeasureTheory.TendstoInMeasure}
-We say that $(X_i)_{i \in \mathbb{N}}$ tends to $X$ in probability (or in measure) in a space with distance function $d$ if for all $\varepsilon > 0$
-\begin{align*}
-\mathbb{P}(d(X_n, X) \ge \varepsilon) \to_{n \to +\infty} 0
-\end{align*}
-We write $X_n \xrightarrow{p} X$.
-\end{definition}
+% \begin{definition}[Convergence in probability]\label{def:cvg_probability}
+% \mathlibok
+% \lean{MeasureTheory.TendstoInMeasure}
+% We say that $(X_i)_{i \in \mathbb{N}}$ tends to $X$ in probability (or in measure) in a space with distance function $d$ if for all $\varepsilon > 0$
+% \begin{align*}
+% \mathbb{P}(d(X_n, X) \ge \varepsilon) \to_{n \to +\infty} 0
+% \end{align*}
+% We write $X_n \xrightarrow{p} X$.
+% \end{definition}
 
 \begin{definition}[Weak convergence of probability measures]\label{def:weak_cvg_measure}
 \mathlibok
@@ -20,5 +20,7 @@ We write $\mathcal L(X)$ for the law of a random variable $X : \Omega \to S$. Th
 
 \begin{definition}[Convergence in distribution]\label{def:cvg_distribution}
 \uses{def:weak_cvg_measure}
+\mathlibok
+\lean{MeasureTheory.ProbabilityMeasure.tendsto_iff_forall_integral_tendsto}
 We say that $X_n$ converges in distribution to $X$ and write $X_n \xrightarrow{d} X$ if $\mathcal L(X_n) \xrightarrow{w} \mathcal L(X)$.
 \end{definition}

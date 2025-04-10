@@ -62,6 +62,7 @@ For $t\in\mathbb{C}$, $\lim_{n\to\infty}(1+t/n+o(1/n))^n=\exp(t)$ (where the lit
 \begin{theorem}[Central limit theorem]\label{clt}
     \leanok
     \lean{ProbabilityTheory.central_limit}
+    \uses{def:cvg_distribution}
 Let $X_1, X_2, \ldots$ be i.i.d. real random variables with mean 0 and variance 1, and let $Z$ be a random variable with law $\mathcal N(0,1)$. Then
 \begin{align*}
 \frac{1}{\sqrt{n}}\sum_{k=1}^n X_k \xrightarrow{d} Z \: .

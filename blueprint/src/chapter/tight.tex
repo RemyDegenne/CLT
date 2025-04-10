@@ -19,13 +19,12 @@ Then $S$ is tight iff $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\Vert x \Vert >
 \end{proof}
 	
 
-\begin{lemma}\label{lem:isTightMeasureSet_iff_sup_basis}
+\begin{lemma}\label{lem:isTightMeasureSet_iff_sup_inner}
 \uses{def:tight}
-\leanok
-\lean{isTightMeasureSet_iff_forall_basis_tendsto}
-Let $S$ be a set of measures on a finite-dimensional inner product space $E$. 
-Let $b_1, \ldots, b_k$ be an orthonormal basis of $E$.
-The $S$ is tight iff for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\vert\langle b_i, x\rangle\vert > r\} = 0$.
+\mathlibok
+\lean{MeasureTheory.isTightMeasureSet_iff_inner_tendsto}
+Let $S$ be a set of measures on a finite-dimensional inner product space $E$.
+Then $S$ is tight iff for all $y \in E$, $\lim_{r \to +\infty}\sup_{\mu \in S} \mu\{\vert\langle y, x\rangle\vert > r\} = 0$.
 \end{lemma}
 
 \begin{proof}\leanok
@@ -36,55 +35,54 @@ The $S$ is tight iff for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\sup
 \begin{lemma}\label{lem:isTightMeasureSet_iff_basis}
 \uses{def:tight}
 \leanok
-\lean{isTightMeasureSet_iff_forall_basis_tendsto_limsup}
+\lean{isTightMeasureSet_iff_tendsto_limsup_inner}
 Let $(\mu_n)_{n \in \mathbb{N}}$ be a sequence of measures on a finite-dimensional inner product space $E$. 
-Let $b_1, \ldots, b_k$ be an orthonormal basis of $E$.
-Then the set $\{\mu_n \mid n \in \mathbb{N}\}$ is tight iff for all $i \in \{1, \ldots, k\}$, $\lim_{r \to +\infty}\limsup_{n \to \infty} \mu_n\{\vert\langle b_i, x\rangle\vert > r\} = 0$.
+Then the set $\{\mu_n \mid n \in \mathbb{N}\}$ is tight iff for all $y \in E$, $\lim_{r \to +\infty}\limsup_{n \to \infty} \mu_n\{\vert\langle y, x\rangle\vert > r\} = 0$.
 \end{lemma}
 
 \begin{proof}\leanok
-\uses{lem:isTightMeasureSet_iff_sup_basis}
+\uses{lem:isTightMeasureSet_iff_sup_inner}
 \end{proof}
 
 
-\begin{lemma}\label{lem:tight_of_cvg}
-\uses{def:tight}
-If $\mu_1, \mu_2, \ldots$ converge weakly to $\mu$, then $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
-\end{lemma}
+% \begin{lemma}\label{lem:tight_of_cvg}
+% \uses{def:tight}
+% If $\mu_1, \mu_2, \ldots$ converge weakly to $\mu$, then $\{\mu_n \mid n \in \mathbb{N}\}$ is tight.
+% \end{lemma}
 
-\begin{proof}
-Fix $r > 0$ and let $f(x) = (1 - (r - \vert x \vert)_+)_+$ . $f$ is a bounded continuous function. Then
-\begin{align*}
-\limsup_{n \to +\infty} \mu_n\{\vert X \vert > r\}
-\le \lim_{n \to +\infty} \mu_n\left[ f \right]
-= \mu[f]
-\le \mu\{\vert X \vert > r - 1\} \: .
-\end{align*}
-As $r \to +\infty$, the last quantity tends to 0.
-\end{proof}
-
-
-\begin{lemma}\label{tight_iff_cvg_probability}
-\uses{def:tight, def:cvg_probability}
-For random variables $(X_i)_{i \in \mathbb{N}}$ (TODO in which kind of space?), the two following conditions are equivalent:
-\begin{itemize}
-	\item $(\mathcal L(X_n))$ is tight,
-	\item For all $(c_n) \ge 0$ with $c_n \to 0$, $c_n X_n \xrightarrow{p} 0$.
-\end{itemize}
-\end{lemma}
-
-\begin{proof}
-
-\end{proof}
+% \begin{proof}
+% Fix $r > 0$ and let $f(x) = (1 - (r - \vert x \vert)_+)_+$ . $f$ is a bounded continuous function. Then
+% \begin{align*}
+% \limsup_{n \to +\infty} \mu_n\{\vert X \vert > r\}
+% \le \lim_{n \to +\infty} \mu_n\left[ f \right]
+% = \mu[f]
+% \le \mu\{\vert X \vert > r - 1\} \: .
+% \end{align*}
+% As $r \to +\infty$, the last quantity tends to 0.
+% \end{proof}
 
 
-\begin{lemma}\label{tight_closure}
-\uses{def:tight}
-The closure of a tight set of measures is tight.
-\end{lemma}
+% \begin{lemma}\label{tight_iff_cvg_probability}
+% \uses{def:tight, def:cvg_probability}
+% For random variables $(X_i)_{i \in \mathbb{N}}$ (TODO in which kind of space?), the two following conditions are equivalent:
+% \begin{itemize}
+% 	\item $(\mathcal L(X_n))$ is tight,
+% 	\item For all $(c_n) \ge 0$ with $c_n \to 0$, $c_n X_n \xrightarrow{p} 0$.
+% \end{itemize}
+% \end{lemma}
 
-\begin{proof}
-\end{proof}
+% \begin{proof}
+
+% \end{proof}
+
+
+% \begin{lemma}\label{tight_closure}
+% \uses{def:tight}
+% The closure of a tight set of measures is tight.
+% \end{lemma}
+
+% \begin{proof}
+% \end{proof}
 
 
 

@@ -93,12 +93,10 @@ lemma map_invSqrtMulSum (μ : Measure Ω) {X : ℕ → Ω → ℝ} (hX : ∀ n, 
   all_goals { fun_prop }
 
 lemma measurable_invSqrtMulSum (n) (hX : ∀ n, Measurable (X n)) :
-    Measurable (invSqrtMulSum X n) :=
-  (Finset.measurable_sum _ fun _ _ ↦ (hX _)).const_mul _
+    Measurable (invSqrtMulSum X n) := by fun_prop
 
 lemma aemeasurable_invSqrtMulSum {μ : Measure Ω} (n) (hX : ∀ n, Measurable (X n)) :
-    AEMeasurable (invSqrtMulSum X n) μ :=
-  (measurable_invSqrtMulSum n hX).aemeasurable
+    AEMeasurable (invSqrtMulSum X n) μ := by fun_prop
 
 theorem central_limit (hX : ∀ n, Measurable (X n))
     {P : ProbabilityMeasure Ω} (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)

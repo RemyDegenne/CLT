@@ -34,7 +34,7 @@ theorem taylor_mean_remainder_peano {f : ℝ → E}
 end Taylor
 
 open MeasureTheory ProbabilityTheory Complex
-open scoped Nat Real NNReal ENNReal Topology
+open scoped Nat Real NNReal ENNReal Topology RealInnerProductSpace
 
 section ForMathlib
 
@@ -76,24 +76,46 @@ theorem iteratedDerivWithin_eq_iteratedDeriv
 
 end ForMathlib
 
-variable {μ : Measure ℝ} [IsProbabilityMeasure μ]
+section InnerProductSpace
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 /-!
 The `n`th derivative of `charFun μ`.
 The proof uses results on iterated derivatives of the Fourier transform.
 -/
 
+noncomputable
+def continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ :=
+  (isBoundedBilinearMap_inner (𝕜 := ℝ)).toContinuousLinearMap
+
+@[simp]
+lemma continuousBilinFormOfInner_apply {x y : E} : continuousBilinFormOfInner x y = ⟪x, y⟫ := rfl
+
+@[simp]
+lemma toLinearMap₂_continuousBilinFormOfInner :
+    ContinuousLinearMap.toLinearMap₂ (continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ)
+      = sesqFormOfInner := by
+  ext x y
+  simp only [ContinuousLinearMap.toLinearMap₂_apply, continuousBilinFormOfInner_apply]
+  rw [real_inner_comm]
+  symm
+  exact sesqFormOfInner_apply_apply (E := E) (𝕜 := ℝ) x y
+
+variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
+  {μ : Measure E} [IsProbabilityMeasure μ]
+
 @[fun_prop]
-theorem contDiff_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
+theorem contDiff_charFun
+    {n : ℕ} (hint : Integrable (‖·‖ ^ n) μ) :
     ContDiff ℝ n (charFun μ) := by
-  have h : sesqFormOfInner = (ContinuousLinearMap.mul ℝ ℝ).toLinearMap₂ := by ext; rfl
-  have hint' (k : ℕ) (hk : k ≤ (n : ℕ∞)) : Integrable (fun x ↦ ‖x‖ ^ k * ‖(1 : ℝ → ℂ) x‖) μ := by
+  have hint' (k : ℕ) (hk : k ≤ (n : ℕ∞)) : Integrable (fun x ↦ ‖x‖ ^ k * ‖(1 : E → ℂ) x‖) μ := by
     simp only [Pi.one_apply, norm_one, mul_one]
     rw [Nat.cast_le] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
   simp_rw [funext (charFun_eq_fourierIntegral' μ)]
-  rw [h]
-  apply (VectorFourier.contDiff_fourierIntegral _ hint').comp
+  rw [← toLinearMap₂_continuousBilinFormOfInner]
+  refine (VectorFourier.contDiff_fourierIntegral (L := continuousBilinFormOfInner) hint').comp ?_
   exact contDiff_const_smul _
 
 @[fun_prop]
@@ -102,6 +124,10 @@ lemma continuous_charFun : Continuous (charFun μ) := by
   refine contDiff_charFun ?_
   suffices Integrable (fun _ ↦ (1 : ℝ)) μ by convert this
   fun_prop
+
+end InnerProductSpace
+
+variable {μ : Measure ℝ} [IsProbabilityMeasure μ]
 
 open VectorFourier in
 theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) μ) :

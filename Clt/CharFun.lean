@@ -85,10 +85,9 @@ lemma charFun_eq_integral_char {μ : Measure E} {t : E} :
     Real.probChar_apply]
   rw [real_inner_comm]
 
-lemma charFun_eq_integral_probChar {μ : Measure ℝ} [IsProbabilityMeasure μ] (y : ℝ) :
-    charFun μ y = ∫ x, (Real.probChar (y * x) : ℂ) ∂μ := by
-  simp only [charFun_apply_real, Real.probChar_apply, ofReal_mul]
-  simp_rw [mul_comm (y : ℂ)]
+lemma charFun_eq_integral_probChar {μ : Measure E} [IsProbabilityMeasure μ] (y : E) :
+    charFun μ y = ∫ x, (Real.probChar ⟪y, x⟫ : ℂ) ∂μ := by
+  simp [charFun_apply, Real.probChar_apply]
 
 lemma stronglyMeasurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E]
     {μ : Measure E} [SFinite μ] :

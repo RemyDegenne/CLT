@@ -1,0 +1,69 @@
+\chapter{Gaussian measures}
+
+\begin{definition}\label{def:gaussianReal}
+\mathlibok
+\lean{ProbabilityTheory.gaussianReal}
+A measure on $\mathbb{R}$ is Gaussian if it is equal to $\mathcal{N}(m, \sigma^2)$ for some $m \in \mathbb{R}$ and $\sigma^2 \ge 0$, in which $\mathcal{N}(m, \sigma^2)$ is the measure absolutely continuous with respect to the Lebesgue measure with density $x \mapsto \frac{1}{\sqrt{2 \pi \sigma^2}}e^{- \frac{1}{2\sigma^2}(x - m)^2}$ if $\sigma^2>0$ and the Dirac probability measure at $m$ if $\sigma^2 = 0$.
+\end{definition}
+
+
+\begin{lemma}\label{lem:gaussian_charFun}
+\leanok
+\lean{ProbabilityTheory.charFun_gaussianReal}
+\uses{def:charFun, def:gaussianReal}
+The Gaussian distribution $\mathcal N(m, \sigma^2)$ has characteristic function $\phi(t) = e^{itm - \sigma^2 t^2 /2}$.
+\end{lemma}
+
+\begin{proof}\leanok
+\end{proof}
+
+
+\begin{lemma}\label{lem:add_gaussianReal}
+\uses{def:gaussianReal}
+The sum of two independent real Gaussian random variables is Gaussian.
+\end{lemma}
+
+\begin{proof}
+\uses{lem:gaussian_charFun, lem:charFun_add_of_indep}
+
+\end{proof}
+
+
+\begin{definition}\label{def:isGaussian}
+\uses{def:gaussianReal}
+A Borel measure $\mu$ on a separable Banach space $E$ is said to be Gaussian if for all continuous linear maps $\ell : E \to \mathbb{R}$, the pushforward $\ell_*\mu$ is a real Gaussian measure.
+\end{definition}
+
+
+\begin{lemma}\label{lem:isGaussian_gaussianReal}
+    \uses{def:gaussianReal, def:isGaussian}
+The real Gaussian measures are Gaussian measures in the sense of Definition~\ref{def:isGaussian}.
+\end{lemma}
+
+\begin{proof}
+
+\end{proof}
+
+
+\begin{lemma}\label{lem:isGaussian_add}
+\uses{def:isGaussian}
+The sum of two independent Gaussian random variables is Gaussian.
+\end{lemma}
+
+\begin{proof}
+\uses{lem:add_gaussianReal}
+
+\end{proof}
+
+
+\begin{lemma}\label{lem:stdGaussian_finiteDimensional}
+\uses{def:isGaussian}
+Let $E$ be a finite dimensional real inner product space and let $b_1, \ldots, b_d$ be an orthonormal basis of $E$.
+Let $X_1, \ldots, X_d$ be independent standard Gaussian random variables on $\mathbb{R}$.
+Then the law of $X_1 b_1 + \ldots + X_d b_d$ is a Gaussian measure on $E$.
+\end{lemma}
+
+\begin{proof}
+\uses{lem:isGaussian_add}
+
+\end{proof}

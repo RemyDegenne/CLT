@@ -70,7 +70,7 @@ For $a \in \mathbb{R}$ and $X$ a random variable with law $\mu$, the characteris
 \leanok
 \lean{ProbabilityTheory.charFun_conv}
 \uses{def:charFun}
-If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are independent, then $X+Y$ has characteristic function $\hat{\mu} + \hat{\nu}$.
+If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are independent, then $X+Y$ has characteristic function $\hat{\mu} \times \hat{\nu}$.
 \end{lemma}
 
 \begin{proof}\leanok
@@ -206,18 +206,6 @@ TODO (see code)
 % \: .
 % \end{align*}
 % \end{proof}
-
-
-\begin{lemma}\label{lem:gaussian_charFun}
-\leanok
-\lean{ProbabilityTheory.charFun_gaussianReal}
-\uses{def:charFun}
-The Gaussian distribution $\mathcal N(m, \sigma^2)$ has characteristic function $\phi(t) = e^{itm - \sigma^2 t^2 /2}$.
-\end{lemma}
-
-\begin{proof}\leanok
-\end{proof}
-
 
 
 \section{Convergence of characteristic functions and weak convergence of measures}

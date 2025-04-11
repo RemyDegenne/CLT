@@ -1,5 +1,7 @@
 \chapter{The central limit theorem}
 
+\section{The central limit theorem for real random variables}
+
 \begin{lemma}\label{lem:deriv_charFun}
 \leanok
 \lean{iteratedDeriv_charFun}
@@ -59,7 +61,7 @@ For $t\in\mathbb{C}$, $\lim_{n\to\infty}(1+t/n+o(1/n))^n=\exp(t)$ (where the lit
 \begin{proof}\leanok
 \end{proof}
 
-\begin{theorem}[Central limit theorem]\label{clt}
+\begin{theorem}[Central limit theorem]\label{thm:clt}
     \leanok
     \lean{ProbabilityTheory.central_limit}
     \uses{def:cvg_distribution}
@@ -79,4 +81,32 @@ By Lemma \ref{lem:charFun_taylor},
 \end{align*}
 
 Since the r.h.s. is the characteristic function of $Z$, we conclude that $\frac{1}{\sqrt{n}}\sum_{k=1}^n X_k \xrightarrow{d} Z$ by Lemma~\ref{thm:charFun_tendsto_iff_measure_tendsto}.
+\end{proof}
+
+
+\section{The central limit theorem for random variables in $\mathbb{R}^d$}
+
+\begin{theorem}[Cramér-Wold]\label{thm:cramer_wold}
+    \uses{def:cvg_distribution}
+Let $X, X_1, X_2, \ldots$ be random variables in $\mathbb{R}^d$.
+Then $X_n \xrightarrow{d} X$ iff for every $a \in \mathbb{R}^d$, $\langle a, X_n \rangle \xrightarrow{d} \langle a, X \rangle$.
+\end{theorem}
+
+\begin{proof}
+    \uses{thm:charFun_tendsto_iff_measure_tendsto}
+By Theorem~\ref{thm:charFun_tendsto_iff_measure_tendsto}, the convergence in distribution of the random variables is equivalent to the convergence of their characteristic functions for each $a \in \mathbb{R}^d$, which for each such $a$ is equivalent to the convergence in distribution of the random variables $\langle a, X_n \rangle$ by the same theorem.
+\end{proof}
+
+\begin{theorem}[Central limit theorem in $\mathbb{R}^d$]\label{thm:multivariate_clt}
+    %\leanok
+    %\lean{ProbabilityTheory.multivariate_central_limit}
+Let $X_1, X_2, \ldots$ be i.i.d. random variables in $\mathbb{R}^d$ with mean 0 and identity covariance matrix, and let $Z$ be a random variable with law $\mathcal N(0,I_d)$. Then
+\begin{align*}
+\frac{1}{\sqrt{n}}\sum_{k=1}^n X_k \xrightarrow{d} Z \: .
+\end{align*}
+\end{theorem}
+
+\begin{proof}
+\uses{thm:cramer_wold, thm:clt, lem:stdGaussian_finiteDimensional}
+
 \end{proof}

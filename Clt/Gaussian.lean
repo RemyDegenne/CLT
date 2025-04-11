@@ -13,7 +13,7 @@ Properties of Gaussian distributions and its characteristic function.
 
 noncomputable section
 
-open MeasureTheory ProbabilityTheory Complex
+open MeasureTheory ProbabilityTheory Complex NormedSpace
 open scoped NNReal Real
 
 namespace ProbabilityTheory
@@ -57,5 +57,59 @@ theorem charFun_gaussianReal : charFun (gaussianReal μ v) t = exp (t * μ * I -
       field_simp
       ring_nf
       simp
+
+lemma gaussianReal_map_prod_add {m₁ m₂ : ℝ} {v₁ v₂ : ℝ≥0} :
+    ((gaussianReal m₁ v₁).prod (gaussianReal m₂ v₂)).map (fun p ↦ p.1 + p.2)
+      = gaussianReal (m₁ + m₂) (v₁ + v₂) := by
+  sorry
+
+section Def
+
+variable {E : Type*} [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E] {mE : MeasurableSpace E}
+
+class IsGaussian (μ : Measure E) : Prop where
+  map_eq_gaussianReal : ∀ L : E →L[ℝ] ℝ, ∃ m v, μ.map L = gaussianReal m v
+
+def _root_.MeasureTheory.Measure.meanMapLinear (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) : ℝ :=
+  (IsGaussian.map_eq_gaussianReal (μ := μ) L).choose
+
+def _root_.MeasureTheory.Measure.varMapLinear (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+    ℝ≥0 :=
+  (IsGaussian.map_eq_gaussianReal (μ := μ) L).choose_spec.choose
+
+lemma _root_.MeasureTheory.Measure.map_eq_gaussianReal (μ : Measure E) [IsGaussian μ]
+    (L : E →L[ℝ] ℝ) :
+    μ.map L = gaussianReal (μ.meanMapLinear L) (μ.varMapLinear L) :=
+  (IsGaussian.map_eq_gaussianReal L).choose_spec.choose_spec
+
+end Def
+
+instance isGaussian_gaussianReal (m : ℝ) (v : ℝ≥0) : IsGaussian (gaussianReal m v) where
+  map_eq_gaussianReal := by
+    intro L
+    sorry
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {mE : MeasurableSpace E} [BorelSpace E] [SecondCountableTopology E]
+
+instance {μ : Measure E} [IsGaussian μ] : IsProbabilityMeasure μ where
+  measure_univ := by
+    let L : E →L[ℝ] ℝ := Nonempty.some inferInstance
+    have : μ.map L Set.univ = 1 := by simp [μ.map_eq_gaussianReal L]
+    simpa [Measure.map_apply (by fun_prop : Measurable L) .univ] using this
+
+lemma isGaussian_map_prod_add {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
+    IsGaussian ((μ.prod ν).map (fun p ↦ p.1 + p.2)) where
+  map_eq_gaussianReal := by
+    intro L
+    rw [Measure.map_map (by fun_prop) (by fun_prop)]
+    have : (L ∘ fun (p : E × E) ↦ p.1 + p.2)
+        = (fun p : ℝ × ℝ ↦ p.1 + p.2) ∘ (Prod.map L L) := by ext; simp
+    rw [this, ← Measure.map_map (by fun_prop) (by fun_prop)]
+    refine ⟨μ.meanMapLinear L + ν.meanMapLinear L, μ.varMapLinear L + ν.varMapLinear L, ?_⟩
+    rw [← Measure.map_prod_map, μ.map_eq_gaussianReal L, ν.map_eq_gaussianReal L,
+      gaussianReal_map_prod_add]
+    · fun_prop
+    · fun_prop
 
 end ProbabilityTheory

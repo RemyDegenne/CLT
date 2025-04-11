@@ -7,6 +7,16 @@ A measure on $\mathbb{R}$ is Gaussian if it is equal to $\mathcal{N}(m, \sigma^2
 \end{definition}
 
 
+\begin{lemma}\label{lem:isProbabilityMeasure_gaussianReal}
+\mathlibok
+\uses{def:gaussianReal}
+A real Gaussian measure is a probability measure.
+\end{lemma}
+
+\begin{proof}\leanok
+\end{proof}
+
+
 \begin{lemma}\label{lem:gaussian_charFun}
 \leanok
 \lean{ProbabilityTheory.charFun_gaussianReal}
@@ -31,12 +41,26 @@ The sum of two independent real Gaussian random variables is Gaussian.
 
 \begin{definition}\label{def:isGaussian}
 \uses{def:gaussianReal}
+\leanok
+\lean{ProbabilityTheory.IsGaussian}
 A Borel measure $\mu$ on a separable Banach space $E$ is said to be Gaussian if for all continuous linear maps $\ell : E \to \mathbb{R}$, the pushforward $\ell_*\mu$ is a real Gaussian measure.
 \end{definition}
 
+\begin{lemma}\label{lem:isProbabilityMeasure_isGaussian}
+\leanok
+\uses{def:isGaussian}
+A Gaussian measure is a probability measure.
+\end{lemma}
+
+\begin{proof}\leanok
+\uses{lem:isProbabilityMeasure_gaussianReal}
+\end{proof}
+
 
 \begin{lemma}\label{lem:isGaussian_gaussianReal}
-    \uses{def:gaussianReal, def:isGaussian}
+\leanok
+\lean{ProbabilityTheory.isGaussian_gaussianReal}
+\uses{def:gaussianReal, def:isGaussian}
 The real Gaussian measures are Gaussian measures in the sense of Definition~\ref{def:isGaussian}.
 \end{lemma}
 
@@ -46,12 +70,14 @@ The real Gaussian measures are Gaussian measures in the sense of Definition~\ref
 
 
 \begin{lemma}\label{lem:isGaussian_add}
+\leanok
+\lean{ProbabilityTheory.isGaussian_map_prod_add}
 \uses{def:isGaussian}
 The sum of two independent Gaussian random variables is Gaussian.
 \end{lemma}
 
-\begin{proof}
-\uses{lem:add_gaussianReal}
+\begin{proof}\leanok
+\uses{lem:add_gaussianReal,lem:isProbabilityMeasure_isGaussian}
 
 \end{proof}
 

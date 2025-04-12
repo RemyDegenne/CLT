@@ -83,7 +83,7 @@ open BoundedContinuousFunction
 
 namespace ProbabilityTheory
 
-variable {E 𝕜 : Type*} [RCLike 𝕜] [MeasurableSpace E] {μ : Measure E} {t : E}
+variable {E : Type*} [MeasurableSpace E] {μ : Measure E} {t : E}
 
 /-- The characteristic function of a measure in an inner product space. -/
 def charFun [Inner ℝ E] (μ : Measure E) (t : E) : ℂ := ∫ x, exp (⟪x, t⟫ * I) ∂μ

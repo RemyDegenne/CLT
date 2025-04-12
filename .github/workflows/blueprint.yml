@@ -52,8 +52,8 @@ jobs:
       #     key: MathlibDoc-${{ hashFiles('lake-manifest.json') }}
       #     restore-keys: MathlibDoc-
 
-      - name: Build project API documentation
-        run: ~/.elan/bin/lake -R -Kenv=dev build Clt:docs
+      # - name: Build project API documentation
+      #   run: ~/.elan/bin/lake -R -Kenv=dev build Clt:docs
       
       - name: Check for `home_page` folder # this is meant to detect a Jekyll-based website
         id: check_home_page

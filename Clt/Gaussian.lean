@@ -6,6 +6,7 @@ Authors: Thomas Zhu, Rémy Degenne
 import Mathlib.Probability.Distributions.Gaussian
 import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
 import Clt.CharFun
+import Clt.MomentGenerating
 
 /-!
 Properties of Gaussian distributions and its characteristic function.
@@ -13,8 +14,8 @@ Properties of Gaussian distributions and its characteristic function.
 
 noncomputable section
 
-open MeasureTheory ProbabilityTheory Complex NormedSpace
-open scoped NNReal Real
+open MeasureTheory ProbabilityTheory Complex
+open scoped NNReal Real ENNReal
 
 namespace ProbabilityTheory
 
@@ -111,5 +112,58 @@ lemma isGaussian_map_prod_add {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν
       gaussianReal_map_prod_add]
     · fun_prop
     · fun_prop
+
+lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+    MemLp L 2 μ := by
+  refine ⟨by fun_prop, ?_⟩
+  rw [eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top (by simp) (by simp)]
+  simp only [ENNReal.toReal_ofNat, ENNReal.rpow_ofNat]
+  change ∫⁻ a, (fun x ↦ ‖x‖ₑ ^ 2) (L a) ∂μ < ⊤
+  rw [← lintegral_map (μ := μ) (f := fun x ↦ ‖x‖ₑ ^ 2) (by fun_prop) (by fun_prop : Measurable L),
+    μ.map_eq_gaussianReal L]
+  sorry
+
+def dualToL2 (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] Lp ℝ 2 μ where
+  toFun := fun L ↦ MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L)
+  map_add' u v := by push_cast; rw [MemLp.toLp_add]
+  map_smul' c L := by push_cast; rw [MemLp.toLp_const_smul]; rfl
+  cont := by
+    refine continuous_iff_continuous_dist.mpr ?_
+    simp only [dist_eq_norm]
+    suffices Continuous fun (p : (E →L[ℝ] ℝ) × (E →L[ℝ] ℝ)) ↦
+        ENNReal.toReal (eLpNorm (p.1 - p.2) 2 μ) by
+      sorry
+    rw [continuous_iff_continuousAt]
+    intro p
+    refine (ENNReal.continuousAt_toReal ?_).comp ?_
+    · sorry
+    simp_rw [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
+    simp only [ContinuousLinearMap.coe_sub', Pi.sub_apply, ENNReal.toReal_ofNat, ENNReal.rpow_ofNat,
+      one_div]
+    sorry
+
+def continuousBilinFormOfInnerL2 (μ : Measure E) : (Lp ℝ 2 μ) →L[ℝ] (Lp ℝ 2 μ) →L[ℝ] ℝ :=
+  continuousBilinFormOfInner (E := Lp ℝ 2 μ)
+
+def covarianceOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
+  ContinuousLinearMap.bilinearComp (continuousBilinFormOfInnerL2 μ) (dualToL2 μ) (dualToL2 μ)
+
+/-!
+
+# Central limit theorem update
+
+There has been some work happening over at https://github.com/RemyDegenne/CLT and we now have a proof of the central limit theorem for real random variables, if we assume Prokhorov's theorem.
+
+@Jakob has recently added to Mathlib a proof that characteristic functions separate measures, which is a key ingredient.
+Using that, we could prove the Lévy convergence theorem (weak convergence of measures equivalent to convergence of characteristic functions), assuming Prokhorov's theorem.
+
+@ThomasZhu then proved the CLT from there, which needed facts about characteristic functions, independence and Gaussian random variables.
+
+Prokhorov's theorem is being worked on by @Arav, and once that's done our proof will be complete.
+You might spot another blue node in the graph leading to the CLT corresponding to a form of Taylor's theorem, but there is an open Mathlib PR for that.
+
+We are making PRs to Mathlib with the material that does not depend on Prokhorov.
+
+-/
 
 end ProbabilityTheory

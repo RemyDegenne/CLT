@@ -29,7 +29,7 @@ theorem MeasureTheory.ProbabilityMeasure.ext_of_charFun_eq (μ ν : ProbabilityM
     (h : charFun (μ : Measure V) = charFun ν) :
     μ = ν := by
   rw [funext_iff] at h
-  simp_rw [charFun_eq_integral_char] at h
+  simp_rw [charFun_eq_integral_innerProbChar] at h
   suffices (μ : Measure V) = ν by ext; rw [this]
   refine ext_of_integral_char_eq continuous_probChar probChar_ne_one ?_ ?_ h
   · exact fun v hv ↦ DFunLike.ne_iff.mpr ⟨v, inner_self_ne_zero.mpr hv⟩
@@ -129,8 +129,7 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
       rw [integral_mul_left]
     · intro i hi
       refine Integrable.const_mul ?_ _
-      change Integrable (fun x ↦ char continuous_probChar (L := bilinFormOfRealInner)
-        continuous_inner i x) μ
+      change Integrable (fun x ↦ innerProbChar i x) μ
       exact BoundedContinuousFunction.integrable μ _
   simp_rw [h_eq (μ _), h_eq μ₀]
   refine tendsto_finset_sum _ fun y hy ↦ Tendsto.const_mul _ ?_
@@ -169,5 +168,5 @@ theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun
       ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
   refine ⟨fun h t ↦ ?_, tendsto_of_tendsto_charFun⟩
   rw [ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto ℂ] at h
-  simp_rw [charFun_eq_integral_char]
-  exact h (char continuous_probChar (L := bilinFormOfRealInner) continuous_inner t)
+  simp_rw [charFun_eq_integral_innerProbChar]
+  exact h (innerProbChar t)

@@ -113,7 +113,7 @@ theorem contDiff_charFun
     simp only [Pi.one_apply, norm_one, mul_one]
     rw [Nat.cast_le] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
-  simp_rw [funext (charFun_eq_fourierIntegral' μ)]
+  simp_rw [funext charFun_eq_fourierIntegral']
   rw [← toLinearMap₂_continuousBilinFormOfInner]
   refine (VectorFourier.contDiff_fourierIntegral (L := continuousBilinFormOfInner) hint').comp ?_
   exact contDiff_const_smul _
@@ -137,7 +137,7 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
     simp only [Pi.one_apply, norm_one, mul_one]
     rw [Nat.cast_le] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
-  simp_rw [funext (charFun_eq_fourierIntegral' μ), smul_eq_mul]
+  simp_rw [funext charFun_eq_fourierIntegral', smul_eq_mul]
   rw [iteratedDeriv_comp_const_smul]
   · dsimp only
     simp only [mul_inv_rev, neg_mul]
@@ -157,7 +157,7 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
           congr
           rw [← mul_pow]
           ring_nf
-          -- ⊢ ↑π ^ n * (↑π)⁻¹ ^ n * I ^ n = I ^ n
+          -- `⊢ ↑π ^ n * (↑π)⁻¹ ^ n * I ^ n = I ^ n`
           rw [inv_pow, mul_inv_cancel₀, one_mul]
           norm_cast
           positivity
@@ -167,7 +167,7 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
           congr 2
           ring_nf
           congr 2
-          -- ⊢ ↑π * ↑x * (↑π)⁻¹ = ↑x
+          -- `⊢ ↑π * ↑x * (↑π)⁻¹ = ↑x`
           rw [mul_comm, ← mul_assoc, inv_mul_cancel₀, one_mul]
           norm_cast
           positivity
@@ -178,7 +178,7 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
     · exact aestronglyMeasurable_one
     · rfl
   · rw [h]
-    apply contDiff_fourierIntegral _ hint'
+    exact contDiff_fourierIntegral _ hint'
 
 theorem iteratedDeriv_charFun_zero {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
     iteratedDeriv n (charFun μ) 0 = I ^ n * ∫ x, x ^ n ∂μ := by

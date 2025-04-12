@@ -66,27 +66,23 @@ namespace ProbabilityTheory
 variable {E : Type*} [MeasurableSpace E]
 
 /-- The characteristic function of a measure. -/
-def charFun [Inner ℝ E] (μ : Measure E) (t : E) : ℂ := ∫ x, exp (⟪t, x⟫ • I) ∂μ
+def charFun [Inner ℝ E] (μ : Measure E) (t : E) : ℂ := ∫ x, exp (⟪x, t⟫ • I) ∂μ
 
 lemma charFun_apply [Inner ℝ E] {μ : Measure E} (t : E) :
-    charFun μ t = ∫ x, exp (⟪t, x⟫ * I) ∂μ := rfl
+    charFun μ t = ∫ x, exp (⟪x, t⟫ * I) ∂μ := rfl
 
 lemma charFun_apply_real {μ : Measure ℝ} {t : ℝ} :
-    charFun μ t = ∫ x, exp (x * t * I) ∂μ := by simp [charFun_apply]
+    charFun μ t = ∫ x, exp (t * x * I) ∂μ := by simp [charFun_apply]
 
 variable [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 lemma charFun_eq_integral_char {μ : Measure E} {t : E} :
     charFun μ t = ∫ v, BoundedContinuousFunction.char Real.continuous_probChar
       (L := bilinFormOfRealInner) continuous_inner t v ∂μ := by
-  rw [charFun_apply]
-  congr with x
-  simp only [BoundedContinuousFunction.char_apply, bilinFormOfRealInner_apply_apply,
-    Real.probChar_apply]
-  rw [real_inner_comm]
+  simp [charFun_apply, Real.probChar_apply]
 
 lemma charFun_eq_integral_probChar {μ : Measure E} [IsProbabilityMeasure μ] (y : E) :
-    charFun μ y = ∫ x, (Real.probChar ⟪y, x⟫ : ℂ) ∂μ := by
+    charFun μ y = ∫ x, (Real.probChar ⟪x, y⟫ : ℂ) ∂μ := by
   simp [charFun_apply, Real.probChar_apply]
 
 lemma stronglyMeasurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E]
@@ -104,6 +100,7 @@ lemma charFun_eq_fourierIntegral (μ : Measure E) (t : E) :
     charFun μ t = VectorFourier.fourierIntegral Real.probChar μ sesqFormOfInner 1 (-t) := by
   simp only [charFun_apply, real_smul, fourierIntegral_probChar_eq_integral_exp,
     Pi.one_apply, smul_eq_mul, mul_one, map_neg, ofReal_neg, neg_neg]
+  simp_rw [real_inner_comm t]
   congr
 
 /-- Relate `charFun` to the "standard" Fourier integral defined by `Real.fourierChar`. -/
@@ -115,6 +112,7 @@ lemma charFun_eq_fourierIntegral' (μ : Measure E) (t : E) :
     map_neg, _root_.map_smul, smul_eq_mul, neg_neg, AddChar.coe_mk, ← mul_assoc, Pi.one_apply,
     Circle.smul_def, Circle.coe_exp, ofReal_mul, ofReal_ofNat, ofReal_inv, mul_inv_cancel₀ h,
     one_mul, mul_one]
+  simp_rw [real_inner_comm t]
   congr
 
 @[simp]
@@ -163,7 +161,7 @@ lemma charFun_conv (μ ν : Measure E) [IsFiniteMeasure μ] [IsFiniteMeasure ν]
   simp_rw [charFun_apply]
   unfold Measure.conv
   rw [integral_map, integral_prod]
-  · simp_rw [inner_add_right]
+  · simp_rw [inner_add_left]
     push_cast
     simp_rw [add_mul, exp_add, integral_mul_left, integral_mul_right]
   · apply (integrable_const (1 : ℝ)).mono
@@ -258,12 +256,12 @@ lemma integral_exp_Icc (r : ℝ) : ∫ t in -r..r, cexp (t * I) = 2 * Real.sin r
 lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     ∫ t in -r..r, charFun μ t
       = 2 * r * ∫ x, if x = 0 then 1 else Real.sin (r * x) / (r * x) ∂μ := by
-  have h_int r : Integrable (Function.uncurry fun (x y : ℝ) ↦ cexp (y * x * I))
+  have h_int r : Integrable (Function.uncurry fun (x y : ℝ) ↦ cexp (x * y * I))
       ((volume.restrict (Set.Ioc (-r) r)).prod μ) := by
     -- integrable since bounded and the measure is finite
     rw [← integrable_norm_iff]
     swap; · exact Measurable.aestronglyMeasurable <| by fun_prop
-    suffices (fun a => ‖Function.uncurry (fun (x y : ℝ) ↦ cexp (y * x * I)) a‖) = fun _ ↦ 1 by
+    suffices (fun a => ‖Function.uncurry (fun (x y : ℝ) ↦ cexp (x * y * I)) a‖) = fun _ ↦ 1 by
       rw [this]
       fun_prop
     ext p
@@ -271,9 +269,9 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     norm_cast
     simp only [Function.uncurry_apply_pair, norm_exp_ofReal_mul_I]
   calc ∫ t in -r..r, charFun μ t
-  _ = ∫ x in -r..r, ∫ y, cexp (y * x * I) ∂μ := by simp_rw [charFun_apply_real]
-  _ = ∫ y, ∫ x in Set.Ioc (-r) r, cexp (y * x * I) ∂volume ∂μ
-      - ∫ y, ∫ x in Set.Ioc r (-r), cexp (y * x * I) ∂volume ∂μ := by
+  _ = ∫ x in -r..r, ∫ y, cexp (x * y * I) ∂μ := by simp_rw [charFun_apply_real]
+  _ = ∫ y, ∫ x in Set.Ioc (-r) r, cexp (x * y * I) ∂volume ∂μ
+      - ∫ y, ∫ x in Set.Ioc r (-r), cexp (x * y * I) ∂volume ∂μ := by
     rw [intervalIntegral]
     congr 1
     · rw [integral_integral_swap]
@@ -281,8 +279,8 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     · rw [integral_integral_swap]
       convert h_int (-r)
       simp
-  _ = ∫ y, ∫ x in -r..r, cexp (y * x * I) ∂volume ∂μ:= by
-    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (↑y * ↑x * I)‖
+  _ = ∫ y, ∫ x in -r..r, cexp (x * y * I) ∂volume ∂μ:= by
+    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (x * y * I)‖
         ≤ (ENNReal.ofReal (a + a)).toReal := by
       refine (norm_integral_le_integral_norm _).trans_eq ?_
       norm_cast
@@ -293,12 +291,12 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     · refine Integrable.mono' (integrable_const (ENNReal.ofReal (r + r)).toReal) ?_
         (ae_of_all _ fun y ↦ h_le y r)
       refine StronglyMeasurable.aestronglyMeasurable ?_
-      refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (y * x * I)) ?_
+      refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (x * y * I)) ?_
       exact Measurable.stronglyMeasurable (by fun_prop)
     · refine Integrable.mono' (integrable_const (ENNReal.ofReal (-r + -r)).toReal) ?_
         (ae_of_all _ fun y ↦ ?_)
       · refine StronglyMeasurable.aestronglyMeasurable ?_
-        refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (y * x * I)) ?_
+        refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (x * y * I)) ?_
         exact Measurable.stronglyMeasurable (by fun_prop)
       · convert h_le y (-r) using 2
         simp
@@ -319,7 +317,8 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
       mul_neg] at h
     rw [← h, ← mul_assoc]
     norm_cast
-    simp [inv_mul_cancel₀ hy]
+    simp_rw [mul_comm _ y]
+    simp [mul_inv_cancel₀ hy]
   _ = ∫ x, 2 * (r : ℂ) * if x = 0 then 1 else Real.sin (r * x) / (r * x) ∂μ := by
     congr with y
     by_cases hy : y = 0
@@ -409,10 +408,10 @@ lemma measure_abs_inner_ge_le_charFun {μ : Measure E} [IsProbabilityMeasure μ]
     · fun_prop
     · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)
   · unfold μ'
-    simp_rw [charFun_apply, inner_smul_left]
+    simp_rw [charFun_apply, inner_smul_right]
     simp only [conj_trivial, ofReal_mul, RCLike.inner_apply]
     rw [integral_map]
-    · simp_rw [mul_comm (x : ℂ)]
+    · simp_rw [real_inner_comm a]
     · fun_prop
     · exact Measurable.aestronglyMeasurable <| by fun_prop
 

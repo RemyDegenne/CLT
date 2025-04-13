@@ -85,8 +85,7 @@ lemma _root_.MeasureTheory.Measure.map_eq_gaussianReal (μ : Measure E) [IsGauss
 end Def
 
 instance isGaussian_gaussianReal (m : ℝ) (v : ℝ≥0) : IsGaussian (gaussianReal m v) where
-  map_eq_gaussianReal := by
-    intro L
+  map_eq_gaussianReal L := by
     have : (L : ℝ → ℝ) = fun x ↦ L 1 * x := by
       ext x
       have : x = x • 1 := by simp

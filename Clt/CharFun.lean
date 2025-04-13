@@ -248,18 +248,24 @@ lemma sin_div_le_inv_abs (x : ℝ) : Real.sin x / x ≤ |x|⁻¹ := by
   · rw [abs_of_nonneg hx.le, div_eq_mul_inv, mul_inv_le_iff₀ hx, inv_mul_cancel₀ hx.ne']
     exact Real.sin_le_one x
 
+@[fun_prop, measurability]
+lemma measurable_sinDiv : Measurable sinDiv := Measurable.ite (by simp) (by fun_prop) (by fun_prop)
+
+@[measurability]
+lemma stronglyMeasurable_sinDiv : StronglyMeasurable sinDiv := measurable_sinDiv.stronglyMeasurable
+
+@[fun_prop]
 lemma integrable_sinDiv {μ : Measure ℝ} [IsFiniteMeasure μ] :
     Integrable sinDiv μ := by
   refine Integrable.mono' (g := fun _ ↦ 1) (integrable_const _) ?_ <| ae_of_all _ fun x ↦ ?_
-  · exact (Measurable.ite (by simp) (by fun_prop) (by fun_prop)).aestronglyMeasurable
+  · exact stronglyMeasurable_sinDiv.aestronglyMeasurable
   · rw [Real.norm_eq_abs]
     exact abs_sinDiv_le_one x
 
 lemma integrable_sinDiv_const_mul {μ : Measure ℝ} [IsFiniteMeasure μ] (r : ℝ) :
-    Integrable (fun x ↦ sinDiv (r * x)) μ := by
-  convert (integrable_map_measure (f := fun x ↦ r * x) (μ := μ) ?_ (by fun_prop)).mp
-    integrable_sinDiv using 2
-  exact (Measurable.ite (by simp) (by fun_prop) (by fun_prop)).aestronglyMeasurable
+    Integrable (fun x ↦ sinDiv (r * x)) μ :=
+  (integrable_map_measure stronglyMeasurable_sinDiv.aestronglyMeasurable (by fun_prop)).mp
+    integrable_sinDiv
 
 end SinDiv
 

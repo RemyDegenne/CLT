@@ -223,9 +223,8 @@ lemma integral_exp_Icc (r : ℝ) : ∫ t in -r..r, cexp (t * I) = 2 * Real.sin r
     · simp
     · simp
   _ = 2 * Real.sin r := by
-    simp_rw [mul_comm I]
-    simp only [exp_mul_I, Complex.cos_neg, Complex.sin_neg, add_sub_add_left_eq_sub, div_I,
-      ofReal_sin]
+    simp only [mul_comm I, exp_mul_I, Complex.cos_neg, Complex.sin_neg, add_sub_add_left_eq_sub,
+      div_I, ofReal_sin]
     rw [sub_mul, mul_assoc, mul_assoc, two_mul]
     simp
 

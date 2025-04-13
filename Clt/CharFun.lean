@@ -218,6 +218,7 @@ section SinDiv
 
 variable {x : ℝ}
 
+/-- The function `Real.sin x / x` mofified to take the value 1 at 0, which makes it continuous. -/
 def sinDiv (x : ℝ) : ℝ := if x = 0 then 1 else Real.sin x / x
 
 lemma sinDiv_apply : sinDiv x = if x = 0 then 1 else Real.sin x / x := rfl

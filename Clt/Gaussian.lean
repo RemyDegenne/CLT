@@ -84,9 +84,13 @@ lemma _root_.MeasureTheory.Measure.map_eq_gaussianReal (μ : Measure E) [IsGauss
 end Def
 
 instance isGaussian_gaussianReal (m : ℝ) (v : ℝ≥0) : IsGaussian (gaussianReal m v) where
-  map_eq_gaussianReal := by
-    intro L
-    sorry
+  map_eq_gaussianReal L := by
+    have : (L : ℝ → ℝ) = fun x ↦ L 1 * x := by
+      ext x
+      have : x = x • 1 := by simp
+      conv_lhs => rw [this, L.map_smul, smul_eq_mul, mul_comm]
+    rw [this]
+    exact ⟨L 1 * m, ⟨(L 1) ^ 2, sq_nonneg _⟩ * v, gaussianReal_map_const_mul _⟩
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {mE : MeasurableSpace E} [BorelSpace E] [SecondCountableTopology E]

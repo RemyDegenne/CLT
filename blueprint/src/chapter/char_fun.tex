@@ -214,6 +214,7 @@ TODO (see code)
 \begin{lemma}\label{lem:tendsto_M_of_tendsto_charFun}
 \leanok
 \lean{MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun}
+\uses{def:charFun}
 Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$ such that $\hat{\mu}_n \to \hat{\mu}$.
 Then for all exponential polynomial $f \in \mathcal M$, $\mu_n[f] \to \nu[f]$.
 \end{lemma}
@@ -289,7 +290,7 @@ Then $\hat{\mu}_n(t) \to e^{- \Vert t \Vert^2 / 2}$ for all $t \in \ell^2$ but $
 Let $\mu, \mu_1, \mu_2, \ldots$ be probability measures on $\mathbb{R}^d$ with characteristic functions $\hat{\mu}, \hat{\mu}_1, \hat{\mu}_2, \ldots$. Then $\mu_n \xrightarrow{w} \mu$ iff for all $t$, $\hat{\mu}_n(t) \to \hat{\mu}(t)$.
 \end{theorem}
 
-\begin{proof}\uses{thm:separating_starSubalgebra, lem:separates_points_expPoly, lem:tight_of_tendsto_charFun, lem:cvg_of_separating, lem:tendsto_M_of_tendsto_charFun}
+\begin{proof}\uses{thm:separating_starSubalgebra, lem:separates_points_expPoly, lem:tight_of_tendsto_charFun, lem:cvg_of_separating, lem:tendsto_M_of_tendsto_charFun, lem:charFun_continuous}
 \leanok
 For all $t$, $x \mapsto e^{i \langle t, x \rangle}$ is a bounded continuous function. Hence by the definition of convergence in distribution, $\mu_n \xrightarrow{w} \mu \implies \hat{\mu}_n(t) \to \hat{\mu}(t)$ for all $t$.
 

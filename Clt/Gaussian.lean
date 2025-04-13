@@ -70,16 +70,16 @@ variable {E : Type*} [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E] {mE :
 class IsGaussian (μ : Measure E) : Prop where
   map_eq_gaussianReal : ∀ L : E →L[ℝ] ℝ, ∃ m v, μ.map L = gaussianReal m v
 
-def _root_.MeasureTheory.Measure.meanMapLinear (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) : ℝ :=
+def _root_.MeasureTheory.Measure.meanMap (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) : ℝ :=
   (IsGaussian.map_eq_gaussianReal (μ := μ) L).choose
 
-def _root_.MeasureTheory.Measure.varMapLinear (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+def _root_.MeasureTheory.Measure.varMap (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
     ℝ≥0 :=
   (IsGaussian.map_eq_gaussianReal (μ := μ) L).choose_spec.choose
 
 lemma _root_.MeasureTheory.Measure.map_eq_gaussianReal (μ : Measure E) [IsGaussian μ]
     (L : E →L[ℝ] ℝ) :
-    μ.map L = gaussianReal (μ.meanMapLinear L) (μ.varMapLinear L) :=
+    μ.map L = gaussianReal (μ.meanMap L) (μ.varMap L) :=
   (IsGaussian.map_eq_gaussianReal L).choose_spec.choose_spec
 
 end Def
@@ -87,7 +87,12 @@ end Def
 instance isGaussian_gaussianReal (m : ℝ) (v : ℝ≥0) : IsGaussian (gaussianReal m v) where
   map_eq_gaussianReal := by
     intro L
-    sorry
+    have : (L : ℝ → ℝ) = fun x ↦ L 1 * x := by
+      ext x
+      have : x = x • 1 := by simp
+      conv_lhs => rw [this, L.map_smul, smul_eq_mul, mul_comm]
+    rw [this]
+    exact ⟨L 1 * m, ⟨(L 1) ^ 2, sq_nonneg _⟩ * v, gaussianReal_map_const_mul _⟩
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {mE : MeasurableSpace E} [BorelSpace E] [SecondCountableTopology E]
@@ -106,7 +111,7 @@ lemma isGaussian_map_prod_add {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν
     have : (L ∘ fun (p : E × E) ↦ p.1 + p.2)
         = (fun p : ℝ × ℝ ↦ p.1 + p.2) ∘ (Prod.map L L) := by ext; simp
     rw [this, ← Measure.map_map (by fun_prop) (by fun_prop)]
-    refine ⟨μ.meanMapLinear L + ν.meanMapLinear L, μ.varMapLinear L + ν.varMapLinear L, ?_⟩
+    refine ⟨μ.meanMap L + ν.meanMap L, μ.varMap L + ν.varMap L, ?_⟩
     rw [← Measure.map_prod_map, μ.map_eq_gaussianReal L, ν.map_eq_gaussianReal L,
       gaussianReal_map_prod_add]
     · fun_prop
@@ -120,6 +125,7 @@ lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L :
   change ∫⁻ a, (fun x ↦ ‖x‖ₑ ^ 2) (L a) ∂μ < ⊤
   rw [← lintegral_map (μ := μ) (f := fun x ↦ ‖x‖ₑ ^ 2) (by fun_prop) (by fun_prop : Measurable L),
     μ.map_eq_gaussianReal L]
+  simp only [← ofReal_norm_eq_enorm, Real.norm_eq_abs]
   sorry
 
 def dualToL2 (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] Lp ℝ 2 μ where

@@ -214,29 +214,29 @@ lemma charFun_map_sum_pi_const (μ : Measure E) [IsFiniteMeasure μ] (n : ℕ) (
 
 section bounds
 
-section SinDiv
+section sinc
 
 variable {x : ℝ}
 
 /-- The function `Real.sin x / x` mofified to take the value 1 at 0, which makes it continuous. -/
-def sinDiv (x : ℝ) : ℝ := if x = 0 then 1 else Real.sin x / x
+def sinc (x : ℝ) : ℝ := if x = 0 then 1 else Real.sin x / x
 
-lemma sinDiv_apply : sinDiv x = if x = 0 then 1 else Real.sin x / x := rfl
+lemma sinc_apply : sinc x = if x = 0 then 1 else Real.sin x / x := rfl
 
 @[simp]
-lemma sinDiv_zero : sinDiv 0 = 1 := by simp [sinDiv]
+lemma sinc_zero : sinc 0 = 1 := by simp [sinc]
 
-lemma sinDiv_of_ne_zero (hx : x ≠ 0) : sinDiv x = Real.sin x / x := by simp [sinDiv, hx]
+lemma sinc_of_ne_zero (hx : x ≠ 0) : sinc x = Real.sin x / x := by simp [sinc, hx]
 
-lemma abs_sinDiv_le_one (x : ℝ) : |sinDiv x| ≤ 1 := by
+lemma abs_sinc_le_one (x : ℝ) : |sinc x| ≤ 1 := by
   by_cases hx : x = 0
   · simp [hx]
-  rw [sinDiv_of_ne_zero hx, abs_div]
+  rw [sinc_of_ne_zero hx, abs_div]
   refine div_le_of_le_mul₀ (abs_nonneg _) zero_le_one ?_
   rw [one_mul]
   exact Real.abs_sin_le_abs
 
-lemma sinDiv_le_one (x : ℝ) : sinDiv x ≤ 1 := (abs_le.mp (abs_sinDiv_le_one x)).2
+lemma sinc_le_one (x : ℝ) : sinc x ≤ 1 := (abs_le.mp (abs_sinc_le_one x)).2
 
 lemma sin_div_le_inv_abs (x : ℝ) : Real.sin x / x ≤ |x|⁻¹ := by
   rcases lt_trichotomy x 0 with hx | rfl | hx
@@ -250,25 +250,25 @@ lemma sin_div_le_inv_abs (x : ℝ) : Real.sin x / x ≤ |x|⁻¹ := by
     exact Real.sin_le_one x
 
 @[fun_prop, measurability]
-lemma measurable_sinDiv : Measurable sinDiv := Measurable.ite (by simp) (by fun_prop) (by fun_prop)
+lemma measurable_sinc : Measurable sinc := Measurable.ite (by simp) (by fun_prop) (by fun_prop)
 
 @[measurability]
-lemma stronglyMeasurable_sinDiv : StronglyMeasurable sinDiv := measurable_sinDiv.stronglyMeasurable
+lemma stronglyMeasurable_sinc : StronglyMeasurable sinc := measurable_sinc.stronglyMeasurable
 
 @[fun_prop]
-lemma integrable_sinDiv {μ : Measure ℝ} [IsFiniteMeasure μ] :
-    Integrable sinDiv μ := by
+lemma integrable_sinc {μ : Measure ℝ} [IsFiniteMeasure μ] :
+    Integrable sinc μ := by
   refine Integrable.mono' (g := fun _ ↦ 1) (integrable_const _) ?_ <| ae_of_all _ fun x ↦ ?_
-  · exact stronglyMeasurable_sinDiv.aestronglyMeasurable
+  · exact stronglyMeasurable_sinc.aestronglyMeasurable
   · rw [Real.norm_eq_abs]
-    exact abs_sinDiv_le_one x
+    exact abs_sinc_le_one x
 
-lemma integrable_sinDiv_const_mul {μ : Measure ℝ} [IsFiniteMeasure μ] (r : ℝ) :
-    Integrable (fun x ↦ sinDiv (r * x)) μ :=
-  (integrable_map_measure stronglyMeasurable_sinDiv.aestronglyMeasurable (by fun_prop)).mp
-    integrable_sinDiv
+lemma integrable_sinc_const_mul {μ : Measure ℝ} [IsFiniteMeasure μ] (r : ℝ) :
+    Integrable (fun x ↦ sinc (r * x)) μ :=
+  (integrable_map_measure stronglyMeasurable_sinc.aestronglyMeasurable (by fun_prop)).mp
+    integrable_sinc
 
-end SinDiv
+end sinc
 
 lemma integral_exp_Icc (r : ℝ) : ∫ t in -r..r, cexp (t * I) = 2 * Real.sin r :=
   calc ∫ t in -r..r, cexp (t * I)
@@ -283,18 +283,18 @@ lemma integral_exp_Icc (r : ℝ) : ∫ t in -r..r, cexp (t * I) = 2 * Real.sin r
     rw [sub_mul, mul_assoc, mul_assoc, two_mul]
     simp
 
-lemma integral_exp_Icc_eq_sinDiv (r : ℝ) :
-    ∫ t in -r..r, cexp (t * I) = 2 * r * sinDiv r := by
+lemma integral_exp_Icc_eq_sinc (r : ℝ) :
+    ∫ t in -r..r, cexp (t * I) = 2 * r * sinc r := by
   rw [integral_exp_Icc]
   by_cases hr : r = 0
   · simp [hr]
-  rw [sinDiv_of_ne_zero hr]
+  rw [sinc_of_ne_zero hr]
   norm_cast
   field_simp
   ring
 
 lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
-    ∫ t in -r..r, charFun μ t = 2 * r * ∫ x, sinDiv (r * x) ∂μ := by
+    ∫ t in -r..r, charFun μ t = 2 * r * ∫ x, sinc (r * x) ∂μ := by
   have h_int r : Integrable (Function.uncurry fun (x y : ℝ) ↦ cexp (x * y * I))
       ((volume.restrict (Set.Ioc (-r) r)).prod μ) := by
     -- integrable since bounded and the measure is finite
@@ -357,16 +357,16 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     rw [← h, ← mul_assoc]
     norm_cast
     simp [mul_comm _ y, mul_inv_cancel₀ hy]
-  _ = ∫ x, 2 * (r : ℂ) * sinDiv (r * x) ∂μ := by
+  _ = ∫ x, 2 * (r : ℂ) * sinc (r * x) ∂μ := by
     congr with y
-    rw [integral_exp_Icc_eq_sinDiv]
+    rw [integral_exp_Icc_eq_sinc]
     split_ifs with hry
     · simp [hry]
     have hy : y ≠ 0 := fun hy ↦ hry (by simp [hy])
     norm_cast
     field_simp
     ring_nf
-  _ = 2 * r * ∫ x, sinDiv (r * x) ∂μ := by
+  _ = 2 * r * ∫ x, sinc (r * x) ∂μ := by
     norm_cast
     rw [integral_complex_ofReal, ← integral_mul_left]
 
@@ -384,39 +384,39 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
     rw [← integral_mul_left]
     congr with _
     rw [mul_inv_cancel₀ (by positivity)]
-  _ ≤ 2 * ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 - sinDiv (2 * r⁻¹ * x) ∂μ := by
+  _ ≤ 2 * ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 - sinc (2 * r⁻¹ * x) ∂μ := by
     gcongr (2 : ℝ) * ?_
     refine setIntegral_mono_on ?_
-      ((integrable_const _).sub (integrable_sinDiv_const_mul _)).integrableOn ?_ fun x hx ↦ ?_
+      ((integrable_const _).sub (integrable_sinc_const_mul _)).integrableOn ?_ fun x hx ↦ ?_
     · exact Integrable.integrableOn <| by fun_prop
     · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)
     · have hx_ne : 2 * r⁻¹ * x ≠ 0 := by
         intro hx0
         simp only [hx0, Set.mem_setOf_eq, mul_zero, abs_zero] at hx
         linarith
-      rw [sinDiv_of_ne_zero hx_ne, le_sub_iff_add_le, ← le_sub_iff_add_le']
+      rw [sinc_of_ne_zero hx_ne, le_sub_iff_add_le, ← le_sub_iff_add_le']
       norm_num
       rw [one_div]
       refine (sin_div_le_inv_abs _).trans ?_
       exact (inv_le_inv₀ (by positivity) (by positivity)).mpr (le_of_lt hx)
-  _ ≤ 2 * ∫ x, 1 - sinDiv (2 * r⁻¹ * x) ∂μ := by
+  _ ≤ 2 * ∫ x, 1 - sinc (2 * r⁻¹ * x) ∂μ := by
     gcongr
-    refine setIntegral_le_integral ((integrable_const _).sub (integrable_sinDiv_const_mul _))
+    refine setIntegral_le_integral ((integrable_const _).sub (integrable_sinc_const_mul _))
       <| ae_of_all _ fun x ↦ ?_
     simp only [Pi.zero_apply, sub_nonneg]
-    exact sinDiv_le_one (2 * r⁻¹ * x)
-  _ ≤ 2 * ‖∫ x, 1 - sinDiv (2 * r⁻¹ * x) ∂μ‖ := by
+    exact sinc_le_one (2 * r⁻¹ * x)
+  _ ≤ 2 * ‖∫ x, 1 - sinc (2 * r⁻¹ * x) ∂μ‖ := by
     gcongr
     exact Real.le_norm_self _
   _ = 2⁻¹ * r *
-      ‖2 * (r : ℂ)⁻¹ + 2 * r⁻¹ - 2 * (2 * r⁻¹) * ∫ x, sinDiv (2 * r⁻¹ * x) ∂μ‖ := by
+      ‖2 * (r : ℂ)⁻¹ + 2 * r⁻¹ - 2 * (2 * r⁻¹) * ∫ x, sinc (2 * r⁻¹ * x) ∂μ‖ := by
     norm_cast
     rw [← two_mul, mul_assoc 2, ← mul_sub, norm_mul, Real.norm_ofNat, ← mul_assoc,
       ← mul_one_sub, norm_mul, Real.norm_of_nonneg (r := 2 * r⁻¹) (by positivity), ← mul_assoc]
     congr
     · ring_nf
       rw [mul_inv_cancel₀ (by positivity), one_mul]
-    · rw [integral_sub (integrable_const _) (integrable_sinDiv_const_mul _)]
+    · rw [integral_sub (integrable_const _) (integrable_sinc_const_mul _)]
       simp
   _ = 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
     rw [intervalIntegral.integral_sub intervalIntegrable_const intervalIntegrable_charFun, neg_mul,

@@ -57,24 +57,26 @@ variable {E : Type*} {mE : MeasurableSpace E} [NormedAddCommGroup E]
 
 section FiniteDimensional
 
-lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt [BorelSpace E]
-    [NormedSpace ℝ E] [FiniteDimensional ℝ E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]
+variable [BorelSpace E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]
+
+section NormedSpace
+
+variable [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+
+lemma isTightMeasureSet_of_tendsto_limsup_measure_norm_gt
     (h : Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < ‖x‖}) atTop) atTop (𝓝 0)) :
     IsTightMeasureSet (Set.range μ) := by
   refine isTightMeasureSet_of_tendsto_measure_norm_gt ?_
   simp_rw [iSup_range]
   refine tendsto_iSup_of_tendsto_limsup (fun n ↦ ?_) h fun n u v huv ↦ ?_
-  · have h_tight : IsTightMeasureSet {μ n} :=
-      isTightMeasureSet_singleton_of_innerRegularWRT
-        (innerRegular_isCompact_isClosed_measurableSet_of_finite (μ n))
+  · have h_tight : IsTightMeasureSet {μ n} := isTightMeasureSet_singleton
     rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h_tight
     simpa using h_tight
   · refine measure_mono fun x hx ↦ ?_
     simp only [Set.mem_setOf_eq] at hx ⊢
     exact huv.trans_lt hx
 
-lemma isTightMeasureSet_iff_tendsto_limsup_measure_norm_gt [BorelSpace E]
-    [NormedSpace ℝ E] [FiniteDimensional ℝ E] {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)] :
+lemma isTightMeasureSet_iff_tendsto_limsup_measure_norm_gt :
     IsTightMeasureSet (Set.range μ)
       ↔ Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < ‖x‖}) atTop) atTop (𝓝 0) := by
   refine ⟨fun h ↦ ?_, isTightMeasureSet_of_tendsto_limsup_measure_norm_gt⟩
@@ -84,8 +86,11 @@ lemma isTightMeasureSet_iff_tendsto_limsup_measure_norm_gt [BorelSpace E]
   simp_rw [iSup_range]
   exact limsup_le_iSup
 
-variable {ι : Type*} [Fintype ι] [BorelSpace E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  {μ : ℕ → Measure E} [∀ i, IsFiniteMeasure (μ i)]
+end NormedSpace
+
+section InnerProductSpace
+
+variable [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
 
 lemma isTightMeasureSet_of_tendsto_limsup_inner
     (h : ∀ z, Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < |⟪z, x⟫|}) atTop) atTop (𝓝 0)) :
@@ -93,11 +98,9 @@ lemma isTightMeasureSet_of_tendsto_limsup_inner
   refine isTightMeasureSet_of_inner_tendsto (𝕜 := ℝ) fun z ↦ ?_
   simp_rw [iSup_range]
   refine tendsto_iSup_of_tendsto_limsup (fun n ↦ ?_) (h z) fun n u v huv ↦ ?_
-  · have h_tight : IsTightMeasureSet {(μ n).map (fun x ↦ ⟪z, x⟫)} :=
-      isTightMeasureSet_singleton
+  · have h_tight : IsTightMeasureSet {(μ n).map (fun x ↦ ⟪z, x⟫)} := isTightMeasureSet_singleton
     rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h_tight
-    have h_map r : (μ n).map (fun x ↦ ⟪z, x⟫) {x | r < |x|}
-        = μ n {x | r < |⟪z, x⟫|} := by
+    have h_map r : (μ n).map (fun x ↦ ⟪z, x⟫) {x | r < |x|} = μ n {x | r < |⟪z, x⟫|} := by
       rw [Measure.map_apply (by fun_prop)]
       · simp
       · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)
@@ -137,17 +140,15 @@ lemma isTightMeasureSet_of_tendsto_limsup_inner_of_norm_eq_one
   rw [mul_lt_mul_left]
   positivity
 
-/-- Let $(\mu_n)_{n \in \mathbb{N}}$ be measures on $\mathbb{R}^d$ with characteristic functions
-$(\hat{\mu}_n)$. If $\hat{\mu}_n$ converges pointwise to a function $f$ which is continuous at 0,
-then $(\mu_n)$ is tight. -/
+/-- If the characteristic functions converge pointwise to a function which is continuous at 0,
+then `{μ n | n}` is tight. -/
 lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
     {f : E → ℂ} (hf : ContinuousAt f 0) (hf_meas : Measurable f)
     (h : ∀ t, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (f t))) :
     IsTightMeasureSet (Set.range μ) := by
   refine isTightMeasureSet_of_tendsto_limsup_inner_of_norm_eq_one fun z hz ↦ ?_
   have h_le n r := measure_abs_inner_ge_le_charFun (μ := μ n) (a := z) (r := r)
-  suffices Tendsto (fun (r : ℝ) ↦
-        limsup (fun n ↦ (μ n {x | r < |⟪z, x⟫|}).toReal) atTop)
+  suffices Tendsto (fun r : ℝ ↦ limsup (fun n ↦ (μ n {x | r < |⟪z, x⟫|}).toReal) atTop)
       atTop (𝓝 0) by
     have h_ofReal r : limsup (fun n ↦ μ n {x | r < |⟪z, x⟫|}) atTop
         = ENNReal.ofReal
@@ -275,6 +276,8 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
     ring_nf
     rw [mul_inv_cancel₀ hr.ne', one_mul]
   _ < ε := by simp [hε]
+
+end InnerProductSpace
 
 end FiniteDimensional
 

@@ -147,22 +147,4 @@ def continuousBilinFormOfInnerL2 (μ : Measure E) : (Lp ℝ 2 μ) →L[ℝ] (Lp 
 def covarianceOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
   ContinuousLinearMap.bilinearComp (continuousBilinFormOfInnerL2 μ) (dualToL2 μ) (dualToL2 μ)
 
-/-!
-
-# Central limit theorem update
-
-There has been some work happening over at https://github.com/RemyDegenne/CLT and we now have a proof of the central limit theorem for real random variables, if we assume Prokhorov's theorem.
-
-@Jakob has recently added to Mathlib a proof that characteristic functions separate measures, which is a key ingredient.
-Using that, we could prove the Lévy convergence theorem (weak convergence of measures equivalent to convergence of characteristic functions), assuming Prokhorov's theorem.
-
-@ThomasZhu then proved the CLT from there, which needed facts about characteristic functions, independence and Gaussian random variables.
-
-Prokhorov's theorem is being worked on by @Arav, and once that's done our proof will be complete.
-You might spot another blue node in the graph leading to the CLT corresponding to a form of Taylor's theorem, but there is an open Mathlib PR for that.
-
-We are making PRs to Mathlib with the material that does not depend on Prokhorov.
-
--/
-
 end ProbabilityTheory

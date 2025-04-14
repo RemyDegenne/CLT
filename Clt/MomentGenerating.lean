@@ -95,12 +95,7 @@ lemma continuousBilinFormOfInner_apply {x y : E} : continuousBilinFormOfInner x 
 @[simp]
 lemma toLinearMap₂_continuousBilinFormOfInner :
     ContinuousLinearMap.toLinearMap₂ (continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ)
-      = sesqFormOfInner := by
-  ext x y
-  simp only [ContinuousLinearMap.toLinearMap₂_apply, continuousBilinFormOfInner_apply]
-  rw [real_inner_comm]
-  symm
-  exact sesqFormOfInner_apply_apply (E := E) (𝕜 := ℝ) x y
+      = bilinFormOfRealInner := rfl
 
 variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
   {μ : Measure E} [IsProbabilityMeasure μ]
@@ -132,7 +127,7 @@ variable {μ : Measure ℝ} [IsProbabilityMeasure μ]
 open VectorFourier in
 theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) μ) :
     iteratedDeriv n (charFun μ) t = I ^ n * ∫ x, x ^ n * exp (t * x * I) ∂μ := by
-  have h : sesqFormOfInner = (ContinuousLinearMap.mul ℝ ℝ).toLinearMap₂ := by ext; rfl
+  have h : bilinFormOfRealInner = (ContinuousLinearMap.mul ℝ ℝ).toLinearMap₂ := by ext; rfl
   have hint' (k : ℕ) (hk : k ≤ (n : ℕ∞)) : Integrable (fun x ↦ ‖x‖ ^ k * ‖(1 : ℝ → ℂ) x‖) μ := by
     simp only [Pi.one_apply, norm_one, mul_one]
     rw [Nat.cast_le] at hk

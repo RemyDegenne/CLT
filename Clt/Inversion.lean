@@ -24,16 +24,11 @@ section FromMathlibPR19761
 variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
     [MeasurableSpace V] [BorelSpace V] [CompleteSpace V] [SecondCountableTopology V]
 
-/-- This is already proven in Mathlib#19761, for FiniteMeasure -/
-theorem MeasureTheory.ProbabilityMeasure.ext_of_charFun_eq (μ ν : ProbabilityMeasure V)
+theorem MeasureTheory.ProbabilityMeasure.ext_of_charFun (μ ν : ProbabilityMeasure V)
     (h : charFun (μ : Measure V) = charFun ν) :
     μ = ν := by
-  rw [funext_iff] at h
-  simp_rw [charFun_eq_integral_innerProbChar] at h
-  suffices (μ : Measure V) = ν by ext; rw [this]
-  refine ext_of_integral_char_eq continuous_probChar probChar_ne_one ?_ ?_ h
-  · exact fun v hv ↦ DFunLike.ne_iff.mpr ⟨v, inner_self_ne_zero.mpr hv⟩
-  · exact continuous_inner
+  ext
+  rw [Measure.ext_of_charFun h]
 
 end FromMathlibPR19761
 

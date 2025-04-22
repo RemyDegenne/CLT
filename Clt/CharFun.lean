@@ -61,7 +61,15 @@ open BoundedContinuousFunction
 
 namespace ProbabilityTheory
 
-variable {E : Type*} [MeasurableSpace E] {μ : Measure E} {t : E}
+lemma integral_conv {E F : Type*} [AddMonoid E] [MeasurableSpace E] [MeasurableAdd₂ E]
+    {μ ν : Measure E} [SFinite μ] [SFinite ν]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] {f : E → F} (hf : Integrable f (μ ∗ ν)) :
+    ∫ x, f x ∂(μ ∗ ν) = ∫ x, ∫ y, f (x + y) ∂ν ∂μ := by
+  unfold Measure.conv
+  rw [integral_map (by fun_prop) hf.1, integral_prod]
+  exact (integrable_map_measure hf.1 (by fun_prop)).mp hf
+
+variable {E : Type*} [MeasurableSpace E] {μ ν : Measure E} {t : E}
   [NormedAddCommGroup E] [InnerProductSpace ℝ E] [BorelSpace E] [SecondCountableTopology E]
 
 /-- The characteristic function of a convolution of measures
@@ -69,17 +77,18 @@ is the product of the respective characteristic functions. -/
 lemma charFun_conv (μ ν : Measure E) [IsFiniteMeasure μ] [IsFiniteMeasure ν] (t : E) :
     charFun (μ ∗ ν) t = charFun μ t * charFun ν t := by
   simp_rw [charFun_apply]
-  -- todo: missing lemma `integral_conv`
-  unfold Measure.conv
-  rw [integral_map, integral_prod]
+  rw [integral_conv]
   · simp_rw [inner_add_left]
     push_cast
     simp_rw [add_mul, Complex.exp_add, integral_mul_left, integral_mul_right]
-  · apply (integrable_const (1 : ℝ)).mono
+  · -- todo: extract lemma about integrability wrt conv?
+    unfold Measure.conv
+    rw [integrable_map_measure]
+    · apply (integrable_const (1 : ℝ)).mono
+      · exact Measurable.aestronglyMeasurable <| by fun_prop
+      · simp
     · exact Measurable.aestronglyMeasurable <| by fun_prop
-    · simp
-  · fun_prop
-  · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · fun_prop
 
 /--
 The characteristic function of the sum of `n` i.i.d. variables with characteristic function `f` is

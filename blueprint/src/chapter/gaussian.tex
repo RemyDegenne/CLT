@@ -29,11 +29,13 @@ The Gaussian distribution $\mathcal N(m, \sigma^2)$ has characteristic function 
 
 
 \begin{lemma}\label{lem:add_gaussianReal}
+\leanok
+\lean{ProbabilityTheory.gaussianReal_conv_gaussianReal}
 \uses{def:gaussianReal}
 The sum of two independent real Gaussian random variables is Gaussian.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\leanok
 \uses{lem:gaussian_charFun, lem:charFun_add_of_indep}
 
 \end{proof}

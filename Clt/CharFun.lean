@@ -155,20 +155,19 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
       convert h_int (-r)
       simp
   _ = ∫ y, ∫ x in -r..r, cexp (x * y * I) ∂volume ∂μ:= by
-    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (x * y * I)‖
-        ≤ (ENNReal.ofReal (a + a)).toReal := by
+    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (x * y * I)‖ ≤ max (a + a) 0 := by
       refine (norm_integral_le_integral_norm _).trans_eq ?_
       norm_cast
       simp_rw [norm_exp_ofReal_mul_I]
       simp
     rw [← integral_sub]
     · congr
-    · refine Integrable.mono' (integrable_const (ENNReal.ofReal (r + r)).toReal) ?_
+    · refine Integrable.mono' (integrable_const (max (r + r) 0)) ?_
         (ae_of_all _ fun y ↦ h_le y r)
       refine StronglyMeasurable.aestronglyMeasurable ?_
       refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (x * y * I)) ?_
       exact Measurable.stronglyMeasurable (by fun_prop)
-    · refine Integrable.mono' (integrable_const (ENNReal.ofReal (-r + -r)).toReal) ?_
+    · refine Integrable.mono' (integrable_const (max (-r + -r) 0)) ?_
         (ae_of_all _ fun y ↦ ?_)
       · refine StronglyMeasurable.aestronglyMeasurable ?_
         refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (x * y * I)) ?_
@@ -207,10 +206,10 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     rw [integral_complex_ofReal, ← integral_mul_left]
 
 lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
-    (μ {x | r < |x|}).toReal
+    μ.real {x | r < |x|}
       ≤ 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
-  calc (μ {x | r < |x|}).toReal
-  _ = (μ {x | 2 < |2 * r⁻¹ * x|}).toReal := by
+  calc μ.real {x | r < |x|}
+  _ = μ.real {x | 2 < |2 * r⁻¹ * x|} := by
     congr with x
     simp only [Set.mem_setOf_eq, abs_mul, Nat.abs_ofNat]
     rw [abs_of_nonneg (a := r⁻¹) (by positivity), mul_assoc, ← inv_mul_lt_iff₀ (by positivity),
@@ -261,11 +260,12 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
 
 lemma measure_abs_inner_ge_le_charFun {μ : Measure E} [IsProbabilityMeasure μ] {a : E}
     {r : ℝ} (hr : 0 < r) :
-    (μ {x | r < |⟪a, x⟫|}).toReal
+    μ.real {x | r < |⟪a, x⟫|}
       ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun μ (t • a)‖ := by
   have : IsProbabilityMeasure (μ.map (fun x ↦ ⟪a, x⟫)) := isProbabilityMeasure_map (by fun_prop)
+  rw [Measure.real_def]
   convert measure_abs_ge_le_charFun (μ := μ.map (fun x ↦ ⟪a, x⟫)) hr with x
-  · rw [Measure.map_apply]
+  · rw [Measure.real_def, Measure.map_apply]
     · simp
     · fun_prop
     · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)

@@ -224,15 +224,16 @@ Then for all exponential polynomial $f \in \mathcal M$, $\mu_n[f] \to \nu[f]$.
 
 
 \begin{lemma}\label{lem:ext_charFun}
-\leanok
-\lean{MeasureTheory.ProbabilityMeasure.ext_of_charFun}
+\mathlibok
+\lean{MeasureTheory.Measure.ext_of_charFun}
 Two finite measures on a complete separable metric space are equal iff they have the same characteristic function.
 \end{lemma}
 
 \begin{proof}\uses{thm:separating_starSubalgebra, lem:separates_points_expPoly}\leanok
 See Mathlib PR \#19783.
 
-The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\ref{lem:separates_points_expPoly} and~\ref{thm:separating_starSubalgebra}. Equality of characteristic functions implies equality on $\mathcal M$, which then implies equality of the measures since $\mathcal M$ is separating.
+The sub-algebra $\mathcal M$ of exponential polynomials is separating by Lemma~\ref{lem:separates_points_expPoly} and~\ref{thm:separating_starSubalgebra}.
+Equality of characteristic functions implies equality on $\mathcal M$, which then implies equality of the measures since $\mathcal M$ is separating.
 \end{proof}
 
 

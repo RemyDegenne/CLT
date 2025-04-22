@@ -32,52 +32,7 @@ theorem MeasureTheory.ProbabilityMeasure.ext_of_charFun (μ ν : ProbabilityMeas
 
 end FromMathlibPR19761
 
-lemma RCLike.lipschitzWith_re {𝕜 : Type*} [RCLike 𝕜] :
-    LipschitzWith 1 (re (K := 𝕜)) := by
-  intro x y
-  simp only [ENNReal.coe_one, one_mul, edist_eq_enorm_sub]
-  calc ‖re x - re y‖ₑ
-  _ = ‖re (x - y)‖ₑ := by rw [ AddMonoidHom.map_sub re x y]
-  _ ≤ ‖x - y‖ₑ := by rw [enorm_le_iff_norm_le]; exact norm_re_le_norm (x - y)
-
-lemma RCLike.lipschitzWith_im {𝕜 : Type*} [RCLike 𝕜] :
-    LipschitzWith 1 (im (K := 𝕜)) := by
-  intro x y
-  simp only [ENNReal.coe_one, one_mul, edist_eq_enorm_sub]
-  calc ‖im x - im y‖ₑ
-  _ = ‖im (x - y)‖ₑ := by rw [ AddMonoidHom.map_sub im x y]
-  _ ≤ ‖x - y‖ₑ := by rw [enorm_le_iff_norm_le]; exact norm_im_le_norm (x - y)
-
-lemma RCLike.isUniformEmbedding_ofReal {𝕜 : Type*} [RCLike 𝕜] :
-    IsUniformEmbedding ((↑) : ℝ → 𝕜) :=
-  ofRealLI.isometry.isUniformEmbedding
-
-lemma _root_.Filter.tendsto_ofReal_iff' {α 𝕜 : Type*} [RCLike 𝕜]
-    {l : Filter α} {f : α → ℝ} {x : ℝ} :
-    Tendsto (fun x ↦ (f x : 𝕜)) l (𝓝 (x : 𝕜)) ↔ Tendsto f l (𝓝 x) :=
-  RCLike.isUniformEmbedding_ofReal.isClosedEmbedding.tendsto_nhds_iff.symm
-
 variable (𝕜 : Type*) [RCLike 𝕜]
-
-theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto
-    {γ Ω : Type*}
-    {F : Filter γ} {mΩ : MeasurableSpace Ω} [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
-    {μs : γ → ProbabilityMeasure Ω} {μ : ProbabilityMeasure Ω} :
-    Tendsto μs F (𝓝 μ) ↔
-      ∀ f : Ω →ᵇ 𝕜,
-        Tendsto (fun i ↦ ∫ ω, f ω ∂(μs i : Measure Ω)) F (𝓝 (∫ ω, f ω ∂(μ : Measure Ω))) := by
-  rw [ProbabilityMeasure.tendsto_iff_forall_integral_tendsto]
-  refine ⟨fun h f ↦ ?_, fun h f ↦ ?_⟩
-  · rw [← integral_re_add_im (integrable μ f)]
-    simp_rw [← integral_re_add_im (integrable (μs _) f)]
-    refine Tendsto.add ?_ ?_
-    · exact Tendsto.comp (continuous_ofReal.tendsto _) (h (f.comp re RCLike.lipschitzWith_re))
-    · exact (Tendsto.comp (continuous_ofReal.tendsto _)
-        (h (f.comp im RCLike.lipschitzWith_im))).mul_const _
-  · specialize h ((ofRealAm (K := 𝕜)).compLeftContinuousBounded ℝ lipschitzWith_ofReal f)
-    simp only [AlgHom.compLeftContinuousBounded_apply_apply, ofRealAm_coe,
-      Complex.coe_algebraMap, integral_ofReal] at h
-    exact tendsto_ofReal_iff'.mp h
 
 lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
     {E : Type*} [MeasurableSpace E]
@@ -102,7 +57,7 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
   specialize heq g hg
   suffices Tendsto (fun n ↦ ∫ x, g x ∂(μ (ns (φ n)))) atTop (𝓝 (∫ x, g x ∂μ')) from
     tendsto_nhds_unique this <| heq.comp (hns.comp hφ_mono.tendsto_atTop)
-  rw [ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto 𝕜] at hφ_tendsto
+  rw [ProbabilityMeasure.tendsto_iff_forall_integral_rclike_tendsto 𝕜] at hφ_tendsto
   exact hφ_tendsto g
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -162,6 +117,6 @@ theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun
     Tendsto μ atTop (𝓝 μ₀) ↔
       ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
   refine ⟨fun h t ↦ ?_, tendsto_of_tendsto_charFun⟩
-  rw [ProbabilityMeasure.tendsto_iff_forall_integral_rcLike_tendsto ℂ] at h
+  rw [ProbabilityMeasure.tendsto_iff_forall_integral_rclike_tendsto ℂ] at h
   simp_rw [charFun_eq_integral_innerProbChar]
   exact h (innerProbChar t)

@@ -57,10 +57,22 @@ theorem charFun_gaussianReal : charFun (gaussianReal μ v) t = exp (t * μ * I -
       ring_nf
       simp
 
+-- `∗` notation not used because of ambiguous notation : `conv` vs `mconv`
+lemma gaussianReal_conv_gaussianReal {m₁ m₂ : ℝ} {v₁ v₂ : ℝ≥0} :
+    Measure.conv (gaussianReal m₁ v₁) (gaussianReal m₂ v₂) = gaussianReal (m₁ + m₂) (v₁ + v₂) := by
+  refine Measure.ext_of_charFun ?_
+  ext t
+  rw [charFun_conv]
+  simp_rw [charFun_gaussianReal]
+  rw [← Complex.exp_add]
+  simp only [ofReal_add, NNReal.coe_add]
+  congr
+  ring
+
 lemma gaussianReal_map_prod_add {m₁ m₂ : ℝ} {v₁ v₂ : ℝ≥0} :
     ((gaussianReal m₁ v₁).prod (gaussianReal m₂ v₂)).map (fun p ↦ p.1 + p.2)
-      = gaussianReal (m₁ + m₂) (v₁ + v₂) := by
-  sorry
+      = gaussianReal (m₁ + m₂) (v₁ + v₂) :=
+  gaussianReal_conv_gaussianReal
 
 section Def
 
@@ -114,5 +126,8 @@ lemma isGaussian_map_prod_add {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν
       gaussianReal_map_prod_add]
     · fun_prop
     · fun_prop
+
+lemma isGaussian_conv {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
+    IsGaussian (μ ∗ ν) := isGaussian_map_prod_add
 
 end ProbabilityTheory

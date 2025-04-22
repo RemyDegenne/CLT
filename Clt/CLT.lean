@@ -98,13 +98,10 @@ lemma measurable_invSqrtMulSum (n) (hX : ∀ n, Measurable (X n)) :
 lemma aemeasurable_invSqrtMulSum {μ : Measure Ω} (n) (hX : ∀ n, Measurable (X n)) :
     AEMeasurable (invSqrtMulSum X n) μ := by fun_prop
 
-theorem central_limit (hX : ∀ n, Measurable (X n))
-    {P : ProbabilityMeasure Ω} (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)
-    (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) :
-    Tendsto (fun n : ℕ => P.map (aemeasurable_invSqrtMulSum n hX)) atTop (𝓝 stdGaussian) := by
-  refine ProbabilityMeasure.tendsto_iff_tendsto_charFun.mpr fun t ↦ ?_
-  rw [stdGaussian, ProbabilityMeasure.coe_mk, charFun_gaussianReal]
-
+lemma charFun_invSqrtMulSum (hX : ∀ n, Measurable (X n)) {P : Measure Ω} [IsProbabilityMeasure P]
+    (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P)
+    {n : ℕ} {t : ℝ} :
+    charFun (P.map (invSqrtMulSum X n)) t = charFun (P.map (X 0)) ((√n)⁻¹ * t) ^ n := by
   -- convert to independence over Fin n
   have indep_fin (n : ℕ) : iIndepFun (fun i : Fin n ↦ X i) P := by
     rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
@@ -117,11 +114,21 @@ theorem central_limit (hX : ∀ n, Measurable (X n))
   have pi_fin (n : ℕ) := (iIndepFun_iff_map_fun_eq_pi_map fun i : Fin n ↦ (hX i).aemeasurable).mp
     (indep_fin n)
   have map_eq (n : ℕ) := (hident n).map_eq
+  -- use existing results to rewrite the charFun
+  simp_rw [map_invSqrtMulSum P hX, charFun_map_mul, pi_fin, map_eq, charFun_map_sum_pi_const]
+
+theorem central_limit (hX : ∀ n, Measurable (X n))
+    {P : ProbabilityMeasure Ω} (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)
+    (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) :
+    Tendsto (fun n : ℕ => P.map (aemeasurable_invSqrtMulSum n hX)) atTop (𝓝 stdGaussian) := by
+  refine ProbabilityMeasure.tendsto_iff_tendsto_charFun.mpr fun t ↦ ?_
+  rw [stdGaussian, ProbabilityMeasure.coe_mk, charFun_gaussianReal]
+  simp only [ProbabilityMeasure.toMeasure_map, ofReal_zero, mul_zero, zero_mul, NNReal.coe_one,
+    ofReal_one, one_mul, zero_sub]
+  -- `⊢ Tendsto (fun n ↦ charFun (P.map (invSqrtMulSum X n)) t) atTop (𝓝 (cexp (-(t ^ 2 / 2))))`
 
   -- use existing results to rewrite the charFun
-  simp_rw [ProbabilityMeasure.toMeasure_map, ofReal_zero, mul_zero, zero_mul, NNReal.coe_one,
-    ofReal_one, one_mul, zero_sub, map_invSqrtMulSum P.toMeasure hX, charFun_map_mul,
-    pi_fin, map_eq, charFun_map_sum_pi_const]
+  simp_rw [charFun_invSqrtMulSum hX hindep hident]
 
   -- apply tendsto_one_plus_div_cpow_cexp; suffices to show the base is (1 - t ^ 2 / 2n + o(1 / n))
   norm_cast

@@ -68,10 +68,8 @@ lemma integral_cexp_mul_gaussianReal {μ : ℝ} {v : ℝ≥0} {z : ℂ} :
       ring
 
 lemma complexMGF_id_gaussianReal {μ : ℝ} {v : ℝ≥0} {z : ℂ} :
-    complexMGF id (gaussianReal μ v) z = cexp (z * μ + v * z ^ 2 / 2) := by
-  rw [complexMGF]
-  simp only [id_eq]
-  rw [integral_cexp_mul_gaussianReal]
+    complexMGF id (gaussianReal μ v) z = cexp (z * μ + v * z ^ 2 / 2) :=
+  integral_cexp_mul_gaussianReal
 
 lemma charFun_eq_complexMGF {μ : Measure ℝ} {t : ℝ} :
     charFun μ t = complexMGF id μ (t * I) := by

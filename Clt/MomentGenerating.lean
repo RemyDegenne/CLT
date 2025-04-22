@@ -20,16 +20,12 @@ open scoped Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- Peano's form of Taylor's theorem (c/f formulations in Mathlib.Analysis.Calculus.Taylor)
-The general form should have some more general `hf` (using `ContDiff*`).
-The resulting form might be different from this one below.
-
-This is already proven in Mathlib PR #19796: https://github.com/leanprover-community/mathlib4/pull/19796.
--/
-theorem taylor_mean_remainder_peano {f : ℝ → E}
-    {x₀ : ℝ} {n : ℕ} (hf : ContDiff ℝ n f) :
+theorem taylor_isLittleO_univ {f : ℝ → E} {x₀ : ℝ} {n : ℕ} (hf : ContDiff ℝ n f) :
     (fun x ↦ f x - taylorWithinEval f n univ x₀ x) =o[𝓝 x₀] fun x ↦ (x - x₀) ^ n := by
-  sorry
+  suffices (fun x ↦ f x - taylorWithinEval f n univ x₀ x) =o[𝓝[univ] x₀] fun x ↦ (x - x₀) ^ n by
+    simpa
+  refine taylor_isLittleO (s := univ) convex_univ (mem_univ _) ?_
+  simpa [contDiffOn_univ] using hf
 
 end Taylor
 
@@ -95,12 +91,7 @@ lemma continuousBilinFormOfInner_apply {x y : E} : continuousBilinFormOfInner x 
 @[simp]
 lemma toLinearMap₂_continuousBilinFormOfInner :
     ContinuousLinearMap.toLinearMap₂ (continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ)
-      = sesqFormOfInner := by
-  ext x y
-  simp only [ContinuousLinearMap.toLinearMap₂_apply, continuousBilinFormOfInner_apply]
-  rw [real_inner_comm]
-  symm
-  exact sesqFormOfInner_apply_apply (E := E) (𝕜 := ℝ) x y
+      = bilinFormOfRealInner := rfl
 
 variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
   {μ : Measure E} [IsProbabilityMeasure μ]
@@ -132,7 +123,7 @@ variable {μ : Measure ℝ} [IsProbabilityMeasure μ]
 open VectorFourier in
 theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) μ) :
     iteratedDeriv n (charFun μ) t = I ^ n * ∫ x, x ^ n * exp (t * x * I) ∂μ := by
-  have h : sesqFormOfInner = (ContinuousLinearMap.mul ℝ ℝ).toLinearMap₂ := by ext; rfl
+  have h : bilinFormOfRealInner = (ContinuousLinearMap.mul ℝ ℝ).toLinearMap₂ := by ext; rfl
   have hint' (k : ℕ) (hk : k ≤ (n : ℕ∞)) : Integrable (fun x ↦ ‖x‖ ^ k * ‖(1 : ℝ → ℂ) x‖) μ := by
     simp only [Pi.one_apply, norm_one, mul_one]
     rw [Nat.cast_le] at hk
@@ -188,22 +179,27 @@ theorem iteratedDeriv_charFun_zero {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
   -- maybe this should have been done by norm_cast?
   exact integral_ofReal
 
-theorem taylor_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
-    (fun t ↦ charFun μ t - ∑ k ∈ Finset.range (n + 1), (k ! : ℝ)⁻¹ * (t * I) ^ k * ∫ x, x ^ k ∂μ)
-      =o[𝓝 0] fun t ↦ t ^ n := by
-  have := taylor_mean_remainder_peano (x₀ := 0) (contDiff_charFun hint)
-  simp_rw [sub_zero] at this
-  convert this with t
+lemma taylorWithinEval_charFun_zero {n : ℕ} (hint : Integrable (|·| ^ n) μ) (t : ℝ):
+    taylorWithinEval (charFun μ) n Set.univ 0 t
+      = ∑ k ∈ Finset.range (n + 1), (k ! : ℂ)⁻¹ * (t * I) ^ k * ∫ x, x ^ k ∂μ := by
   simp_rw [taylor_within_apply, sub_zero, RCLike.real_smul_eq_coe_mul]
-  apply Finset.sum_congr rfl
-  intro k hkn
+  refine Finset.sum_congr rfl fun k hkn ↦ ?_
   push_cast
   have hint' : Integrable (fun x ↦ |x| ^ k) μ :=
     integrable_norm_pow_antitone μ aestronglyMeasurable_id (Finset.mem_range_succ_iff.mp hkn) hint
-  rw [iteratedDerivWithin, iteratedFDerivWithin_eq_iteratedFDeriv, ← iteratedDeriv,
-    iteratedDeriv_charFun_zero]
+  rw [iteratedDerivWithin,
+    iteratedFDerivWithin_eq_iteratedFDeriv uniqueDiffOn_univ _ (Set.mem_univ _),
+    ← iteratedDeriv, iteratedDeriv_charFun_zero hint']
   · simp [mul_pow, mul_comm, mul_assoc, mul_left_comm]
-  · exact hint'
-  · exact uniqueDiffOn_univ
   · exact (contDiff_charFun hint').contDiffAt
-  · trivial
+
+theorem taylor_charFun {n : ℕ} (hint : Integrable (|·| ^ n) μ) :
+    (fun t ↦ charFun μ t - ∑ k ∈ Finset.range (n + 1), (k ! : ℝ)⁻¹ * (t * I) ^ k * ∫ x, x ^ k ∂μ)
+      =o[𝓝 0] fun t ↦ t ^ n := by
+  have : (fun x ↦ charFun μ x - taylorWithinEval (charFun μ) n Set.univ 0 x)
+      =o[𝓝 0] fun x ↦ x ^ n :=by
+    convert taylor_isLittleO_univ (contDiff_charFun hint)
+    simp_rw [sub_zero]
+  convert this with t
+  push_cast
+  exact (taylorWithinEval_charFun_zero hint t).symm

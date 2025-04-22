@@ -98,13 +98,10 @@ lemma measurable_invSqrtMulSum (n) (hX : ∀ n, Measurable (X n)) :
 lemma aemeasurable_invSqrtMulSum {μ : Measure Ω} (n) (hX : ∀ n, Measurable (X n)) :
     AEMeasurable (invSqrtMulSum X n) μ := by fun_prop
 
-theorem central_limit (hX : ∀ n, Measurable (X n))
-    {P : ProbabilityMeasure Ω} (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)
-    (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) :
-    Tendsto (fun n : ℕ => P.map (aemeasurable_invSqrtMulSum n hX)) atTop (𝓝 stdGaussian) := by
-  refine ProbabilityMeasure.tendsto_iff_tendsto_charFun.mpr fun t ↦ ?_
-  rw [stdGaussian, ProbabilityMeasure.coe_mk, charFun_gaussianReal]
-
+lemma charFun_invSqrtMulSum (hX : ∀ n, Measurable (X n)) {P : Measure Ω} [IsProbabilityMeasure P]
+    (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P)
+    {n : ℕ} {t : ℝ} :
+    charFun (P.map (invSqrtMulSum X n)) t = charFun (P.map (X 0)) ((√n)⁻¹ * t) ^ n := by
   -- convert to independence over Fin n
   have indep_fin (n : ℕ) : iIndepFun (fun i : Fin n ↦ X i) P := by
     rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
@@ -117,48 +114,91 @@ theorem central_limit (hX : ∀ n, Measurable (X n))
   have pi_fin (n : ℕ) := (iIndepFun_iff_map_fun_eq_pi_map fun i : Fin n ↦ (hX i).aemeasurable).mp
     (indep_fin n)
   have map_eq (n : ℕ) := (hident n).map_eq
+  -- use existing results to rewrite the charFun
+  simp_rw [map_invSqrtMulSum P hX, charFun_map_mul, pi_fin, map_eq, charFun_map_sum_pi_const]
+
+lemma taylor_charFun_two' {X : Ω → ℝ} (hX : Measurable X) {P : Measure Ω} [IsProbabilityMeasure P]
+    (hint : Integrable (|·| ^ 2) (P.map X)) :
+    (fun t ↦ charFun (P.map X) t - (1 + P[X] * t * I - P[X ^ 2] * t ^ 2 / 2))
+      =o[𝓝 0] fun t ↦ t ^ 2 := by
+  -- Apply Taylor's theorem to `charFun`
+  have : IsProbabilityMeasure (P.map X) := isProbabilityMeasure_map hX.aemeasurable
+  have h := taylor_charFun hint
+  -- simplify the Taylor expansion
+  simp only [Nat.reduceAdd, ofReal_inv, ofReal_natCast, mul_pow, Finset.sum_range_succ,
+    Finset.range_one, Finset.sum_singleton, Nat.factorial_zero, Nat.cast_one, inv_one, pow_zero,
+    mul_one, integral_const, measureReal_univ_eq_one, smul_eq_mul, ofReal_one, Nat.factorial_one,
+    pow_one, one_mul, Nat.factorial_two, Nat.cast_ofNat, I_sq, mul_neg, neg_mul] at h
+  have h1 : ∫ x, x ∂P.map X = P[X] := by
+    rw [integral_map hX.aemeasurable]
+    exact aestronglyMeasurable_id
+  have h2 : ∫ x, x ^ 2 ∂P.map X = P[X ^ 2] := by
+    rw [integral_map hX.aemeasurable]
+    · simp
+    · exact aestronglyMeasurable_id.pow 2
+  simp only [h1, h2, Pi.pow_apply, ← sub_eq_add_neg] at h
+  simp only [integral_complex_ofReal, Pi.pow_apply, ← ofReal_pow]
+  simp only [ofReal_pow]
+  convert h using 4 with t
+  · ring
+  · ring
+
+lemma taylor_charFun_two {X : Ω → ℝ} (hX : Measurable X) {P : Measure Ω} [IsProbabilityMeasure P]
+    (h0 : P[X] = 0) (h1 : P[X ^ 2] = 1) :
+    (fun t ↦ charFun (P.map X) t - (1 - t ^ 2 / 2)) =o[𝓝 0] fun t ↦ t ^ 2 := by
+  have hint : Integrable (|·| ^ 2) (P.map X) := by
+    simp_rw [_root_.sq_abs]
+    apply Integrable.of_integral_ne_zero
+    erw [← integral_map hX.aemeasurable (aestronglyMeasurable_id.pow 2)] at h1
+    simp only [Pi.pow_apply, id_eq] at h1
+    simp [h1]
+  convert taylor_charFun_two' hX hint with t
+  · simp [integral_complex_ofReal, h0]
+  · simp only [Pi.pow_apply] at h1
+    simp [← ofReal_pow, integral_complex_ofReal, h1]
+
+theorem central_limit (hX : ∀ n, Measurable (X n))
+    {P : ProbabilityMeasure Ω} (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)
+    (hindep : iIndepFun X P) (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) :
+    Tendsto (fun n : ℕ => P.map (aemeasurable_invSqrtMulSum n hX)) atTop (𝓝 stdGaussian) := by
+  refine ProbabilityMeasure.tendsto_iff_tendsto_charFun.mpr fun t ↦ ?_
+  rw [stdGaussian, ProbabilityMeasure.coe_mk, charFun_gaussianReal]
+  simp only [ProbabilityMeasure.toMeasure_map, ofReal_zero, mul_zero, zero_mul, NNReal.coe_one,
+    ofReal_one, one_mul, zero_sub]
+  -- `⊢ Tendsto (fun n ↦ charFun (P.map (invSqrtMulSum X n)) t) atTop (𝓝 (cexp (-(t ^ 2 / 2))))`
 
   -- use existing results to rewrite the charFun
-  simp_rw [ProbabilityMeasure.toMeasure_map, ofReal_zero, mul_zero, zero_mul, NNReal.coe_one,
-    ofReal_one, one_mul, zero_sub, map_invSqrtMulSum P.toMeasure hX, charFun_map_mul,
-    pi_fin, map_eq, charFun_map_sum_pi_const]
+  simp_rw [charFun_invSqrtMulSum hX hindep hident]
 
   -- apply tendsto_one_plus_div_cpow_cexp; suffices to show the base is (1 - t ^ 2 / 2n + o(1 / n))
   norm_cast
   rw [ofReal_exp]
   apply tendsto_one_plus_div_cpow_cexp
 
-  -- rewrite h0 and h1 as pushforward
-  erw [← integral_map (hX 0).aemeasurable aestronglyMeasurable_id] at h0
-  erw [← integral_map (hX 0).aemeasurable (aestronglyMeasurable_id.pow 2)] at h1
-  dsimp only [Pi.pow_apply, id_eq] at h0 h1
+  suffices (fun (n : ℕ) ↦
+        charFun (Measure.map (X 0) P) ((√n)⁻¹ * t) - (1 + (-(((√n)⁻¹ * t) ^ 2 / 2) : ℂ)))
+      =o[atTop] fun n ↦ ((√n)⁻¹ * t) ^ 2 by
+    simp_rw [mul_comm _ t] at this ⊢
+    simp_rw [mul_pow] at this
+    convert this.of_const_mul_right (c := t ^ 2) using 3 with n
+    · simp only [ofReal_neg, ofReal_div, ofReal_ofNat, ofReal_inv, inv_pow, ← ofReal_pow,
+        Nat.cast_nonneg, Real.sq_sqrt, ofReal_natCast, add_right_inj]
+      ring
+    · simp
 
-  -- derive the required littleO result
-  have hint : Integrable (|·| ^ 2) (P.toMeasure.map (X 0)) := by
-    simp_rw [_root_.sq_abs]
-    apply Integrable.of_integral_ne_zero
-    rw [h1]
-    norm_num
-  have : IsProbabilityMeasure (P.toMeasure.map (X 0)) :=
-    isProbabilityMeasure_map (hX 0).aemeasurable
-  have t_mul_inv_sqrt := Tendsto.const_mul t <| tendsto_inv_atTop_zero.comp <|
-    tendsto_sqrt_atTop.comp <| tendsto_natCast_atTop_atTop
-  rw [mul_zero] at t_mul_inv_sqrt
-  have littleO : _ =o[atTop] fun k ↦ _ := (taylor_charFun hint).comp_tendsto t_mul_inv_sqrt
-  simp only [Nat.reduceAdd, ofReal_inv, ofReal_natCast, mul_pow, Finset.sum_range_succ,
-    Finset.range_one, Finset.sum_singleton, Nat.factorial_zero, Nat.cast_one, inv_one, pow_zero,
-    mul_one, integral_const, measure_univ, ENNReal.toReal_one, smul_eq_mul, ofReal_one,
-    Nat.factorial_one, pow_one, one_mul, Nat.factorial_two, Nat.cast_ofNat, I_sq, mul_neg, neg_mul,
-    Function.comp_apply, inv_pow, Nat.cast_nonneg, Real.sq_sqrt] at littleO
+  have h_taylor : (fun t ↦ charFun (Measure.map (X 0) P) t - (1 - t ^ 2 / 2))
+      =o[𝓝 0] fun t ↦ t ^ 2 := taylor_charFun_two (hX 0) h0 h1
 
-  -- littleO is what we wanted
-  convert littleO.of_const_mul_right with n
-  · -- simp? says
-    simp only [ofReal_neg, ofReal_div, ofReal_pow, ofReal_ofNat, Function.comp_apply, ofReal_mul,
-      ofReal_inv]
-    rw [h0, h1]
-    simp [mul_pow, mul_comm, ← ofReal_pow]
+  have h_tendsto : Tendsto (fun (n : ℕ) ↦ (√n)⁻¹ * t) atTop (𝓝 0) := by
+    have t_mul_inv_sqrt := Tendsto.const_mul t <| tendsto_inv_atTop_zero.comp <|
+        tendsto_sqrt_atTop.comp <| tendsto_natCast_atTop_atTop
+    rw [mul_zero] at t_mul_inv_sqrt
+    convert t_mul_inv_sqrt using 2 with n
+    simp only [Function.comp_apply]
     ring
-  · ext; apply one_div
+
+  convert h_taylor.comp_tendsto h_tendsto using 2 with n n
+  simp only [ofReal_inv, Function.comp_apply, ofReal_mul]
+  ring_nf
 
 end ProbabilityTheory

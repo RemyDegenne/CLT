@@ -16,8 +16,8 @@ $\phi^{(k)}(t) = \mathbb{E}[i X]^k e^{i t X}$ \: .
 \end{proof}
 
 \begin{lemma}[Peano form of Taylor's theorem]\label{lem:taylor_peano}
-\leanok
-\lean{taylor_mean_remainder_peano}
+\mathlibok
+\lean{taylor_isLittleO}
 For a $n$-times continuously differentiable function $f : \mathbb{R} \to E$, for any $x_0\in\mathbb{R}$,
 \begin{align*}
 f(x) - \sum_{i=0}^n\frac{f^{(i)}(x_0)}{i!}(x-x_0)^i = o((x - x_0)^k)
@@ -25,8 +25,7 @@ f(x) - \sum_{i=0}^n\frac{f^{(i)}(x_0)}{i!}(x-x_0)^i = o((x - x_0)^k)
 \end{align*}
 \end{lemma}
 
-\begin{proof}
-This is proven in mathlib PR: \href{https://github.com/leanprover-community/mathlib4/pull/19796}{\#19796}.
+\begin{proof}\leanok
 \end{proof}
 
 \begin{lemma}\label{lem:iIndepFun_iff_pi_map_eq_map}

@@ -53,30 +53,7 @@ lemma integrable_probChar {μ : Measure ℝ} [IsProbabilityMeasure μ] (y : ℝ)
   · simp
   · exact Measurable.aestronglyMeasurable <| by fun_prop
 
-theorem fourierIntegral_probChar_eq_integral_exp {V : Type _} [AddCommGroup V] [Module ℝ V]
-    [MeasurableSpace V] {W : Type _} [AddCommGroup W] [Module ℝ W] (L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ)
-    (μ : Measure V) (f : V → E) (w : W) :
-    VectorFourier.fourierIntegral Real.probChar μ L f w =
-      ∫ v : V, exp (-↑(L v w) * I) • f v ∂μ := by
-  simp_rw [VectorFourier.fourierIntegral, Circle.smul_def, Real.probChar_apply, ofReal_neg]
-
 end
-
-namespace BoundedContinuousFunction
-
-variable {E : Type*} [SeminormedAddCommGroup E] [InnerProductSpace ℝ E]
-
-/-- The bounded continuous map `x ↦ exp(⟪x, t⟫ * I)`. -/
-def innerProbChar (t : E) : BoundedContinuousFunction E ℂ :=
-  BoundedContinuousFunction.char Real.continuous_probChar
-    (L := bilinFormOfRealInner) continuous_inner t
-
-lemma innerProbChar_apply (t x : E) : innerProbChar t x = exp (⟪x, t⟫ * I) := rfl
-
-@[simp]
-lemma innerProbChar_zero : innerProbChar (0 : E) = 1 := by simp [innerProbChar]
-
-end BoundedContinuousFunction
 
 end Character
 
@@ -84,111 +61,34 @@ open BoundedContinuousFunction
 
 namespace ProbabilityTheory
 
-variable {E : Type*} [MeasurableSpace E] {μ : Measure E} {t : E}
+lemma integral_conv {E F : Type*} [AddMonoid E] [MeasurableSpace E] [MeasurableAdd₂ E]
+    {μ ν : Measure E} [SFinite μ] [SFinite ν]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] {f : E → F} (hf : Integrable f (μ ∗ ν)) :
+    ∫ x, f x ∂(μ ∗ ν) = ∫ x, ∫ y, f (x + y) ∂ν ∂μ := by
+  unfold Measure.conv
+  rw [integral_map (by fun_prop) hf.1, integral_prod]
+  exact (integrable_map_measure hf.1 (by fun_prop)).mp hf
 
-/-- The characteristic function of a measure in an inner product space. -/
-def charFun [Inner ℝ E] (μ : Measure E) (t : E) : ℂ := ∫ x, exp (⟪x, t⟫ * I) ∂μ
-
-lemma charFun_apply [Inner ℝ E] (t : E) : charFun μ t = ∫ x, exp (⟪x, t⟫ * I) ∂μ := rfl
-
-lemma charFun_apply_real {μ : Measure ℝ} {t : ℝ} :
-    charFun μ t = ∫ x, exp (t * x * I) ∂μ := by simp [charFun_apply]
-
-variable [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-
-@[simp]
-lemma charFun_zero (μ : Measure E) : charFun μ 0 = (μ Set.univ).toReal := by
-  simp [charFun_apply]
-
-@[simp]
-lemma charFun_zero_measure : charFun (0 : Measure E) t = 0 := by simp [charFun_apply]
-
-lemma charFun_eq_integral_innerProbChar : charFun μ t = ∫ v, innerProbChar t v ∂μ := by
-  simp [charFun_apply, innerProbChar_apply]
-
-lemma charFun_eq_integral_probChar (y : E) : charFun μ y = ∫ x, (Real.probChar ⟪x, y⟫ : ℂ) ∂μ := by
-  simp [charFun_apply, Real.probChar_apply]
-
-lemma charFun_eq_fourierIntegral (t : E) :
-    charFun μ t = VectorFourier.fourierIntegral Real.probChar μ sesqFormOfInner 1 (-t) := by
-  simp only [charFun_apply, real_smul, fourierIntegral_probChar_eq_integral_exp,
-    Pi.one_apply, smul_eq_mul, mul_one, map_neg, ofReal_neg, neg_neg]
-  simp_rw [real_inner_comm t]
-  congr
-
-/-- Relate `charFun` to the "standard" Fourier integral defined by `Real.fourierChar`. -/
-lemma charFun_eq_fourierIntegral' (t : E) :
-    charFun μ t = VectorFourier.fourierIntegral Real.fourierChar μ
-      sesqFormOfInner 1 (-(2 * π)⁻¹ • t) := by
-  have h : (2 : ℂ) * π ≠ 0 := by simp [Real.pi_ne_zero]
-  simp only [charFun_apply, real_smul, VectorFourier.fourierIntegral, Real.fourierChar, neg_smul,
-    map_neg, _root_.map_smul, smul_eq_mul, neg_neg, AddChar.coe_mk, ← mul_assoc, Pi.one_apply,
-    Circle.smul_def, Circle.coe_exp, ofReal_mul, ofReal_ofNat, ofReal_inv, mul_inv_cancel₀ h,
-    one_mul, mul_one]
-  simp_rw [real_inner_comm t]
-  congr
-
-lemma charFun_neg (t : E) : charFun μ (-t) = conj (charFun μ t) := by
-  simp [charFun_apply, ← integral_conj, ← exp_conj]
-
-lemma norm_charFun_le (t : E) : ‖charFun μ t‖ ≤ (μ Set.univ).toReal := by
-  rw [charFun_eq_fourierIntegral]
-  refine (VectorFourier.norm_fourierIntegral_le_integral_norm _ _ _ _ _).trans_eq ?_
-  simp
-
-lemma norm_charFun_le_one [IsProbabilityMeasure μ] (t : E) : ‖charFun μ t‖ ≤ 1 :=
-  (norm_charFun_le _).trans_eq (by simp)
-
-lemma norm_one_sub_charFun_le_two [IsProbabilityMeasure μ] :
-    ‖1 - charFun μ t‖ ≤ 2 :=
-  calc ‖1 - charFun μ t‖
-  _ ≤ ‖(1 : ℂ)‖ + ‖charFun μ t‖ := norm_sub_le _ _
-  _ ≤ 1 + 1 := by simp [norm_charFun_le_one]
-  _ = 2 := by norm_num
-
-lemma stronglyMeasurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E] [SFinite μ] :
-    StronglyMeasurable (charFun μ) :=
-  (Measurable.stronglyMeasurable (by fun_prop)).integral_prod_left
-
-@[fun_prop]
-lemma measurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E] [SFinite μ] :
-    Measurable (charFun μ) :=
-  stronglyMeasurable_charFun.measurable
-
-lemma intervalIntegrable_charFun {μ : Measure ℝ} [IsFiniteMeasure μ] {a b : ℝ} :
-    IntervalIntegrable (charFun μ) ℙ a b :=
-  IntervalIntegrable.mono_fun' (g := fun _ ↦ (μ Set.univ).toReal) (by simp)
-    stronglyMeasurable_charFun.aestronglyMeasurable (ae_of_all _ norm_charFun_le)
-
-variable [BorelSpace E] [SecondCountableTopology E]
-
-lemma charFun_map_smul (r : ℝ) (t : E) :
-    charFun (μ.map (r • ·)) t = charFun μ (r • t) := by
-  rw [charFun_apply, charFun_apply, integral_map]
-  · simp_rw [inner_smul_right, ← real_inner_smul_left]
-  · fun_prop
-  · exact Measurable.aestronglyMeasurable <| by fun_prop
-
-lemma charFun_map_mul {μ : Measure ℝ} (r : ℝ) (t : ℝ) :
-    charFun (μ.map (r * ·)) t = charFun μ (r * t) :=
-  charFun_map_smul r t
+variable {E : Type*} [MeasurableSpace E] {μ ν : Measure E} {t : E}
+  [NormedAddCommGroup E] [InnerProductSpace ℝ E] [BorelSpace E] [SecondCountableTopology E]
 
 /-- The characteristic function of a convolution of measures
 is the product of the respective characteristic functions. -/
 lemma charFun_conv (μ ν : Measure E) [IsFiniteMeasure μ] [IsFiniteMeasure ν] (t : E) :
     charFun (μ ∗ ν) t = charFun μ t * charFun ν t := by
   simp_rw [charFun_apply]
-  -- todo: missing lemma `integral_conv`
-  unfold Measure.conv
-  rw [integral_map, integral_prod]
+  rw [integral_conv]
   · simp_rw [inner_add_left]
     push_cast
     simp_rw [add_mul, Complex.exp_add, integral_mul_left, integral_mul_right]
-  · apply (integrable_const (1 : ℝ)).mono
+  · -- todo: extract lemma about integrability wrt conv?
+    unfold Measure.conv
+    rw [integrable_map_measure]
+    · apply (integrable_const (1 : ℝ)).mono
+      · exact Measurable.aestronglyMeasurable <| by fun_prop
+      · simp
     · exact Measurable.aestronglyMeasurable <| by fun_prop
-    · simp
-  · fun_prop
-  · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · fun_prop
 
 /--
 The characteristic function of the sum of `n` i.i.d. variables with characteristic function `f` is
@@ -264,20 +164,19 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
       convert h_int (-r)
       simp
   _ = ∫ y, ∫ x in -r..r, cexp (x * y * I) ∂volume ∂μ:= by
-    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (x * y * I)‖
-        ≤ (ENNReal.ofReal (a + a)).toReal := by
+    have h_le (y : ℝ) a : ‖∫ (x : ℝ) in Set.Ioc (-a) a, cexp (x * y * I)‖ ≤ max (a + a) 0 := by
       refine (norm_integral_le_integral_norm _).trans_eq ?_
       norm_cast
       simp_rw [norm_exp_ofReal_mul_I]
       simp
     rw [← integral_sub]
     · congr
-    · refine Integrable.mono' (integrable_const (ENNReal.ofReal (r + r)).toReal) ?_
+    · refine Integrable.mono' (integrable_const (max (r + r) 0)) ?_
         (ae_of_all _ fun y ↦ h_le y r)
       refine StronglyMeasurable.aestronglyMeasurable ?_
       refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (x * y * I)) ?_
       exact Measurable.stronglyMeasurable (by fun_prop)
-    · refine Integrable.mono' (integrable_const (ENNReal.ofReal (-r + -r)).toReal) ?_
+    · refine Integrable.mono' (integrable_const (max (-r + -r) 0)) ?_
         (ae_of_all _ fun y ↦ ?_)
       · refine StronglyMeasurable.aestronglyMeasurable ?_
         refine StronglyMeasurable.integral_prod_left (f := fun (x y : ℝ) ↦ cexp (x * y * I)) ?_
@@ -316,10 +215,10 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     rw [integral_complex_ofReal, ← integral_mul_left]
 
 lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
-    (μ {x | r < |x|}).toReal
+    μ.real {x | r < |x|}
       ≤ 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
-  calc (μ {x | r < |x|}).toReal
-  _ = (μ {x | 2 < |2 * r⁻¹ * x|}).toReal := by
+  calc μ.real {x | r < |x|}
+  _ = μ.real {x | 2 < |2 * r⁻¹ * x|} := by
     congr with x
     simp only [Set.mem_setOf_eq, abs_mul, Nat.abs_ofNat]
     rw [abs_of_nonneg (a := r⁻¹) (by positivity), mul_assoc, ← inv_mul_lt_iff₀ (by positivity),
@@ -370,11 +269,12 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
 
 lemma measure_abs_inner_ge_le_charFun {μ : Measure E} [IsProbabilityMeasure μ] {a : E}
     {r : ℝ} (hr : 0 < r) :
-    (μ {x | r < |⟪a, x⟫|}).toReal
+    μ.real {x | r < |⟪a, x⟫|}
       ≤ 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun μ (t • a)‖ := by
   have : IsProbabilityMeasure (μ.map (fun x ↦ ⟪a, x⟫)) := isProbabilityMeasure_map (by fun_prop)
+  rw [Measure.real_def]
   convert measure_abs_ge_le_charFun (μ := μ.map (fun x ↦ ⟪a, x⟫)) hr with x
-  · rw [Measure.map_apply]
+  · rw [Measure.real_def, Measure.map_apply]
     · simp
     · fun_prop
     · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)

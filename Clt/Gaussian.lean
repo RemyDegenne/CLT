@@ -229,10 +229,18 @@ def ContinuousLinearMap.toLp (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ
       rw [← ofReal_norm]
       gcongr
 
+@[simp]
+lemma ContinuousLinearMap.toLp_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+    L.toLp μ = MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L) := rfl
+
 /-- Covariance operator of a Gaussian measure. -/
 def covarianceOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
   ContinuousLinearMap.bilinearComp (continuousBilinFormOfInner (E := Lp ℝ 2 μ))
-    (ContinuousLinearMap.toLp  μ) (ContinuousLinearMap.toLp  μ)
+    (ContinuousLinearMap.toLp μ) (ContinuousLinearMap.toLp μ)
+
+lemma covarianceOperator_apply {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E →L[ℝ] ℝ) :
+    covarianceOperator μ L₁ L₂ = ∫ x, L₁ x * L₂ x ∂μ := by
+  sorry
 
 end Covariance
 

@@ -167,9 +167,8 @@ lemma isGaussian_conv {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
 
 lemma integrable_exp_mul_gaussianReal (t : ℝ) :
     Integrable (fun x ↦ rexp (t * x)) (gaussianReal μ v) := by
-  rw [← mgf_pos_iff, mgf_gaussianReal (μ := μ) (v := v)]
-  · exact Real.exp_pos _
-  · simp
+  rw [← mgf_pos_iff, mgf_gaussianReal (μ := μ) (v := v) (by simp)]
+  exact Real.exp_pos _
 
 lemma memLp_id_gaussianReal (p : ℝ≥0) : MemLp id p (gaussianReal μ v) := by
   refine memLp_of_mem_interior_integrableExpSet ?_ _

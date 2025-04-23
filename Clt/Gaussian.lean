@@ -15,7 +15,7 @@ Properties of Gaussian distributions and its characteristic function.
 noncomputable section
 
 open MeasureTheory ProbabilityTheory Complex NormedSpace
-open scoped ENNReal NNReal Real
+open scoped ENNReal NNReal Real Topology
 
 namespace ProbabilityTheory
 
@@ -102,12 +102,13 @@ lemma integrable_exp_mul_gaussianReal (t : ℝ) :
   rw [← mgf_pos_iff, mgf_gaussianReal (μ := μ) (v := v) (by simp)]
   exact Real.exp_pos _
 
-lemma memLp_id_gaussianReal (p : ℝ≥0) : MemLp id p (gaussianReal μ v) := by
-  refine memLp_of_mem_interior_integrableExpSet ?_ _
-  suffices integrableExpSet id (gaussianReal μ v) = Set.univ by simp [this]
-  ext x
-  simp only [integrableExpSet, id_eq, Set.mem_setOf_eq, Set.mem_univ, iff_true]
-  exact integrable_exp_mul_gaussianReal _ _ _
+@[simp]
+lemma integrableExpSet_id_gaussianReal : integrableExpSet id (gaussianReal μ v) = Set.univ := by
+  ext
+  simpa [integrableExpSet] using integrable_exp_mul_gaussianReal _ _ _
+
+lemma memLp_id_gaussianReal (p : ℝ≥0) : MemLp id p (gaussianReal μ v) :=
+  memLp_of_mem_interior_integrableExpSet (by simp) p
 
 lemma integrable_pow_gaussianReal {n : ℕ} :
     Integrable (fun x ↦ |x| ^ n) (gaussianReal μ v) := by
@@ -126,29 +127,62 @@ lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L :
   · exact Measurable.aestronglyMeasurable <| by fun_prop
   · fun_prop
 
-def dualToL2 (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] Lp ℝ 2 μ where
+/-- `MemLp.toLp` as a `LinearMap` from the continuous linear maps. -/
+def ContinuousLinearMap.toLpₗ (μ : Measure E) [IsGaussian μ] :
+    (E →L[ℝ] ℝ) →ₗ[ℝ] Lp ℝ 2 μ where
   toFun := fun L ↦ MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L)
   map_add' u v := by push_cast; rw [MemLp.toLp_add]
   map_smul' c L := by push_cast; rw [MemLp.toLp_const_smul]; rfl
+
+omit [SecondCountableTopology E] in
+@[simp]
+lemma ContinuousLinearMap.toLpₗ_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+    L.toLpₗ μ = MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L) := rfl
+
+-- Corollary of Fernique's theorem
+lemma IsGaussian.memL2_id (μ : Measure E) [IsGaussian μ] : MemLp id 2 μ := by
+  sorry
+
+/-- `MemLp.toLp` as a `ContinuousLinearMap` from the continuous linear maps. -/
+def ContinuousLinearMap.toLp (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] Lp ℝ 2 μ where
+  toLinearMap := ContinuousLinearMap.toLpₗ μ
   cont := by
-    refine continuous_iff_continuous_dist.mpr ?_
-    simp only [dist_eq_norm]
-    suffices Continuous fun (p : (E →L[ℝ] ℝ) × (E →L[ℝ] ℝ)) ↦
-        ENNReal.toReal (eLpNorm (p.1 - p.2) 2 μ) by
-      sorry
-    rw [continuous_iff_continuousAt]
-    intro p
-    refine (ENNReal.continuousAt_toReal ?_).comp ?_
-    · sorry
-    simp_rw [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
-    simp only [ContinuousLinearMap.coe_sub', Pi.sub_apply, ENNReal.toReal_ofNat, ENNReal.rpow_ofNat,
-      one_div]
-    sorry
+    refine LinearMap.continuous_of_locally_bounded _ fun s hs ↦ ?_
+    simp only [ContinuousLinearMap.toLpₗ_apply]
+    rw [image_isVonNBounded_iff]
+    simp_rw [isVonNBounded_iff'] at hs
+    obtain ⟨r, hxr⟩ := hs
+    refine ⟨((ENNReal.ofReal r) ^ 2 * (∫⁻ x, ‖x‖ₑ ^ 2 ∂μ)).toReal ^ (2 : ℝ)⁻¹, fun L hLs ↦ ?_⟩
+    specialize hxr L hLs
+    rw [Lp.norm_toLp, eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
+    simp only [ENNReal.toReal_ofNat, ENNReal.rpow_ofNat, one_div]
+    refine ENNReal.toReal_le_of_le_ofReal (by positivity) ?_
+    suffices ∫⁻ x, ‖L x‖ₑ ^ 2 ∂μ ≤ (ENNReal.ofReal r) ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ by
+      rw [← ENNReal.ofReal_rpow_of_nonneg (by positivity) (by positivity)]
+      gcongr
+      rwa [ENNReal.ofReal_toReal]
+      refine ENNReal.mul_ne_top ?_ ?_
+      · simp
+      · have h := (IsGaussian.memL2_id μ).eLpNorm_ne_top
+        rw [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)] at h
+        simpa using h
+    calc ∫⁻ x, ‖L x‖ₑ ^ 2 ∂μ
+    _ ≤ ∫⁻ x, ‖L‖ₑ ^ 2 * ‖x‖ₑ ^ 2 ∂μ := by
+      refine lintegral_mono fun x ↦ ?_
+      rw [← mul_pow]
+      gcongr
+      simp_rw [← ofReal_norm]
+      rw [← ENNReal.ofReal_mul (by positivity)]
+      gcongr
+      exact L.le_opNorm x
+    _ = ‖L‖ₑ ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ := by rw [lintegral_const_mul]; fun_prop
+    _ ≤ (ENNReal.ofReal r) ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ := by
+      rw [← ofReal_norm]
+      gcongr
 
-def continuousBilinFormOfInnerL2 (μ : Measure E) : (Lp ℝ 2 μ) →L[ℝ] (Lp ℝ 2 μ) →L[ℝ] ℝ :=
-  continuousBilinFormOfInner (E := Lp ℝ 2 μ)
-
+/-- Covariance operator of a Gaussian measure. -/
 def covarianceOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
-  ContinuousLinearMap.bilinearComp (continuousBilinFormOfInnerL2 μ) (dualToL2 μ) (dualToL2 μ)
+  ContinuousLinearMap.bilinearComp (continuousBilinFormOfInner (E := Lp ℝ 2 μ))
+    (ContinuousLinearMap.toLp  μ) (ContinuousLinearMap.toLp  μ)
 
 end ProbabilityTheory

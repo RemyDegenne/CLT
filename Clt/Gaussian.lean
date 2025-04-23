@@ -127,6 +127,59 @@ lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L :
   · exact Measurable.aestronglyMeasurable <| by fun_prop
   · fun_prop
 
+section CharFun
+
+open BoundedContinuousFunction Real
+
+lemma IsBoundedBilinearMap.symm {E F G 𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [SeminormedAddCommGroup F] [NormedSpace 𝕜 F]
+    [SeminormedAddCommGroup G] [NormedSpace 𝕜 G]
+    {f : E × F → G} (h : IsBoundedBilinearMap 𝕜 f) :
+    IsBoundedBilinearMap 𝕜 (fun p ↦ f (p.2, p.1)) where
+  add_left x₁ x₂ y := h.add_right _ _ _
+  smul_left c x y := h.smul_right _ _ _
+  add_right x y₁ y₂ := h.add_left _ _ _
+  smul_right c x y := h.smul_left _ _ _
+  bound := by
+    obtain ⟨C, hC_pos, hC⟩ := h.bound
+    exact ⟨C, hC_pos, fun x y ↦ (hC y x).trans_eq (by ring)⟩
+
+namespace BoundedContinuousFunction
+
+variable {E : Type*} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
+
+noncomputable
+def probCharCLM (L : E →L[ℝ] ℝ) : E →ᵇ ℂ :=
+  char continuous_probChar (L := isBoundedBilinearMap_apply.symm.toContinuousLinearMap.toLinearMap₂)
+    isBoundedBilinearMap_apply.symm.continuous L
+
+lemma probCharCLM_apply (L : E →L[ℝ] ℝ) (x : E) : probCharCLM L x = exp (L x * I) := rfl
+
+@[simp]
+lemma probCharCLM_zero : probCharCLM (0 : E →L[ℝ] ℝ) = 1 := by simp [probCharCLM]
+
+end BoundedContinuousFunction
+
+open BoundedContinuousFunction
+
+def charFunCLM {μ : Measure E} (L : E →L[ℝ] ℝ) : ℂ := ∫ v, probCharCLM L v ∂μ
+
+end CharFun
+
+section Fernique
+
+theorem fernique (μ : Measure E) [IsGaussian μ] :
+    ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
+  sorry
+
+-- Corollary of Fernique's theorem
+lemma IsGaussian.memL2_id (μ : Measure E) [IsGaussian μ] : MemLp id 2 μ := by
+  sorry
+
+end Fernique
+
+section Covariance
+
 /-- `MemLp.toLp` as a `LinearMap` from the continuous linear maps. -/
 def ContinuousLinearMap.toLpₗ (μ : Measure E) [IsGaussian μ] :
     (E →L[ℝ] ℝ) →ₗ[ℝ] Lp ℝ 2 μ where
@@ -138,10 +191,6 @@ omit [SecondCountableTopology E] in
 @[simp]
 lemma ContinuousLinearMap.toLpₗ_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
     L.toLpₗ μ = MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L) := rfl
-
--- Corollary of Fernique's theorem
-lemma IsGaussian.memL2_id (μ : Measure E) [IsGaussian μ] : MemLp id 2 μ := by
-  sorry
 
 /-- `MemLp.toLp` as a `ContinuousLinearMap` from the continuous linear maps. -/
 def ContinuousLinearMap.toLp (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] Lp ℝ 2 μ where
@@ -184,5 +233,7 @@ def ContinuousLinearMap.toLp (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ
 def covarianceOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
   ContinuousLinearMap.bilinearComp (continuousBilinFormOfInner (E := Lp ℝ 2 μ))
     (ContinuousLinearMap.toLp  μ) (ContinuousLinearMap.toLp  μ)
+
+end Covariance
 
 end ProbabilityTheory

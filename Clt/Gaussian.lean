@@ -255,12 +255,34 @@ lemma covarianceOperator_apply {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E �
     MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₂)] with x hxL₁ hxL₂
   rw [hxL₁, hxL₂, mul_comm]
 
+lemma rpow_toReal_eLpNorm {E F : Type*} {mE : MeasurableSpace E} {μ : Measure E}
+    [NormedAddCommGroup F] {f : E → F} {p : ℝ}
+    (hf : MemLp f (ENNReal.ofReal p) μ) (hp : 0 < p) :
+    (eLpNorm f (ENNReal.ofReal p) μ).toReal ^ p = ∫ x, ‖f x‖ ^ p ∂μ := by
+  rw [eLpNorm_eq_lintegral_rpow_enorm (by simp [hp]) (by simp)]
+  simp only [one_div]
+  have : (ENNReal.ofReal p).toReal = p := ENNReal.toReal_ofReal (by positivity)
+  simp_rw [this]
+  rw [ENNReal.toReal_rpow, ← ENNReal.rpow_mul, inv_mul_cancel₀ hp.ne', ENNReal.rpow_one]
+  simp_rw [← ofReal_norm, ENNReal.ofReal_rpow_of_nonneg (norm_nonneg _) hp.le]
+  rw [← ofReal_integral_eq_lintegral_ofReal, ENNReal.toReal_ofReal (by positivity)]
+  · convert MemLp.integrable_norm_rpow hf (by simp [hp]) (by simp)
+    exact this.symm
+  · exact ae_of_all _ fun x ↦ by positivity
+
+lemma pow_toReal_eLpNorm {E F : Type*} {mE : MeasurableSpace E} {μ : Measure E}
+    [NormedAddCommGroup F] {f : E → F} {n : ℕ}
+    (hf : MemLp f n μ) (hn : n ≠ 0) :
+    (eLpNorm f n μ).toReal ^ n = ∫ x, ‖f x‖ ^ n ∂μ := by
+  have h_Lp : MemLp f (ENNReal.ofReal n) μ := by convert hf; simp
+  have h := rpow_toReal_eLpNorm h_Lp (by positivity)
+  simpa using h
+
 lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E →L[ℝ] ℝ) :
     ‖covarianceOperator μ L₁ L₂‖ ≤ ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2:= by
   calc ‖covarianceOperator μ L₁ L₂‖
   _ = ‖∫ x, L₁ x * L₂ x ∂μ‖ := by rw [covarianceOperator_apply]
-  _ ≤ ∫ x, ‖L₁ x * L₂ x‖ ∂μ := norm_integral_le_integral_norm _
-  _ = ∫ x, ‖L₁ x‖ * ‖L₂ x‖ ∂μ := by simp
+  _ ≤ ∫ x, ‖L₁ x‖ * ‖L₂ x‖ ∂μ := (norm_integral_le_integral_norm _).trans (by simp)
   _ ≤ ∫ x, ‖L₁‖ * ‖x‖ * ‖L₂‖ * ‖x‖ ∂μ := by
     refine integral_mono_ae ?_ ?_ (ae_of_all _ fun x ↦ ?_)
     · simp_rw [← norm_mul]
@@ -277,24 +299,13 @@ lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E
       · exact ContinuousLinearMap.le_opNorm L₁ x
       · exact ContinuousLinearMap.le_opNorm L₂ x
   _ = ‖L₁‖ * ‖L₂‖ * ∫ x, ‖x‖ ^ 2 ∂μ := by
-    simp_rw [mul_assoc]
-    rw [integral_mul_left]
-    simp_rw [← mul_assoc, mul_comm _ (‖L₂‖), mul_assoc]
-    rw [integral_mul_left, ← mul_assoc, mul_comm (‖L₁‖), ← mul_assoc]
-    simp_rw [pow_two]
-  _ = ‖L₁‖ * ‖L₂‖ * (∫⁻ x, ‖x‖ₑ ^ 2 ∂μ).toReal := by
-    congr
-    simp_rw [← ofReal_norm, ← ENNReal.ofReal_pow (norm_nonneg _)]
-    rw [← ofReal_integral_eq_lintegral_ofReal, ENNReal.toReal_ofReal (by positivity)]
-    · exact (IsGaussian.memL2_id μ).integrable_norm_pow (by simp)
-    · exact ae_of_all _ fun _ ↦ by positivity
+    rw [← integral_mul_left]
+    congr with x
+    ring
   _ = ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2 := by
     congr
-    rw [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
-    simp only [id_eq, ENNReal.toReal_ofNat, ENNReal.rpow_ofNat, one_div]
-    rw [← ENNReal.toReal_rpow,
-      Real.rpow_pow_comm (by positivity), ← Real.rpow_natCast_mul (by positivity)]
-    simp
+    have h := pow_toReal_eLpNorm (IsGaussian.memL2_id μ) (by simp)
+    simpa only [ENNReal.ofReal_ofNat, Real.rpow_two, id_eq] using h.symm
 
 end Covariance
 

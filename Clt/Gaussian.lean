@@ -17,6 +17,33 @@ noncomputable section
 open MeasureTheory ProbabilityTheory Complex NormedSpace
 open scoped ENNReal NNReal Real Topology
 
+section Aux
+
+lemma rpow_toReal_eLpNorm {E F : Type*} {mE : MeasurableSpace E} {μ : Measure E}
+    [NormedAddCommGroup F] {f : E → F} {p : ℝ}
+    (hf : MemLp f (ENNReal.ofReal p) μ) (hp : 0 < p) :
+    (eLpNorm f (ENNReal.ofReal p) μ).toReal ^ p = ∫ x, ‖f x‖ ^ p ∂μ := by
+  rw [eLpNorm_eq_lintegral_rpow_enorm (by simp [hp]) (by simp)]
+  simp only [one_div]
+  have : (ENNReal.ofReal p).toReal = p := ENNReal.toReal_ofReal (by positivity)
+  simp_rw [this]
+  rw [ENNReal.toReal_rpow, ← ENNReal.rpow_mul, inv_mul_cancel₀ hp.ne', ENNReal.rpow_one]
+  simp_rw [← ofReal_norm, ENNReal.ofReal_rpow_of_nonneg (norm_nonneg _) hp.le]
+  rw [← ofReal_integral_eq_lintegral_ofReal, ENNReal.toReal_ofReal (by positivity)]
+  · convert MemLp.integrable_norm_rpow hf (by simp [hp]) (by simp)
+    exact this.symm
+  · exact ae_of_all _ fun x ↦ by positivity
+
+lemma pow_toReal_eLpNorm {E F : Type*} {mE : MeasurableSpace E} {μ : Measure E}
+    [NormedAddCommGroup F] {f : E → F} {n : ℕ}
+    (hf : MemLp f n μ) (hn : n ≠ 0) :
+    (eLpNorm f n μ).toReal ^ n = ∫ x, ‖f x‖ ^ n ∂μ := by
+  have h_Lp : MemLp f (ENNReal.ofReal n) μ := by convert hf; simp
+  have h := rpow_toReal_eLpNorm h_Lp (by positivity)
+  simpa using h
+
+end Aux
+
 namespace ProbabilityTheory
 
 variable (μ : ℝ) (v : ℝ≥0) {t : ℝ}
@@ -255,31 +282,8 @@ lemma covarianceOperator_apply {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E �
     MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₂)] with x hxL₁ hxL₂
   rw [hxL₁, hxL₂, mul_comm]
 
-lemma rpow_toReal_eLpNorm {E F : Type*} {mE : MeasurableSpace E} {μ : Measure E}
-    [NormedAddCommGroup F] {f : E → F} {p : ℝ}
-    (hf : MemLp f (ENNReal.ofReal p) μ) (hp : 0 < p) :
-    (eLpNorm f (ENNReal.ofReal p) μ).toReal ^ p = ∫ x, ‖f x‖ ^ p ∂μ := by
-  rw [eLpNorm_eq_lintegral_rpow_enorm (by simp [hp]) (by simp)]
-  simp only [one_div]
-  have : (ENNReal.ofReal p).toReal = p := ENNReal.toReal_ofReal (by positivity)
-  simp_rw [this]
-  rw [ENNReal.toReal_rpow, ← ENNReal.rpow_mul, inv_mul_cancel₀ hp.ne', ENNReal.rpow_one]
-  simp_rw [← ofReal_norm, ENNReal.ofReal_rpow_of_nonneg (norm_nonneg _) hp.le]
-  rw [← ofReal_integral_eq_lintegral_ofReal, ENNReal.toReal_ofReal (by positivity)]
-  · convert MemLp.integrable_norm_rpow hf (by simp [hp]) (by simp)
-    exact this.symm
-  · exact ae_of_all _ fun x ↦ by positivity
-
-lemma pow_toReal_eLpNorm {E F : Type*} {mE : MeasurableSpace E} {μ : Measure E}
-    [NormedAddCommGroup F] {f : E → F} {n : ℕ}
-    (hf : MemLp f n μ) (hn : n ≠ 0) :
-    (eLpNorm f n μ).toReal ^ n = ∫ x, ‖f x‖ ^ n ∂μ := by
-  have h_Lp : MemLp f (ENNReal.ofReal n) μ := by convert hf; simp
-  have h := rpow_toReal_eLpNorm h_Lp (by positivity)
-  simpa using h
-
 lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E →L[ℝ] ℝ) :
-    ‖covarianceOperator μ L₁ L₂‖ ≤ ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2:= by
+    ‖covarianceOperator μ L₁ L₂‖ ≤ ‖L₁‖ * ‖L₂‖ * ∫ x, ‖x‖ ^ 2 ∂μ := by
   calc ‖covarianceOperator μ L₁ L₂‖
   _ = ‖∫ x, L₁ x * L₂ x ∂μ‖ := by rw [covarianceOperator_apply]
   _ ≤ ∫ x, ‖L₁ x‖ * ‖L₂ x‖ ∂μ := (norm_integral_le_integral_norm _).trans (by simp)
@@ -302,6 +306,11 @@ lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E
     rw [← integral_mul_left]
     congr with x
     ring
+
+lemma norm_covarianceOperator_le' {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E →L[ℝ] ℝ) :
+    ‖covarianceOperator μ L₁ L₂‖ ≤ ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2 := by
+  calc ‖covarianceOperator μ L₁ L₂‖
+  _ ≤ ‖L₁‖ * ‖L₂‖ * ∫ x, ‖x‖ ^ 2 ∂μ := norm_covarianceOperator_le _ _
   _ = ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2 := by
     congr
     have h := pow_toReal_eLpNorm (IsGaussian.memL2_id μ) (by simp)

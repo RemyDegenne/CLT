@@ -264,9 +264,8 @@ lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E
   _ ≤ ∫ x, ‖L₁‖ * ‖x‖ * ‖L₂‖ * ‖x‖ ∂μ := by
     refine integral_mono_ae ?_ ?_ (ae_of_all _ fun x ↦ ?_)
     · simp_rw [← norm_mul]
-      refine Integrable.norm ?_
-      exact MemLp.integrable_mul (IsGaussian.memLp_continuousLinearMap μ L₁)
-        (IsGaussian.memLp_continuousLinearMap μ L₂)
+      exact (MemLp.integrable_mul (IsGaussian.memLp_continuousLinearMap μ L₁)
+        (IsGaussian.memLp_continuousLinearMap μ L₂)).norm
     · simp_rw [mul_assoc]
       refine Integrable.const_mul ?_ _
       simp_rw [← mul_assoc, mul_comm _ (‖L₂‖), mul_assoc, ← pow_two]
@@ -286,8 +285,7 @@ lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E
   _ = ‖L₁‖ * ‖L₂‖ * (∫⁻ x, ‖x‖ₑ ^ 2 ∂μ).toReal := by
     congr
     simp_rw [← ofReal_norm, ← ENNReal.ofReal_pow (norm_nonneg _)]
-    rw [← ofReal_integral_eq_lintegral_ofReal, ENNReal.toReal_ofReal]
-    · positivity
+    rw [← ofReal_integral_eq_lintegral_ofReal, ENNReal.toReal_ofReal (by positivity)]
     · exact (IsGaussian.memL2_id μ).integrable_norm_pow (by simp)
     · exact ae_of_all _ fun _ ↦ by positivity
   _ = ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2 := by

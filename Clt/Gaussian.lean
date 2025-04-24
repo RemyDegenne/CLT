@@ -43,7 +43,7 @@ lemma pow_toReal_eLpNorm {E F : Type*} {mE : MeasurableSpace E} {μ : Measure E}
   simpa using h
 
 @[simp]
-lemma variance_id_dirac {E : Type*} {mE : MeasurableSpace E} [MeasurableSingletonClass E]
+lemma variance_dirac {E : Type*} {mE : MeasurableSpace E} [MeasurableSingletonClass E]
     (X : E → ℝ) (x : E) :
     Var[X ; Measure.dirac x] = 0 := by
   rw [variance_eq_integral]

@@ -255,6 +255,49 @@ lemma covarianceOperator_apply {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E �
     MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₂)] with x hxL₁ hxL₂
   rw [hxL₁, hxL₂, mul_comm]
 
+lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E →L[ℝ] ℝ) :
+    ‖covarianceOperator μ L₁ L₂‖ ≤ ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2:= by
+  calc ‖covarianceOperator μ L₁ L₂‖
+  _ = ‖∫ x, L₁ x * L₂ x ∂μ‖ := by rw [covarianceOperator_apply]
+  _ ≤ ∫ x, ‖L₁ x * L₂ x‖ ∂μ := norm_integral_le_integral_norm _
+  _ = ∫ x, ‖L₁ x‖ * ‖L₂ x‖ ∂μ := by simp
+  _ ≤ ∫ x, ‖L₁‖ * ‖x‖ * ‖L₂‖ * ‖x‖ ∂μ := by
+    refine integral_mono_ae ?_ ?_ (ae_of_all _ fun x ↦ ?_)
+    · simp_rw [← norm_mul]
+      refine Integrable.norm ?_
+      exact MemLp.integrable_mul (IsGaussian.memLp_continuousLinearMap μ L₁)
+        (IsGaussian.memLp_continuousLinearMap μ L₂)
+    · simp_rw [mul_assoc]
+      refine Integrable.const_mul ?_ _
+      simp_rw [← mul_assoc, mul_comm _ (‖L₂‖), mul_assoc, ← pow_two]
+      refine Integrable.const_mul ?_ _
+      exact (IsGaussian.memL2_id μ).integrable_norm_pow (by simp)
+    · simp only
+      rw [mul_assoc]
+      gcongr
+      · exact ContinuousLinearMap.le_opNorm L₁ x
+      · exact ContinuousLinearMap.le_opNorm L₂ x
+  _ = ‖L₁‖ * ‖L₂‖ * ∫ x, ‖x‖ ^ 2 ∂μ := by
+    simp_rw [mul_assoc]
+    rw [integral_mul_left]
+    simp_rw [← mul_assoc, mul_comm _ (‖L₂‖), mul_assoc]
+    rw [integral_mul_left, ← mul_assoc, mul_comm (‖L₁‖), ← mul_assoc]
+    simp_rw [pow_two]
+  _ = ‖L₁‖ * ‖L₂‖ * (∫⁻ x, ‖x‖ₑ ^ 2 ∂μ).toReal := by
+    congr
+    simp_rw [← ofReal_norm, ← ENNReal.ofReal_pow (norm_nonneg _)]
+    rw [← ofReal_integral_eq_lintegral_ofReal, ENNReal.toReal_ofReal]
+    · positivity
+    · exact (IsGaussian.memL2_id μ).integrable_norm_pow (by simp)
+    · exact ae_of_all _ fun _ ↦ by positivity
+  _ = ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2 := by
+    congr
+    rw [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
+    simp only [id_eq, ENNReal.toReal_ofNat, ENNReal.rpow_ofNat, one_div]
+    rw [← ENNReal.toReal_rpow,
+      Real.rpow_pow_comm (by positivity), ← Real.rpow_natCast_mul (by positivity)]
+    simp
+
 end Covariance
 
 end ProbabilityTheory

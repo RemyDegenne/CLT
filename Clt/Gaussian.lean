@@ -171,7 +171,7 @@ lemma integrable_pow_gaussianReal {n : ℕ} :
   · simp [hn]
   · exact h hn
 
-lemma gaussianReal_map_continuousLinearMap (L : ℝ →L[ℝ] ℝ) :
+lemma gaussianReal_map_linearMap (L : ℝ →ₗ[ℝ] ℝ) :
     (gaussianReal μ v).map L = gaussianReal (L μ) ((L 1 ^ 2).toNNReal * v) := by
   have : (L : ℝ → ℝ) = fun x ↦ L 1 * x := by
     ext x
@@ -182,39 +182,51 @@ lemma gaussianReal_map_continuousLinearMap (L : ℝ →L[ℝ] ℝ) :
   simp only [mul_one, left_eq_sup]
   positivity
 
+lemma gaussianReal_map_continuousLinearMap (L : ℝ →L[ℝ] ℝ) :
+    (gaussianReal μ v).map L = gaussianReal (L μ) ((L 1 ^ 2).toNNReal * v) :=
+  gaussianReal_map_linearMap _ _ L
+
 @[simp]
-lemma integral_continuousLinearMap_gaussianReal (L : ℝ →L[ℝ] ℝ) :
+lemma integral_linearMap_gaussianReal (L : ℝ →ₗ[ℝ] ℝ) :
     ∫ x, L x ∂(gaussianReal μ v) = L μ := by
   have : ∫ x, L x ∂(gaussianReal μ v) = ∫ x, x ∂((gaussianReal μ v).map L) := by
     rw [integral_map (φ := L) (by fun_prop)]
     exact measurable_id.aestronglyMeasurable
-  simp [this, gaussianReal_map_continuousLinearMap]
+  simp [this, gaussianReal_map_linearMap]
+
+@[simp]
+lemma integral_continuousLinearMap_gaussianReal (L : ℝ →L[ℝ] ℝ) :
+    ∫ x, L x ∂(gaussianReal μ v) = L μ := integral_linearMap_gaussianReal _ _ L
+
+@[simp]
+lemma variance_linearMap_gaussianReal (L : ℝ →ₗ[ℝ] ℝ) :
+    Var[L ; gaussianReal μ v] = (L 1 ^ 2).toNNReal * v := by
+  rw [← variance_id_map, gaussianReal_map_linearMap, variance_id_gaussianReal']
+  · simp only [NNReal.coe_mul, Real.coe_toNNReal']
+  · fun_prop
 
 @[simp]
 lemma variance_continuousLinearMap_gaussianReal (L : ℝ →L[ℝ] ℝ) :
-    Var[L ; gaussianReal μ v] = (L 1 ^ 2).toNNReal * v := by
-  rw [← variance_id_map, gaussianReal_map_continuousLinearMap, variance_id_gaussianReal']
-  · simp only [NNReal.coe_mul, Real.coe_toNNReal']
-  · fun_prop
+    Var[L ; gaussianReal μ v] = (L 1 ^ 2).toNNReal * v :=
+  variance_linearMap_gaussianReal _ _ L
 
 end GaussianReal
 
 /-- A measure is Gaussian if its map by every continuous linear form is a real Gaussian measure. -/
 class IsGaussian {E : Type*} [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E]
   {mE : MeasurableSpace E} (μ : Measure E) : Prop where
-  map_eq_gaussianReal : ∀ L : E →L[ℝ] ℝ,
-    μ.map L = gaussianReal (μ[L]) (Var[L ; μ]).toNNReal
+  map_eq_gaussianReal (L : E →L[ℝ] ℝ) : μ.map L = gaussianReal (μ[L]) (Var[L ; μ]).toNNReal
 
 instance isGaussian_gaussianReal (m : ℝ) (v : ℝ≥0) : IsGaussian (gaussianReal m v) where
   map_eq_gaussianReal L := by
     rw [gaussianReal_map_continuousLinearMap]
+    simp only [integral_continuousLinearMap_gaussianReal, variance_continuousLinearMap_gaussianReal,
+      Real.coe_toNNReal']
     congr
-    · simp
-    · simp only [variance_continuousLinearMap_gaussianReal, Real.coe_toNNReal']
-      rw [Real.toNNReal_mul (by positivity), Real.toNNReal_coe]
-      congr
-      simp only [left_eq_sup]
-      positivity
+    rw [Real.toNNReal_mul (by positivity), Real.toNNReal_coe]
+    congr
+    simp only [left_eq_sup]
+    positivity
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {mE : MeasurableSpace E} [BorelSpace E] [SecondCountableTopology E]

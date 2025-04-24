@@ -98,11 +98,31 @@ instance isGaussian_gaussianReal (m : ℝ) (v : ℝ≥0) : IsGaussian (gaussianR
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {mE : MeasurableSpace E} [BorelSpace E] [SecondCountableTopology E]
 
+instance {x : E} : IsGaussian (Measure.dirac x) where
+  map_eq_gaussianReal L := by
+    refine ⟨L x, 0, ?_⟩
+    simp only [gaussianReal_zero_var]
+    rw [Measure.map_dirac (by fun_prop)]
+
 instance {μ : Measure E} [IsGaussian μ] : IsProbabilityMeasure μ where
   measure_univ := by
     let L : E →L[ℝ] ℝ := Nonempty.some inferInstance
     have : μ.map L Set.univ = 1 := by simp [μ.map_eq_gaussianReal L]
     simpa [Measure.map_apply (by fun_prop : Measurable L) .univ] using this
+
+@[simp]
+lemma meanMap_dirac (L : E →L[ℝ] ℝ) (x : E) :
+    (Measure.dirac x).meanMap L = L x := by
+  have h := Measure.map_eq_gaussianReal (Measure.dirac 0) L
+  rw [Measure.map_dirac (by fun_prop), ← gaussianReal_zero_var] at h
+  sorry
+
+@[simp]
+lemma varMap_dirac (L : E →L[ℝ] ℝ) (x : E) :
+    (Measure.dirac x).varMap L = 0 := by
+  have h := Measure.map_eq_gaussianReal (Measure.dirac 0) L
+  rw [Measure.map_dirac (by fun_prop), ← gaussianReal_zero_var] at h
+  sorry
 
 lemma isGaussian_map_prod_add {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
     IsGaussian ((μ.prod ν).map (fun p ↦ p.1 + p.2)) where
@@ -146,11 +166,13 @@ lemma integrable_pow_gaussianReal {n : ℕ} :
   · exact h hn
 
 omit [SecondCountableTopology E] in
-lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
-    MemLp L 2 μ := by
-  suffices MemLp (id ∘ L) 2 μ from this
+lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ)
+    (p : ℝ≥0∞) (hp : p ≠ ∞) :
+    MemLp L p μ := by
+  suffices MemLp (id ∘ L) p μ from this
   rw [← memLp_map_measure_iff, μ.map_eq_gaussianReal L]
-  · exact memLp_id_gaussianReal _ _ _
+  · convert memLp_id_gaussianReal _ _ p.toNNReal
+    simp [hp]
   · exact Measurable.aestronglyMeasurable <| by fun_prop
   · fun_prop
 
@@ -206,11 +228,50 @@ lemma ext_of_charFunCLM [CompleteSpace E] {μ ν : Measure E}
 
 end CharFun
 
+section Centered
+
+def IsCentered (μ : Measure E) [IsGaussian μ] : Prop := ∀ L : E →L[ℝ] ℝ, μ.meanMap L = 0
+
+lemma isCentered_dirac_zero : IsCentered (Measure.dirac (0 : E)) := by intro L; simp
+
+end Centered
+
+section IsDegenerate
+
+def IsDegenerate (μ : Measure E) [IsGaussian μ] : Prop :=
+  ∃ L : E →L[ℝ] ℝ, L ≠ 0 ∧ μ.varMap L = 0
+
+lemma isDegenerate_dirac (x : E) : IsDegenerate (Measure.dirac x) := by
+  obtain ⟨L, hL⟩ : ∃ L : E →L[ℝ] ℝ, L ≠ 0 := by
+    sorry
+  exact ⟨L, hL, by simp⟩
+
+end IsDegenerate
+
 section Rotation
 
 
 
 end Rotation
+
+section ToLpₗ
+
+variable {p : ℝ≥0∞}
+
+/-- `MemLp.toLp` as a `LinearMap` from the continuous linear maps. -/
+def ContinuousLinearMap.toLpₗ (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞) (hp : p ≠ ∞) :
+    (E →L[ℝ] ℝ) →ₗ[ℝ] Lp ℝ p μ where
+  toFun := fun L ↦ MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L p hp)
+  map_add' u v := by push_cast; rw [MemLp.toLp_add]
+  map_smul' c L := by push_cast; rw [MemLp.toLp_const_smul]; rfl
+
+omit [SecondCountableTopology E] in
+@[simp]
+lemma ContinuousLinearMap.toLpₗ_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ)
+    (hp : p ≠ ∞) :
+    L.toLpₗ μ p hp = MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L p hp) := rfl
+
+end ToLpₗ
 
 section Fernique
 
@@ -219,86 +280,112 @@ theorem fernique (μ : Measure E) [IsGaussian μ] :
   sorry
 
 -- Corollary of Fernique's theorem
-lemma IsGaussian.memL2_id (μ : Measure E) [IsGaussian μ] : MemLp id 2 μ := by
+lemma IsGaussian.memLp_id (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞) (hp : p ≠ ∞) :
+    MemLp id p μ := by
   sorry
 
 end Fernique
 
-section Covariance
+section ToLp
 
-/-- `MemLp.toLp` as a `LinearMap` from the continuous linear maps. -/
-def ContinuousLinearMap.toLpₗ (μ : Measure E) [IsGaussian μ] :
-    (E →L[ℝ] ℝ) →ₗ[ℝ] Lp ℝ 2 μ where
-  toFun := fun L ↦ MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L)
-  map_add' u v := by push_cast; rw [MemLp.toLp_add]
-  map_smul' c L := by push_cast; rw [MemLp.toLp_const_smul]; rfl
+variable {p : ℝ≥0∞}
 
-omit [SecondCountableTopology E] in
-@[simp]
-lemma ContinuousLinearMap.toLpₗ_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
-    L.toLpₗ μ = MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L) := rfl
-
-lemma norm_toLpₗ_le (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
-    ‖L.toLpₗ μ‖ ≤ ‖L‖ * (eLpNorm id 2 μ).toReal := by
-  suffices ‖L.toLpₗ μ‖ ≤ (‖L‖ₑ ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ).toReal ^ (2 : ℝ)⁻¹ by
+lemma norm_toLpₗ_le (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) (hp : p ≠ 0) (hp_top : p ≠ ∞) :
+    ‖L.toLpₗ μ p hp_top‖ ≤ ‖L‖ * (eLpNorm id p μ).toReal := by
+  have h0 : 0 < p.toReal := by simp [ENNReal.toReal_pos_iff, pos_iff_ne_zero, hp, hp_top.lt_top]
+  suffices ‖L.toLpₗ μ p hp_top‖
+      ≤ (‖L‖ₑ ^ p.toReal * ∫⁻ x, ‖x‖ₑ ^ p.toReal ∂μ).toReal ^ p.toReal⁻¹ by
     refine this.trans_eq ?_
-    simp only [ENNReal.toReal_mul, ENNReal.toReal_pow, toReal_enorm]
-    rw [Real.mul_rpow (by positivity) (by positivity), ← Real.rpow_natCast_mul (by positivity),
-      ENNReal.toReal_rpow]
-    simp [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
+    simp only [ENNReal.toReal_mul]
+    rw [← ENNReal.toReal_rpow, Real.mul_rpow (by positivity) (by positivity),
+      ← Real.rpow_mul (by positivity), mul_inv_cancel₀ h0.ne', Real.rpow_one, toReal_enorm]
+    rw [eLpNorm_eq_lintegral_rpow_enorm (by simp [hp]) hp_top, ENNReal.toReal_rpow]
+    simp
   rw [ContinuousLinearMap.toLpₗ_apply, Lp.norm_toLp,
-    eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
+    eLpNorm_eq_lintegral_rpow_enorm (by simp [hp]) hp_top]
   simp only [ENNReal.toReal_ofNat, ENNReal.rpow_ofNat, one_div]
   refine ENNReal.toReal_le_of_le_ofReal (by positivity) ?_
-  suffices ∫⁻ x, ‖L x‖ₑ ^ 2 ∂μ ≤ ‖L‖ₑ ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ by
+  suffices ∫⁻ x, ‖L x‖ₑ ^ p.toReal ∂μ ≤ ‖L‖ₑ ^ p.toReal * ∫⁻ x, ‖x‖ₑ ^ p.toReal ∂μ by
     rw [← ENNReal.ofReal_rpow_of_nonneg (by positivity) (by positivity)]
     gcongr
     rwa [ENNReal.ofReal_toReal]
     refine ENNReal.mul_ne_top (by simp) ?_
-    have h := (IsGaussian.memL2_id μ).eLpNorm_ne_top
-    rw [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)] at h
-    simpa using h
-  calc ∫⁻ x, ‖L x‖ₑ ^ 2 ∂μ
-  _ ≤ ∫⁻ x, ‖L‖ₑ ^ 2 * ‖x‖ₑ ^ 2 ∂μ := by
+    have h := (IsGaussian.memLp_id μ p hp_top).eLpNorm_ne_top
+    rw [eLpNorm_eq_lintegral_rpow_enorm (by simp [hp]) hp_top] at h
+    simpa [h0] using h
+  calc ∫⁻ x, ‖L x‖ₑ ^ p.toReal ∂μ
+  _ ≤ ∫⁻ x, ‖L‖ₑ ^ p.toReal * ‖x‖ₑ ^ p.toReal ∂μ := by
     refine lintegral_mono fun x ↦ ?_
-    rw [← mul_pow]
+    rw [← ENNReal.mul_rpow_of_nonneg]
+    swap; · positivity
     gcongr
     simp_rw [← ofReal_norm]
     rw [← ENNReal.ofReal_mul (by positivity)]
     gcongr
     exact L.le_opNorm x
-  _ = ‖L‖ₑ ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ := by rw [lintegral_const_mul]; fun_prop
+  _ = ‖L‖ₑ ^ p.toReal * ∫⁻ x, ‖x‖ₑ ^ p.toReal ∂μ := by rw [lintegral_const_mul]; fun_prop
 
 /-- `MemLp.toLp` as a `ContinuousLinearMap` from the continuous linear maps. -/
-def ContinuousLinearMap.toLp (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] Lp ℝ 2 μ where
-  toLinearMap := ContinuousLinearMap.toLpₗ μ
+def ContinuousLinearMap.toLp (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞) [Fact (1 ≤ p)]
+    (hp : p ≠ ∞) :
+    (E →L[ℝ] ℝ) →L[ℝ] Lp ℝ p μ where
+  toLinearMap := ContinuousLinearMap.toLpₗ μ p hp
   cont := by
     refine LinearMap.continuous_of_locally_bounded _ fun s hs ↦ ?_
     rw [image_isVonNBounded_iff]
     simp_rw [isVonNBounded_iff'] at hs
     obtain ⟨r, hxr⟩ := hs
-    refine ⟨r * (eLpNorm id 2 μ).toReal, fun L hLs ↦ ?_⟩
+    refine ⟨r * (eLpNorm id p μ).toReal, fun L hLs ↦ ?_⟩
     specialize hxr L hLs
-    refine (norm_toLpₗ_le μ L).trans ?_
+    have hp_ne : p ≠ 0 := by
+      have : 1 ≤ p := Fact.out
+      positivity
+    refine (norm_toLpₗ_le μ L hp_ne hp).trans ?_
     gcongr
 
 @[simp]
-lemma ContinuousLinearMap.toLp_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
-    L.toLp μ = MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L) := rfl
+lemma ContinuousLinearMap.toLp_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ)
+    [Fact (1 ≤ p)] (hp : p ≠ ∞) :
+    L.toLp μ p hp = MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L p hp) := rfl
 
+end ToLp
+
+section Mean
+
+def meanOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
+  (L1.integralCLM (μ := μ)).comp (ContinuousLinearMap.toLp μ 1 (by simp))
+
+lemma meanOperator_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+    meanOperator μ L = ∫ x, L x ∂μ := by
+  simp only [meanOperator, ContinuousLinearMap.coe_comp', Function.comp_apply,
+    ContinuousLinearMap.toLp_apply]
+  rw [← L1.integral_eq, L1.integral_eq_integral]
+  exact integral_congr_ae (MemLp.coeFn_toLp _)
+
+theorem exists_mean (μ : Measure E) [IsGaussian μ] :
+    ∃ m : E, ∀ L : E →L[ℝ] ℝ, meanOperator μ L = L m := by
+  sorry
+
+end Mean
+
+section Covariance
+
+-- todo: this is the right def only for centered gaussian measures
 /-- Covariance operator of a Gaussian measure. -/
 def covarianceOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
   ContinuousLinearMap.bilinearComp (continuousBilinFormOfInner (E := Lp ℝ 2 μ))
-    (ContinuousLinearMap.toLp μ) (ContinuousLinearMap.toLp μ)
+    (ContinuousLinearMap.toLp μ 2 (by simp)) (ContinuousLinearMap.toLp μ 2 (by simp))
 
 lemma covarianceOperator_apply {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E →L[ℝ] ℝ) :
     covarianceOperator μ L₁ L₂ = ∫ x, L₁ x * L₂ x ∂μ := by
+  have : Fact (1 ≤ 2) := ⟨by simp⟩
   simp only [covarianceOperator, ContinuousLinearMap.bilinearComp_apply,
-    ContinuousLinearMap.toLp_apply, continuousBilinFormOfInner_apply, L2.inner_def,
+    ContinuousLinearMap.toLp_apply,
+    continuousBilinFormOfInner_apply, L2.inner_def,
     RCLike.inner_apply, conj_trivial]
   refine integral_congr_ae ?_
-  filter_upwards [MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₁),
-    MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₂)] with x hxL₁ hxL₂
+  filter_upwards [MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₁ 2 (by simp)),
+    MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₂ 2 (by simp))] with x hxL₁ hxL₂
   rw [hxL₁, hxL₂, mul_comm]
 
 lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E →L[ℝ] ℝ) :
@@ -309,13 +396,13 @@ lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E
   _ ≤ ∫ x, ‖L₁‖ * ‖x‖ * ‖L₂‖ * ‖x‖ ∂μ := by
     refine integral_mono_ae ?_ ?_ (ae_of_all _ fun x ↦ ?_)
     · simp_rw [← norm_mul]
-      exact (MemLp.integrable_mul (IsGaussian.memLp_continuousLinearMap μ L₁)
-        (IsGaussian.memLp_continuousLinearMap μ L₂)).norm
+      exact (MemLp.integrable_mul (IsGaussian.memLp_continuousLinearMap μ L₁ 2 (by simp))
+        (IsGaussian.memLp_continuousLinearMap μ L₂ 2 (by simp))).norm
     · simp_rw [mul_assoc]
       refine Integrable.const_mul ?_ _
       simp_rw [← mul_assoc, mul_comm _ (‖L₂‖), mul_assoc, ← pow_two]
       refine Integrable.const_mul ?_ _
-      exact (IsGaussian.memL2_id μ).integrable_norm_pow (by simp)
+      exact (IsGaussian.memLp_id μ 2 (by simp)).integrable_norm_pow (by simp)
     · simp only
       rw [mul_assoc]
       gcongr
@@ -332,7 +419,7 @@ lemma norm_covarianceOperator_le' {μ : Measure E} [IsGaussian μ] (L₁ L₂ : 
   _ ≤ ‖L₁‖ * ‖L₂‖ * ∫ x, ‖x‖ ^ 2 ∂μ := norm_covarianceOperator_le _ _
   _ = ‖L₁‖ * ‖L₂‖ * (eLpNorm id 2 μ).toReal ^ 2 := by
     congr
-    have h := pow_toReal_eLpNorm (IsGaussian.memL2_id μ) (by simp)
+    have h := pow_toReal_eLpNorm (IsGaussian.memLp_id μ 2 (by simp)) (by simp)
     simpa only [ENNReal.ofReal_ofNat, Real.rpow_two, id_eq] using h.symm
 
 end Covariance

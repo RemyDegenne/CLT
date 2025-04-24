@@ -247,7 +247,13 @@ def covarianceOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L
 
 lemma covarianceOperator_apply {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E →L[ℝ] ℝ) :
     covarianceOperator μ L₁ L₂ = ∫ x, L₁ x * L₂ x ∂μ := by
-  sorry
+  simp only [covarianceOperator, ContinuousLinearMap.bilinearComp_apply,
+    ContinuousLinearMap.toLp_apply, continuousBilinFormOfInner_apply, L2.inner_def,
+    RCLike.inner_apply, conj_trivial]
+  refine integral_congr_ae ?_
+  filter_upwards [MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₁),
+    MemLp.coeFn_toLp (IsGaussian.memLp_continuousLinearMap μ L₂)] with x hxL₁ hxL₂
+  rw [hxL₁, hxL₂, mul_comm]
 
 end Covariance
 

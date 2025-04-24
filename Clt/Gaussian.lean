@@ -192,42 +192,49 @@ omit [SecondCountableTopology E] in
 lemma ContinuousLinearMap.toLpₗ_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
     L.toLpₗ μ = MemLp.toLp L (IsGaussian.memLp_continuousLinearMap μ L) := rfl
 
+lemma norm_toLpₗ_le (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+    ‖L.toLpₗ μ‖ ≤ ‖L‖ * (eLpNorm id 2 μ).toReal := by
+  suffices ‖L.toLpₗ μ‖ ≤ (‖L‖ₑ ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ).toReal ^ (2 : ℝ)⁻¹ by
+    refine this.trans_eq ?_
+    simp only [ENNReal.toReal_mul, ENNReal.toReal_pow, toReal_enorm]
+    rw [Real.mul_rpow (by positivity) (by positivity), ← Real.rpow_natCast_mul (by positivity),
+      ENNReal.toReal_rpow]
+    simp [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
+  rw [ContinuousLinearMap.toLpₗ_apply, Lp.norm_toLp,
+    eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
+  simp only [ENNReal.toReal_ofNat, ENNReal.rpow_ofNat, one_div]
+  refine ENNReal.toReal_le_of_le_ofReal (by positivity) ?_
+  suffices ∫⁻ x, ‖L x‖ₑ ^ 2 ∂μ ≤ ‖L‖ₑ ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ by
+    rw [← ENNReal.ofReal_rpow_of_nonneg (by positivity) (by positivity)]
+    gcongr
+    rwa [ENNReal.ofReal_toReal]
+    refine ENNReal.mul_ne_top (by simp) ?_
+    have h := (IsGaussian.memL2_id μ).eLpNorm_ne_top
+    rw [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)] at h
+    simpa using h
+  calc ∫⁻ x, ‖L x‖ₑ ^ 2 ∂μ
+  _ ≤ ∫⁻ x, ‖L‖ₑ ^ 2 * ‖x‖ₑ ^ 2 ∂μ := by
+    refine lintegral_mono fun x ↦ ?_
+    rw [← mul_pow]
+    gcongr
+    simp_rw [← ofReal_norm]
+    rw [← ENNReal.ofReal_mul (by positivity)]
+    gcongr
+    exact L.le_opNorm x
+  _ = ‖L‖ₑ ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ := by rw [lintegral_const_mul]; fun_prop
+
 /-- `MemLp.toLp` as a `ContinuousLinearMap` from the continuous linear maps. -/
 def ContinuousLinearMap.toLp (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] Lp ℝ 2 μ where
   toLinearMap := ContinuousLinearMap.toLpₗ μ
   cont := by
     refine LinearMap.continuous_of_locally_bounded _ fun s hs ↦ ?_
-    simp only [ContinuousLinearMap.toLpₗ_apply]
     rw [image_isVonNBounded_iff]
     simp_rw [isVonNBounded_iff'] at hs
     obtain ⟨r, hxr⟩ := hs
-    refine ⟨((ENNReal.ofReal r) ^ 2 * (∫⁻ x, ‖x‖ₑ ^ 2 ∂μ)).toReal ^ (2 : ℝ)⁻¹, fun L hLs ↦ ?_⟩
+    refine ⟨r * (eLpNorm id 2 μ).toReal, fun L hLs ↦ ?_⟩
     specialize hxr L hLs
-    rw [Lp.norm_toLp, eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)]
-    simp only [ENNReal.toReal_ofNat, ENNReal.rpow_ofNat, one_div]
-    refine ENNReal.toReal_le_of_le_ofReal (by positivity) ?_
-    suffices ∫⁻ x, ‖L x‖ₑ ^ 2 ∂μ ≤ (ENNReal.ofReal r) ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ by
-      rw [← ENNReal.ofReal_rpow_of_nonneg (by positivity) (by positivity)]
-      gcongr
-      rwa [ENNReal.ofReal_toReal]
-      refine ENNReal.mul_ne_top ?_ ?_
-      · simp
-      · have h := (IsGaussian.memL2_id μ).eLpNorm_ne_top
-        rw [eLpNorm_eq_lintegral_rpow_enorm (by simp : (2 : ℝ≥0∞) ≠ 0) (by simp : 2 ≠ ∞)] at h
-        simpa using h
-    calc ∫⁻ x, ‖L x‖ₑ ^ 2 ∂μ
-    _ ≤ ∫⁻ x, ‖L‖ₑ ^ 2 * ‖x‖ₑ ^ 2 ∂μ := by
-      refine lintegral_mono fun x ↦ ?_
-      rw [← mul_pow]
-      gcongr
-      simp_rw [← ofReal_norm]
-      rw [← ENNReal.ofReal_mul (by positivity)]
-      gcongr
-      exact L.le_opNorm x
-    _ = ‖L‖ₑ ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ := by rw [lintegral_const_mul]; fun_prop
-    _ ≤ (ENNReal.ofReal r) ^ 2 * ∫⁻ x, ‖x‖ₑ ^ 2 ∂μ := by
-      rw [← ofReal_norm]
-      gcongr
+    refine (norm_toLpₗ_le μ L).trans ?_
+    gcongr
 
 @[simp]
 lemma ContinuousLinearMap.toLp_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :

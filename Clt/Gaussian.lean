@@ -318,7 +318,7 @@ end IsDegenerate
 
 section Rotation
 
-
+-- TODO
 
 end Rotation
 
@@ -343,7 +343,8 @@ end ToLpₗ
 
 section Fernique
 
-theorem fernique (μ : Measure E) [IsGaussian μ] :
+/-- **Fernique's theorem** -/
+theorem IsGaussian.exists_integrable_exp_sq (μ : Measure E) [IsGaussian μ] :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
   sorry
 
@@ -420,19 +421,19 @@ end ToLp
 
 section Mean
 
-def meanOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
-  (L1.integralCLM (μ := μ)).comp (ContinuousLinearMap.toLp μ 1 (by simp))
-
-lemma meanOperator_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
-    meanOperator μ L = ∫ x, L x ∂μ := by
-  simp only [meanOperator, ContinuousLinearMap.coe_comp', Function.comp_apply,
-    ContinuousLinearMap.toLp_apply]
-  rw [← L1.integral_eq, L1.integral_eq_integral]
-  exact integral_congr_ae (MemLp.coeFn_toLp _)
-
-theorem exists_mean (μ : Measure E) [IsGaussian μ] :
-    ∃ m : E, ∀ L : E →L[ℝ] ℝ, meanOperator μ L = L m := by
-  sorry
+lemma IsGaussian.integral_continuousLinearMap [CompleteSpace E] {μ : Measure E} [IsGaussian μ]
+    (L : E →L[ℝ] ℝ) :
+    μ[L] = L (∫ x, x ∂μ) := by
+  have h_Lp := IsGaussian.memLp_id μ 1 (by simp)
+  have h := L.integral_comp_L1_comm (h_Lp.toLp id)
+  refine (trans ?_ h).trans ?_
+  · refine integral_congr_ae ?_
+    filter_upwards [MemLp.coeFn_toLp h_Lp] with x hx
+    rw [hx, id_eq]
+  · congr 1
+    refine integral_congr_ae ?_
+    filter_upwards [MemLp.coeFn_toLp h_Lp] with x hx
+    rw [hx, id_eq]
 
 end Mean
 

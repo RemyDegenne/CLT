@@ -189,9 +189,28 @@ end BoundedContinuousFunction
 
 open BoundedContinuousFunction
 
-def charFunCLM {μ : Measure E} (L : E →L[ℝ] ℝ) : ℂ := ∫ v, probCharCLM L v ∂μ
+def charFunCLM (μ : Measure E) (L : E →L[ℝ] ℝ) : ℂ := ∫ v, probCharCLM L v ∂μ
+
+lemma ext_of_charFunCLM [CompleteSpace E] {μ ν : Measure E}
+    [IsFiniteMeasure μ] [IsFiniteMeasure ν] (h : charFunCLM μ = charFunCLM ν) :
+    μ = ν := by
+  refine ext_of_integral_char_eq continuous_probChar probChar_ne_one
+    ?_ ?_ (fun L ↦ funext_iff.mp h L)
+  · intro v hv
+    rw [ne_eq, LinearMap.ext_iff]
+    simp only [ContinuousLinearMap.toLinearMap₂_apply, LinearMap.zero_apply, not_forall]
+    change ∃ L : E →L[ℝ] ℝ, L v ≠ 0
+    by_contra! h
+    exact hv (eq_zero_of_forall_dual_eq_zero _ h)
+  · exact isBoundedBilinearMap_apply.symm.continuous
 
 end CharFun
+
+section Rotation
+
+
+
+end Rotation
 
 section Fernique
 

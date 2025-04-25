@@ -3,10 +3,9 @@ Copyright (c) 2025 Rémy Degenne. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rémy Degenne
 -/
-import Mathlib.Probability.Distributions.Gaussian
-import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
-import Clt.CharFun
-import Clt.MomentGenerating
+import Mathlib.Analysis.Normed.Module.Dual
+import Mathlib.MeasureTheory.Constructions.BorelSpace.ContinuousLinearMap
+import Mathlib.MeasureTheory.Measure.CharacteristicFunction
 
 /-!
 # Characteristic function in Banach spaces

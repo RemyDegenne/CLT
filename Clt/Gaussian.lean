@@ -6,6 +6,7 @@ Authors: Thomas Zhu, Rémy Degenne
 import Mathlib.Probability.Distributions.Gaussian
 import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
 import Clt.CharFunCLM
+import Clt.Covariance
 import Clt.MomentGenerating
 
 /-!
@@ -529,10 +530,40 @@ lemma IsGaussian.map_rotation_eq_self [SecondCountableTopology E] [CompleteSpace
       ContinuousLinearMap.coe_smul', Pi.smul_apply, ContinuousLinearMap.inl_apply, smul_eq_mul]
     rw [← L.comp_inl_add_comp_inr]
     simp
-  rw [h1, h2]
-  -- todo: need a covariance def to use that it's bilinear
-  -- the result then follows
-  sorry
+  rw [h1, h2, ← covariance_self (by fun_prop), ← covariance_self (by fun_prop),
+    ← covariance_self (by fun_prop), ← covariance_self (by fun_prop)]
+  simp only [ContinuousLinearMap.coe_sub',
+    ContinuousLinearMap.coe_add']
+  rw [covariance_sub_left, covariance_sub_right, covariance_sub_right,
+    covariance_add_left, covariance_add_right, covariance_add_right]
+  rotate_left
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · refine MemLp.add ?_ ?_
+    · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+    · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · refine MemLp.sub ?_ ?_
+    · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+    · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  simp only [ContinuousLinearMap.coe_smul', ContinuousLinearMap.coe_comp', covariance_smul_right,
+    covariance_smul_left]
+  ring_nf
+  rw [add_assoc, add_add_add_comm, mul_comm _ (Real.sin θ ^ 2), ← add_mul, ← add_mul,
+    Real.cos_sq_add_sin_sq, one_mul, one_mul]
 
 -- TODO: invariance by rotation, using charFunCLM
 

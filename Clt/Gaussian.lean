@@ -565,8 +565,6 @@ lemma IsGaussian.map_rotation_eq_self [SecondCountableTopology E] [CompleteSpace
   rw [add_assoc, add_add_add_comm, mul_comm _ (Real.sin θ ^ 2), ← add_mul, ← add_mul,
     Real.cos_sq_add_sin_sq, one_mul, one_mul]
 
--- TODO: invariance by rotation, using charFunCLM
-
 end Rotation
 
 section ToLpₗ

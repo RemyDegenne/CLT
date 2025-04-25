@@ -318,6 +318,12 @@ lemma IsGaussian.charFunCLM_eq {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ]
     · simp only [sup_eq_left]
       exact variance_nonneg _ _
 
+lemma IsGaussian.charFunCLM_eq_of_isCentered {μ : Measure E} [IsGaussian μ]
+    (hμ : IsCentered μ) (L : E →L[ℝ] ℝ) :
+    charFunCLM μ L = cexp (- Var[L ; μ] / 2) := by
+  rw [IsGaussian.charFunCLM_eq L, integral_complex_ofReal, hμ L]
+  simp [neg_div]
+
 theorem isGaussian_iff_charFunCLM_eq {μ : Measure E} [IsFiniteMeasure μ] :
     IsGaussian μ ↔ ∀ L : E →L[ℝ] ℝ, charFunCLM μ L = cexp (μ[L] * I - Var[L ; μ] / 2) := by
   refine ⟨fun h ↦ h.charFunCLM_eq, fun h ↦ ⟨fun L ↦ ?_⟩⟩
@@ -462,6 +468,71 @@ instance [SecondCountableTopologyEither E F] : IsGaussian (μ.prod ν) := by
   · field_simp
     rw [variance_continuousLinearMap_prod]
     norm_cast
+
+noncomputable
+def _root_.ContinuousLinearMap.rotation (θ : ℝ) :
+    E × E →L[ℝ] E × E where
+  toFun := fun x ↦ (Real.cos θ • x.1 + Real.sin θ • x.2, - Real.sin θ • x.1 + Real.cos θ • x.2)
+  map_add' x y := by
+    simp only [Prod.fst_add, smul_add, Prod.snd_add, neg_smul, Prod.mk_add_mk]
+    ext
+    · simp_rw [add_assoc]
+      congr 1
+      rw [add_comm, add_assoc]
+      congr 1
+      rw [add_comm]
+    · simp only
+      simp_rw [add_assoc]
+      congr 1
+      rw [add_comm, add_assoc]
+      congr 1
+      rw [add_comm]
+  map_smul' c x := by
+    simp only [Prod.smul_fst, Prod.smul_snd, neg_smul, RingHom.id_apply, Prod.smul_mk, smul_add,
+      smul_neg]
+    simp_rw [smul_comm c]
+  cont := by fun_prop
+
+lemma _root_.ContinuousLinearMap.rotation_apply (θ : ℝ) (x : E × E) :
+    ContinuousLinearMap.rotation θ x = (Real.cos θ • x.1 + Real.sin θ • x.2,
+      - Real.sin θ • x.1 + Real.cos θ • x.2) := rfl
+
+lemma IsGaussian.map_rotation_eq_self [SecondCountableTopology E] [CompleteSpace E]
+    (θ : ℝ) (hμ : IsCentered μ) :
+    (μ.prod μ).map (ContinuousLinearMap.rotation θ) = μ.prod μ := by
+  refine ext_of_charFunCLM ?_
+  ext L
+  rw [charFunCLM_map, charFunCLM_prod, IsGaussian.charFunCLM_eq_of_isCentered hμ,
+    IsGaussian.charFunCLM_eq_of_isCentered hμ, ← Complex.exp_add, charFunCLM_prod,
+    IsGaussian.charFunCLM_eq_of_isCentered hμ, IsGaussian.charFunCLM_eq_of_isCentered hμ,
+    ← Complex.exp_add]
+  rw [← add_div, ← add_div, ← neg_add, ← neg_add]
+  congr 3
+  norm_cast
+  show Var[(L.comp (.rotation θ)).comp (.inl ℝ E E) ; μ]
+        + Var[(L.comp (.rotation θ)).comp (.inr ℝ E E) ; μ]
+      = Var[L.comp (.inl ℝ E E) ; μ] + Var[L.comp (.inr ℝ E E) ; μ]
+  have h1 : (L.comp (.rotation θ)).comp (.inl ℝ E E)
+      = Real.cos θ • L.comp (.inl ℝ E E) - Real.sin θ • L.comp (.inr ℝ E E) := by
+    ext x
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply, ContinuousLinearMap.inl_apply,
+      ContinuousLinearMap.rotation_apply, smul_zero, add_zero,
+      ContinuousLinearMap.add_apply, ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul,
+      ContinuousLinearMap.inr_apply]
+    rw [← L.comp_inl_add_comp_inr]
+    simp [- neg_smul, sub_eq_add_neg]
+  have h2 : (L.comp (.rotation θ)).comp (.inr ℝ E E)
+      = Real.sin θ • L.comp (.inl ℝ E E) + Real.cos θ • L.comp (.inr ℝ E E) := by
+    ext x
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply, ContinuousLinearMap.inr_apply,
+      ContinuousLinearMap.rotation_apply, smul_zero, zero_add, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.coe_smul', Pi.smul_apply, ContinuousLinearMap.inl_apply, smul_eq_mul]
+    rw [← L.comp_inl_add_comp_inr]
+    simp
+  rw [h1, h2]
+  -- todo: need a covariance def to use that it's bilinear
+  -- the result then follows
+  sorry
 
 -- TODO: invariance by rotation, using charFunCLM
 

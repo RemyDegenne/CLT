@@ -77,7 +77,7 @@ lemma charFunCLM_prod [SFinite μ] [SFinite ν] (L : E × F →L[ℝ] ℝ) :
     Complex.exp_add]
   rw [integral_prod_mul (f := fun x ↦ cexp ((L₁ x * I))) (g := fun x ↦ cexp ((L₂ x * I)))]
 
-lemma charFunCLM_eq_charFun_map_one [BorelSpace E] {μ : Measure E} (L : E →L[ℝ] ℝ) :
+lemma charFunCLM_eq_charFun_map_one [BorelSpace E] (L : E →L[ℝ] ℝ) :
     charFunCLM μ L = charFun (μ.map L) 1 := by
   rw [charFunCLM_apply]
   have : ∫ x, cexp (L x * I) ∂μ = ∫ x, cexp (x * I) ∂(μ.map L) := by
@@ -87,7 +87,7 @@ lemma charFunCLM_eq_charFun_map_one [BorelSpace E] {μ : Measure E} (L : E →L[
   rw [this, charFun_apply]
   simp
 
-lemma charFun_map_eq_charFunCLM_smul [BorelSpace E] {μ : Measure E} (L : E →L[ℝ] ℝ) (u : ℝ) :
+lemma charFun_map_eq_charFunCLM_smul [BorelSpace E] (L : E →L[ℝ] ℝ) (u : ℝ) :
     charFun (μ.map L) u = charFunCLM μ (u • L) := by
   rw [charFunCLM_apply]
   have : ∫ x, cexp ((u • L) x * I) ∂μ = ∫ x, cexp (u * x * I) ∂(μ.map L) := by
@@ -96,6 +96,13 @@ lemma charFun_map_eq_charFunCLM_smul [BorelSpace E] {μ : Measure E} (L : E →L
     · fun_prop
     · exact Measurable.aestronglyMeasurable <| by fun_prop
   rw [this, charFun_apply]
+  simp
+
+lemma charFunCLM_map [BorelSpace E] [BorelSpace F] {μ : Measure E}
+    (L : E →L[ℝ] F) (L' : F →L[ℝ] ℝ) :
+    charFunCLM (μ.map L) L' = charFunCLM μ (L'.comp L) := by
+  rw [charFunCLM_eq_charFun_map_one, charFunCLM_eq_charFun_map_one,
+    Measure.map_map (by fun_prop) (by fun_prop)]
   simp
 
 variable [CompleteSpace E] [BorelSpace E] [SecondCountableTopology E]

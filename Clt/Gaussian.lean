@@ -384,10 +384,28 @@ theorem IsGaussian.exists_integrable_exp_sq (μ : Measure E) [IsGaussian μ] :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
   sorry
 
--- Corollary of Fernique's theorem
 lemma IsGaussian.memLp_id (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞) (hp : p ≠ ∞) :
     MemLp id p μ := by
-  sorry
+  suffices MemLp (fun x ↦ ‖x‖ ^ 2) (p / 2) μ by
+    rw [← memLp_norm_rpow_iff (q := 2) _ (by simp) (by simp)]
+    · simpa using this
+    · exact Measurable.aestronglyMeasurable <| by fun_prop
+  lift p to ℝ≥0 using hp
+  convert memLp_of_mem_interior_integrableExpSet ?_ (p / 2)
+  · simp
+  obtain ⟨C, hC_pos, hC⟩ := exists_integrable_exp_sq μ
+  have hC_neg : Integrable (fun x ↦ rexp (-C * ‖x‖ ^ 2)) μ := by -- `-C` could be any negative
+    refine integrable_of_le_of_le (g₁ := 0) (g₂ := 1) ?_ ?_ ?_
+      (integrable_const _) (integrable_const _)
+    · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · exact ae_of_all _ fun _ ↦ by positivity
+    · refine ae_of_all _ fun x ↦ ?_
+      simp only [neg_mul, Pi.one_apply, Real.exp_le_one_iff, Left.neg_nonpos_iff]
+      positivity
+  have h_subset : Set.Ioo (-C) C ⊆ interior (integrableExpSet (fun x ↦ ‖x‖ ^ 2) μ) := by
+    rw [IsOpen.subset_interior_iff isOpen_Ioo]
+    exact fun x hx ↦ integrable_exp_mul_of_le_of_le hC_neg hC hx.1.le hx.2.le
+  exact h_subset ⟨by simp [hC_pos], hC_pos⟩
 
 end Fernique
 

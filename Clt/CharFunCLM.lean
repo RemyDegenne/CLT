@@ -28,6 +28,15 @@ lemma IsBoundedBilinearMap.symm {E F G 𝕜 : Type*} [NontriviallyNormedField �
     obtain ⟨C, hC_pos, hC⟩ := h.bound
     exact ⟨C, hC_pos, fun x y ↦ (hC y x).trans_eq (by ring)⟩
 
+lemma ContinuousLinearMap.comp_inl_add_comp_inr
+    {E F : Type*} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
+    [SeminormedAddCommGroup F] [NormedSpace ℝ F]
+    (L : E × F →L[ℝ] ℝ) (v : E × F) :
+    L.comp (.inl ℝ E F) v.1 + L.comp (.inr ℝ E F) v.2 = L v := by
+  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.inl_apply, ContinuousLinearMap.inr_apply, ← ContinuousLinearMap.map_add]
+  simp
+
 namespace BoundedContinuousFunction
 
 variable {E : Type*} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
@@ -64,12 +73,8 @@ lemma charFunCLM_prod [SFinite μ] [SFinite ν] (L : E × F →L[ℝ] ℝ) :
       = charFunCLM μ (L.comp (.inl ℝ E F)) * charFunCLM ν (L.comp (.inr ℝ E F)) := by
   let L₁ : E →L[ℝ] ℝ := L.comp (.inl ℝ E F)
   let L₂ : F →L[ℝ] ℝ := L.comp (.inr ℝ E F)
-  simp_rw [charFunCLM_apply]
-  have h_eq_add v : L v = L₁ v.1 + L₂ v.2 := by
-    rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
-      ContinuousLinearMap.inl_apply, ContinuousLinearMap.inr_apply, ← ContinuousLinearMap.map_add]
-    simp
-  simp_rw [h_eq_add, ofReal_add, add_mul, Complex.exp_add]
+  simp_rw [charFunCLM_apply, ← L.comp_inl_add_comp_inr, ofReal_add, add_mul,
+    Complex.exp_add]
   rw [integral_prod_mul (f := fun x ↦ cexp ((L₁ x * I))) (g := fun x ↦ cexp ((L₂ x * I)))]
 
 lemma charFunCLM_eq_charFun_map_one [BorelSpace E] {μ : Measure E} (L : E →L[ℝ] ℝ) :

@@ -249,6 +249,11 @@ lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L :
   · exact Measurable.aestronglyMeasurable <| by fun_prop
   · fun_prop
 
+lemma IsGaussian.integrable_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+    Integrable L μ := by
+  rw [← memLp_one_iff_integrable]
+  exact IsGaussian.memLp_continuousLinearMap μ L 1 (by simp)
+
 lemma isGaussian_map_prod_add [SecondCountableTopology E]
     {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
     IsGaussian ((μ.prod ν).map (fun p ↦ p.1 + p.2)) where
@@ -279,7 +284,7 @@ lemma isGaussian_conv [SecondCountableTopology E] {μ ν : Measure E} [IsGaussia
 
 section Centered
 
-def IsCentered (μ : Measure E) [IsGaussian μ] : Prop := ∀ L : E →L[ℝ] ℝ, ∫ x, L x ∂μ = 0
+def IsCentered (μ : Measure E) [IsGaussian μ] : Prop := ∀ L : E →L[ℝ] ℝ, μ[L] = 0
 
 lemma isCentered_dirac_zero : IsCentered (Measure.dirac (0 : E)) := by intro L; simp
 
@@ -334,12 +339,129 @@ section Rotation
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {mF : MeasurableSpace F} [BorelSpace F]
+  {μ : Measure E} [IsGaussian μ] {ν : Measure F} [IsGaussian ν]
 
-instance [SecondCountableTopology E] {μ : Measure E} [IsGaussian μ] {ν : Measure F} [IsGaussian ν] :
-    IsGaussian (μ.prod ν) := by
+lemma todol' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
+    MemLp (fun x ↦ (L.comp (.inl ℝ E F) x.1)) p (μ.prod ν) := by
+  change MemLp ((L.comp (.inl ℝ E F) ∘ Prod.fst)) p (μ.prod ν)
+  rw [← memLp_map_measure_iff]
+  · simp only [Measure.map_fst_prod, measure_univ, one_smul]
+    exact IsGaussian.memLp_continuousLinearMap μ (L.comp (.inl ℝ E F)) p hp
+  · simp only [Measure.map_fst_prod, measure_univ, one_smul]
+    exact (IsGaussian.integrable_continuousLinearMap μ (L.comp (.inl ℝ E F))).1
+  · fun_prop
+
+lemma todor' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
+    MemLp (fun x ↦ (L.comp (.inr ℝ E F) x.2)) p (μ.prod ν) := by
+  change MemLp ((L.comp (.inr ℝ E F) ∘ Prod.snd)) p (μ.prod ν)
+  rw [← memLp_map_measure_iff]
+  · simp only [Measure.map_snd_prod, measure_univ, one_smul]
+    exact IsGaussian.memLp_continuousLinearMap _ (L.comp (.inr ℝ E F)) p hp
+  · simp only [Measure.map_snd_prod, measure_univ, one_smul]
+    exact (IsGaussian.integrable_continuousLinearMap _ (L.comp (.inr ℝ E F))).1
+  · fun_prop
+
+lemma todo' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
+    MemLp L p (μ.prod ν) := by
+  suffices MemLp (fun v ↦ L.comp (.inl ℝ E F) v.1 + L.comp (.inr ℝ E F) v.2) p (μ.prod ν) by
+    simp_rw [L.comp_inl_add_comp_inr] at this
+    exact this
+  exact MemLp.add (todol' L hp) (todor' L hp)
+
+lemma todol (L : E × F →L[ℝ] ℝ) :
+    Integrable (fun x ↦ (L.comp (.inl ℝ E F) x.1)) (μ.prod ν) := by
+  rw [← memLp_one_iff_integrable]
+  exact todol' L (by simp)
+
+lemma todor (L : E × F →L[ℝ] ℝ) :
+    Integrable (fun x ↦ (L.comp (.inr ℝ E F) x.2)) (μ.prod ν) := by
+  rw [← memLp_one_iff_integrable]
+  exact todor' L (by simp)
+
+lemma integral_continuousLinearMap_prod (L : E × F →L[ℝ] ℝ) :
+    (μ.prod ν)[L] = μ[L.comp (.inl ℝ E F)] + ν[L.comp (.inr ℝ E F)] := by
+  simp_rw [← L.comp_inl_add_comp_inr]
+  rw [integral_add (todol L) (todor L)]
+  · congr
+    · rw [integral_prod _ (todol L)]
+      simp
+    · rw [integral_prod _ (todor L)]
+      simp
+
+lemma variance_continuousLinearMap_prod [SecondCountableTopologyEither E F] (L : E × F →L[ℝ] ℝ) :
+    Var[L ; μ.prod ν] = Var[L.comp (.inl ℝ E F) ; μ] + Var[L.comp (.inr ℝ E F) ; ν] := by
+  rw [variance_def' (todo' L (by simp)), integral_continuousLinearMap_prod L,
+    variance_def', variance_def']
+  rotate_left
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
+  let L₁ := L.comp (.inl ℝ E F)
+  let L₂ := L.comp (.inr ℝ E F)
+  simp only [Pi.pow_apply, Function.comp_apply,
+    ContinuousLinearMap.inl_apply, ContinuousLinearMap.inr_apply]
+  suffices h_sq : ∫ v, L v ^ 2 ∂(μ.prod ν)
+      = ∫ x, L₁ x ^ 2 ∂μ + ∫ x, L₂ x ^ 2 ∂ν + 2 * μ[L₁] * ν[L₂] by rw [h_sq]; ring
+  calc ∫ v, L v ^ 2 ∂μ.prod ν
+  _ = ∫ v, (L₁ v.1 + L₂ v.2) ^ 2 ∂μ.prod ν := by simp_rw [← L.comp_inl_add_comp_inr]; simp [L₁, L₂]
+  _ = ∫ v, L₁ v.1 ^ 2 + L₂ v.2 ^ 2 + 2 * L₁ v.1 * L₂ v.2 ∂μ.prod ν := by
+    congr with v; ring
+  _ = ∫ v, L₁ v.1 ^ 2 ∂μ.prod ν + ∫ v, L₂ v.2 ^ 2 ∂μ.prod ν
+      + 2 * ∫ v, L₁ v.1 * L₂ v.2 ∂μ.prod ν := by
+    have h_int1 : Integrable (fun a ↦ L₁ a.1 ^ 2) (μ.prod ν) := by
+      rw [← integrable_norm_iff]
+      swap; · exact Measurable.aestronglyMeasurable <| by fun_prop
+      simp only [norm_pow]
+      refine MemLp.integrable_norm_pow ?_ (by simp)
+      exact todol' L (by simp)
+    have h_int2 : Integrable (fun a ↦ L₂ a.2 ^ 2) (μ.prod ν) := by
+      rw [← integrable_norm_iff]
+      swap; · exact Measurable.aestronglyMeasurable <| by fun_prop
+      simp only [norm_pow]
+      refine MemLp.integrable_norm_pow ?_ (by simp)
+      exact todor' L (by simp)
+    rw [integral_add, integral_add]
+    · simp_rw [mul_assoc]
+      rw [integral_mul_left]
+    · exact h_int1
+    · exact h_int2
+    · exact Integrable.add h_int1 h_int2
+    · simp_rw [mul_assoc]
+      refine Integrable.const_mul ?_ _
+      refine MemLp.integrable_mul (p := 2) (q := 2) ?_ ?_
+      · exact todol' L (by simp)
+      · exact todor' L (by simp)
+  _ = ∫ x, L₁ x ^ 2 ∂μ + ∫ x, L₂ x ^ 2 ∂ν + 2 * μ[L₁] * ν[L₂] := by
+    simp_rw [mul_assoc]
+    congr
+    · have : μ = (μ.prod ν).map (fun p ↦ p.1) := by simp
+      conv_rhs => rw [this]
+      rw [integral_map]
+      · fun_prop
+      · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · have : ν = (μ.prod ν).map (fun p ↦ p.2) := by simp
+      conv_rhs => rw [this]
+      rw [integral_map]
+      · fun_prop
+      · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · rw [integral_prod_mul]
+
+/-- A product of Gaussian distributions is Gaussian. -/
+instance [SecondCountableTopologyEither E F] : IsGaussian (μ.prod ν) := by
   refine isGaussian_of_charFunCLM_eq fun L ↦ ?_
-  rw [charFunCLM_prod]
-  sorry
+  rw [charFunCLM_prod, IsGaussian.charFunCLM_eq, IsGaussian.charFunCLM_eq, ← Complex.exp_add]
+  congr
+  let L₁ := L.comp (.inl ℝ E F)
+  let L₂ := L.comp (.inr ℝ E F)
+  suffices μ[L₁] * I - Var[L₁ ; μ] / 2 +(ν[L₂] * I - Var[L₂ ; ν] / 2)
+      = (μ.prod ν)[L] * I - Var[L ; μ.prod ν] / 2 by convert this
+  rw [sub_add_sub_comm, ← add_mul]
+  congr
+  · simp_rw [integral_complex_ofReal]
+    rw [integral_continuousLinearMap_prod L]
+    norm_cast
+  · field_simp
+    rw [variance_continuousLinearMap_prod]
+    norm_cast
 
 -- TODO: invariance by rotation, using charFunCLM
 

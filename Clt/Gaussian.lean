@@ -422,6 +422,13 @@ end ToLpₗ
 
 section Fernique
 
+variable {μ : Measure E} [IsGaussian μ]
+
+lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ)
+    {a b : ℝ} (ha : 0 < a) (h : a < b) :
+    μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖} ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by
+  sorry
+
 /-- **Fernique's theorem** -/
 theorem IsGaussian.exists_integrable_exp_sq (μ : Measure E) [IsGaussian μ] :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by

@@ -5,14 +5,12 @@ Authors: Thomas Zhu, Rémy Degenne
 -/
 import Mathlib.Probability.Distributions.Gaussian
 import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
-import Clt.CharFun
+import Clt.CharFunCLM
 import Clt.MomentGenerating
 
 /-!
 Properties of Gaussian distributions and its characteristic function.
 -/
-
-noncomputable section
 
 open MeasureTheory ProbabilityTheory Complex NormedSpace
 open scoped ENNReal NNReal Real Topology
@@ -66,9 +64,9 @@ end Aux
 
 namespace ProbabilityTheory
 
-variable (μ : ℝ) (v : ℝ≥0) {t : ℝ}
-
 section GaussianReal
+
+variable (μ : ℝ) (v : ℝ≥0) {t : ℝ}
 
 -- `∗` notation not used because of ambiguous notation : `conv` vs `mconv`
 lemma gaussianReal_conv_gaussianReal {m₁ m₂ : ℝ} {v₁ v₂ : ℝ≥0} :
@@ -279,58 +277,6 @@ lemma isGaussian_map_prod_add {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν
 lemma isGaussian_conv {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
     IsGaussian (μ ∗ ν) := isGaussian_map_prod_add
 
-section CharFun
-
-open BoundedContinuousFunction Real
-
-lemma IsBoundedBilinearMap.symm {E F G 𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [SeminormedAddCommGroup F] [NormedSpace 𝕜 F]
-    [SeminormedAddCommGroup G] [NormedSpace 𝕜 G]
-    {f : E × F → G} (h : IsBoundedBilinearMap 𝕜 f) :
-    IsBoundedBilinearMap 𝕜 (fun p ↦ f (p.2, p.1)) where
-  add_left x₁ x₂ y := h.add_right _ _ _
-  smul_left c x y := h.smul_right _ _ _
-  add_right x y₁ y₂ := h.add_left _ _ _
-  smul_right c x y := h.smul_left _ _ _
-  bound := by
-    obtain ⟨C, hC_pos, hC⟩ := h.bound
-    exact ⟨C, hC_pos, fun x y ↦ (hC y x).trans_eq (by ring)⟩
-
-namespace BoundedContinuousFunction
-
-variable {E : Type*} [SeminormedAddCommGroup E] [NormedSpace ℝ E]
-
-noncomputable
-def probCharCLM (L : E →L[ℝ] ℝ) : E →ᵇ ℂ :=
-  char continuous_probChar (L := isBoundedBilinearMap_apply.symm.toContinuousLinearMap.toLinearMap₂)
-    isBoundedBilinearMap_apply.symm.continuous L
-
-lemma probCharCLM_apply (L : E →L[ℝ] ℝ) (x : E) : probCharCLM L x = exp (L x * I) := rfl
-
-@[simp]
-lemma probCharCLM_zero : probCharCLM (0 : E →L[ℝ] ℝ) = 1 := by simp [probCharCLM]
-
-end BoundedContinuousFunction
-
-open BoundedContinuousFunction
-
-def charFunCLM (μ : Measure E) (L : E →L[ℝ] ℝ) : ℂ := ∫ v, probCharCLM L v ∂μ
-
-lemma ext_of_charFunCLM [CompleteSpace E] {μ ν : Measure E}
-    [IsFiniteMeasure μ] [IsFiniteMeasure ν] (h : charFunCLM μ = charFunCLM ν) :
-    μ = ν := by
-  refine ext_of_integral_char_eq continuous_probChar probChar_ne_one
-    ?_ ?_ (fun L ↦ funext_iff.mp h L)
-  · intro v hv
-    rw [ne_eq, LinearMap.ext_iff]
-    simp only [ContinuousLinearMap.toLinearMap₂_apply, LinearMap.zero_apply, not_forall]
-    change ∃ L : E →L[ℝ] ℝ, L v ≠ 0
-    by_contra! h
-    exact hv (eq_zero_of_forall_dual_eq_zero _ h)
-  · exact isBoundedBilinearMap_apply.symm.continuous
-
-end CharFun
-
 section Centered
 
 def IsCentered (μ : Measure E) [IsGaussian μ] : Prop := ∀ L : E →L[ℝ] ℝ, ∫ x, L x ∂μ = 0
@@ -353,6 +299,14 @@ lemma isDegenerate_dirac (x : E) : IsDegenerate (Measure.dirac x) := by
 end IsDegenerate
 
 section Rotation
+
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  {mF : MeasurableSpace F}
+
+instance {μ : Measure E} [IsGaussian μ] {ν : Measure F} [IsGaussian ν] :
+    IsGaussian (μ.prod ν) where
+  map_eq_gaussianReal L := by
+    sorry
 
 -- TODO: invariance by rotation, using charFunCLM
 
@@ -495,6 +449,7 @@ section Covariance
 
 -- todo: this is the right def only for centered gaussian measures
 /-- Covariance operator of a Gaussian measure. -/
+noncomputable
 def covarianceOperator (μ : Measure E) [IsGaussian μ] : (E →L[ℝ] ℝ) →L[ℝ] (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
   ContinuousLinearMap.bilinearComp (continuousBilinFormOfInner (E := Lp ℝ 2 μ))
     (ContinuousLinearMap.toLp μ 2 (by simp)) (ContinuousLinearMap.toLp μ 2 (by simp))

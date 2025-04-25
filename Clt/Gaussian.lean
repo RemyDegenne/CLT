@@ -227,7 +227,7 @@ instance isGaussian_gaussianReal (m : ℝ) (v : ℝ≥0) : IsGaussian (gaussianR
     positivity
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  {mE : MeasurableSpace E} [BorelSpace E] [SecondCountableTopology E]
+  {mE : MeasurableSpace E} [BorelSpace E]
 
 instance {x : E} : IsGaussian (Measure.dirac x) where
   map_eq_gaussianReal L := by rw [Measure.map_dirac (by fun_prop)]; simp
@@ -239,7 +239,6 @@ instance {μ : Measure E} [IsGaussian μ] : IsProbabilityMeasure μ where
     have : μ.map L Set.univ = 1 := by simp [IsGaussian.map_eq_gaussianReal L]
     simpa [Measure.map_apply (by fun_prop : Measurable L) .univ] using this
 
-omit [SecondCountableTopology E] in
 lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ)
     (p : ℝ≥0∞) (hp : p ≠ ∞) :
     MemLp L p μ := by
@@ -250,7 +249,8 @@ lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L :
   · exact Measurable.aestronglyMeasurable <| by fun_prop
   · fun_prop
 
-lemma isGaussian_map_prod_add {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
+lemma isGaussian_map_prod_add [SecondCountableTopology E]
+    {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
     IsGaussian ((μ.prod ν).map (fun p ↦ p.1 + p.2)) where
   map_eq_gaussianReal := by
     intro L
@@ -274,14 +274,13 @@ lemma isGaussian_map_prod_add {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν
     · simp
     · simp [variance_nonneg]
 
-lemma isGaussian_conv {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
+lemma isGaussian_conv [SecondCountableTopology E] {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
     IsGaussian (μ ∗ ν) := isGaussian_map_prod_add
 
 section Centered
 
 def IsCentered (μ : Measure E) [IsGaussian μ] : Prop := ∀ L : E →L[ℝ] ℝ, ∫ x, L x ∂μ = 0
 
-omit [SecondCountableTopology E] in
 lemma isCentered_dirac_zero : IsCentered (Measure.dirac (0 : E)) := by intro L; simp
 
 end Centered
@@ -298,15 +297,49 @@ lemma isDegenerate_dirac (x : E) : IsDegenerate (Measure.dirac x) := by
 
 end IsDegenerate
 
+section CharFunCLM
+
+lemma IsGaussian.charFunCLM_eq {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
+    charFunCLM μ L = cexp (μ[L] * I - Var[L ; μ] / 2) := by
+  calc charFunCLM μ L
+  _ = charFun (μ.map L) 1 := by rw [charFunCLM_eq_charFun_map_one]
+  _ = charFun (gaussianReal (μ[L]) (Var[L ; μ]).toNNReal) 1 := by
+    rw [IsGaussian.map_eq_gaussianReal L]
+  _ = cexp (μ[L] * I - Var[L ; μ] / 2) := by
+    rw [charFun_gaussianReal]
+    simp only [ofReal_one, one_mul, Real.coe_toNNReal', one_pow, mul_one]
+    congr
+    · rw [integral_complex_ofReal]
+    · simp only [sup_eq_left]
+      exact variance_nonneg _ _
+
+theorem isGaussian_iff_charFunCLM_eq {μ : Measure E} [IsFiniteMeasure μ] :
+    IsGaussian μ ↔ ∀ L : E →L[ℝ] ℝ, charFunCLM μ L = cexp (μ[L] * I - Var[L ; μ] / 2) := by
+  refine ⟨fun h ↦ h.charFunCLM_eq, fun h ↦ ⟨fun L ↦ ?_⟩⟩
+  refine Measure.ext_of_charFun ?_
+  ext u
+  rw [charFun_map_eq_charFunCLM_smul L u, h (u • L), charFun_gaussianReal]
+  simp only [ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul, ofReal_mul,
+    Real.coe_toNNReal']
+  congr
+  · rw [integral_mul_left, integral_complex_ofReal]
+  · rw [max_eq_left (variance_nonneg _ _), mul_comm, ← ofReal_pow, ← ofReal_mul, ← variance_mul]
+    congr
+
+alias ⟨_, isGaussian_of_charFunCLM_eq⟩ := isGaussian_iff_charFunCLM_eq
+
+end CharFunCLM
+
 section Rotation
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
-  {mF : MeasurableSpace F}
+  {mF : MeasurableSpace F} [BorelSpace F]
 
-instance {μ : Measure E} [IsGaussian μ] {ν : Measure F} [IsGaussian ν] :
-    IsGaussian (μ.prod ν) where
-  map_eq_gaussianReal L := by
-    sorry
+instance [SecondCountableTopology E] {μ : Measure E} [IsGaussian μ] {ν : Measure F} [IsGaussian ν] :
+    IsGaussian (μ.prod ν) := by
+  refine isGaussian_of_charFunCLM_eq fun L ↦ ?_
+  rw [charFunCLM_prod]
+  sorry
 
 -- TODO: invariance by rotation, using charFunCLM
 
@@ -323,7 +356,6 @@ def ContinuousLinearMap.toLpₗ (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞
   map_add' u v := by push_cast; rw [MemLp.toLp_add]
   map_smul' c L := by push_cast; rw [MemLp.toLp_const_smul]; rfl
 
-omit [SecondCountableTopology E] in
 @[simp]
 lemma ContinuousLinearMap.toLpₗ_apply {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ)
     (hp : p ≠ ∞) :
@@ -338,7 +370,8 @@ theorem IsGaussian.exists_integrable_exp_sq (μ : Measure E) [IsGaussian μ] :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
   sorry
 
-lemma IsGaussian.memLp_id (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞) (hp : p ≠ ∞) :
+lemma IsGaussian.memLp_id [SecondCountableTopology E]
+    (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞) (hp : p ≠ ∞) :
     MemLp id p μ := by
   suffices MemLp (fun x ↦ ‖x‖ ^ 2) (p / 2) μ by
     rw [← memLp_norm_rpow_iff (q := 2) _ (by simp) (by simp)]
@@ -365,7 +398,7 @@ end Fernique
 
 section ToLp
 
-variable {p : ℝ≥0∞}
+variable {p : ℝ≥0∞} [SecondCountableTopology E]
 
 lemma norm_toLpₗ_le (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) (hp : p ≠ 0) (hp_top : p ≠ ∞) :
     ‖L.toLpₗ μ p hp_top‖ ≤ ‖L‖ * (eLpNorm id p μ).toReal := by
@@ -429,8 +462,8 @@ end ToLp
 
 section Mean
 
-lemma IsGaussian.integral_continuousLinearMap [CompleteSpace E] {μ : Measure E} [IsGaussian μ]
-    (L : E →L[ℝ] ℝ) :
+lemma IsGaussian.integral_continuousLinearMap [SecondCountableTopology E] [CompleteSpace E]
+    {μ : Measure E} [IsGaussian μ] (L : E →L[ℝ] ℝ) :
     μ[L] = L (∫ x, x ∂μ) := by
   have h_Lp := IsGaussian.memLp_id μ 1 (by simp)
   have h := L.integral_comp_L1_comm (h_Lp.toLp id)
@@ -446,6 +479,8 @@ lemma IsGaussian.integral_continuousLinearMap [CompleteSpace E] {μ : Measure E}
 end Mean
 
 section Covariance
+
+variable [SecondCountableTopology E]
 
 -- todo: this is the right def only for centered gaussian measures
 /-- Covariance operator of a Gaussian measure. -/

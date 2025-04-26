@@ -629,6 +629,10 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
         simp [t]
       · exact measurableSet_le (by fun_prop) (by fun_prop)
     | succ n _ =>
+      have h_mul_le : c * μ {x | t (n + 1) < ‖x‖} ≤ μ {x | t n < ‖x‖} ^ 2 := by
+        convert IsGaussian.measure_le_mul_measure_gt_le hμ _ _
+        rw [ht_succ_def]
+        field_simp
       sorry
   -- cut the space into annuli
   have h_iUnion : (Set.univ : Set E)

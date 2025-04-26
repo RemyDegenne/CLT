@@ -85,6 +85,7 @@ lemma IsGaussian.memLp_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L :
   · exact Measurable.aestronglyMeasurable <| by fun_prop
   · fun_prop
 
+@[fun_prop]
 lemma IsGaussian.integrable_continuousLinearMap (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) :
     Integrable L μ := by
   rw [← memLp_one_iff_integrable]
@@ -115,12 +116,13 @@ lemma isGaussian_map_prod_add [SecondCountableTopology E]
     · simp
     · simp [variance_nonneg]
 
-lemma isGaussian_conv [SecondCountableTopology E] {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
+instance isGaussian_conv [SecondCountableTopology E]
+    {μ ν : Measure E} [IsGaussian μ] [IsGaussian ν] :
     IsGaussian (μ ∗ ν) := isGaussian_map_prod_add
 
 section Centered
 
-def IsCentered (μ : Measure E) [IsGaussian μ] : Prop := ∀ L : E →L[ℝ] ℝ, μ[L] = 0
+def IsCentered (μ : Measure E) : Prop := ∀ L : E →L[ℝ] ℝ, μ[L] = 0
 
 lemma isCentered_dirac_zero : IsCentered (Measure.dirac (0 : E)) := by intro L; simp
 
@@ -128,7 +130,7 @@ end Centered
 
 section IsDegenerate
 
-def IsDegenerate (μ : Measure E) [IsGaussian μ] : Prop :=
+def IsDegenerate (μ : Measure E) : Prop :=
   ∃ L : E →L[ℝ] ℝ, L ≠ 0 ∧ Var[L ; μ] = 0
 
 lemma isDegenerate_dirac (x : E) : IsDegenerate (Measure.dirac x) := by
@@ -182,6 +184,42 @@ section Rotation
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {mF : MeasurableSpace F} [BorelSpace F]
   {μ : Measure E} [IsGaussian μ] {ν : Measure F} [IsGaussian ν]
+
+instance isGaussian_map (L : E →L[ℝ] F) : IsGaussian (μ.map L) where
+  map_eq_gaussianReal L' := by
+    rw [Measure.map_map (by fun_prop) (by fun_prop)]
+    change Measure.map (L'.comp L) μ = _
+    rw [IsGaussian.map_eq_gaussianReal (L'.comp L)]
+    congr
+    · rw [integral_map (by fun_prop)]
+      · simp
+      · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · rw [← variance_id_map (by fun_prop)]
+      conv_rhs => rw [← variance_id_map (by fun_prop)]
+      rw [Measure.map_map (by fun_prop) (by fun_prop)]
+      simp
+
+instance isGaussian_map_equiv (L : E ≃L[ℝ] F) : IsGaussian (μ.map L) := by
+  convert isGaussian_map (L : E →L[ℝ] F)
+  infer_instance
+
+lemma isCentered_conv_map_neg [SecondCountableTopology E] :
+    IsCentered (μ ∗ (μ.map (ContinuousLinearEquiv.neg ℝ))) := by
+  intro L
+  rw [integral_conv (by fun_prop)]
+  simp only [map_add]
+  calc ∫ x, ∫ y, L x + L y ∂μ.map (ContinuousLinearEquiv.neg ℝ) ∂μ
+  _ = ∫ x, L x + ∫ y, L y ∂μ.map (ContinuousLinearEquiv.neg ℝ) ∂μ := by
+    congr with x
+    rw [integral_add (by fun_prop) (by fun_prop)]
+    simp [- ContinuousLinearEquiv.coe_neg, integral_const, smul_eq_mul, add_left_inj]
+  _ = ∫ x, L x ∂μ + ∫ y, L y ∂μ.map (ContinuousLinearEquiv.neg ℝ) := by
+    rw [integral_add (by fun_prop) (by fun_prop)]
+    simp
+  _ = 0 := by
+    rw [integral_map (by fun_prop)]
+    · simp [integral_neg]
+    · exact Measurable.aestronglyMeasurable <| by fun_prop
 
 lemma todol' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
     MemLp (fun x ↦ (L.comp (.inl ℝ E F) x.1)) p (μ.prod ν) := by
@@ -610,13 +648,80 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     refine ENNReal.mul_lt_top hc_lt_top ?_
     sorry
 
+lemma todo_ineq {a b ε : ℝ} (hε : 0 < ε) : 2 * a * b ≤ ε * a ^ 2 + (1 / ε) * b ^ 2 := by
+  have h : 2 * (ε * a) * b ≤ (ε * a) ^ 2 + b ^ 2 := two_mul_le_add_sq (ε * a) b
+  calc 2 * a * b
+  _ = (2 * (ε * a) * b) / ε := by field_simp; ring
+  _ ≤ ((ε * a) ^ 2 + b ^ 2) / ε := by gcongr
+  _ = ε * a ^ 2 + (1 / ε) * b ^ 2  := by field_simp; ring
+
 /-- **Fernique's theorem** -/
 theorem IsGaussian.exists_integrable_exp_sq (μ : Measure E) [IsGaussian μ] :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
-  sorry
+  obtain ⟨C, hC_pos, hC⟩ := exists_integrable_exp_sq_of_isCentered
+    (isCentered_conv_map_neg (μ := μ))
+  have h_int : ∀ᵐ y ∂μ, Integrable (fun x ↦ rexp (C * ‖x - y‖^2)) μ := by
+    -- todo: extract lemma about integrability wrt conv
+    unfold Measure.conv at hC
+    rw [integrable_map_measure] at hC
+    rotate_left
+    · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · fun_prop
+    rw [integrable_prod_iff] at hC
+    swap; · exact Measurable.aestronglyMeasurable <| by fun_prop
+    replace hC := hC.1
+    simp only [Function.comp_apply, ContinuousLinearEquiv.coe_neg] at hC
+    filter_upwards [hC] with y hy
+    rw [integrable_map_measure] at hy
+    rotate_left
+    · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · exact measurable_id.neg.aemeasurable
+    convert hy with x
+    simp only [Function.comp_apply, Pi.neg_apply, id_eq, Real.exp_eq_exp, mul_eq_mul_left_iff,
+      norm_nonneg, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_left_inj₀]
+    left
+    simp_rw [← sub_eq_add_neg, norm_sub_rev]
+  obtain ⟨y, hy⟩ := h_int.exists
+  obtain ⟨C', hC'_pos, hC'_lt⟩ : ∃ C', 0 < C' ∧ C' < C := ⟨C / 2, by positivity, by simp [hC_pos]⟩
+  refine ⟨C', hC'_pos, ?_⟩
+  let ε := (C - C') / C'
+  have hε : 0 < ε := div_pos (by rwa [sub_pos]) (by positivity)
+  suffices ∀ x, rexp (C' * ‖x‖ ^ 2) ≤ rexp (C/ε * ‖y‖ ^ 2) * rexp (C * ‖x - y‖ ^ 2) by
+    refine integrable_of_le_of_le (g₁ := 0)
+      (g₂ := fun x ↦ rexp (C/ε * ‖y‖ ^ 2) * rexp (C * ‖x - y‖ ^ 2)) ?_ ?_ ?_
+      (integrable_const _) (hy.const_mul _)
+    · exact Measurable.aestronglyMeasurable <| by fun_prop
+    · exact ae_of_all _ fun _ ↦ by positivity
+    · exact ae_of_all _ this
+  intro x
+  rw [← Real.exp_add]
+  gcongr
+  have h_le ε' (hε' : 0 < ε') : ‖x‖ ^ 2 ≤ (1 + ε') * ‖x - y‖ ^ 2 + (1 + 1 / ε') * ‖y‖ ^ 2 := by
+    calc ‖x‖ ^ 2
+    _ = ‖x - y + y‖ ^ 2 := by simp
+    _ ≤ (‖x - y‖  + ‖y‖) ^ 2 := by gcongr; exact norm_add_le (x - y) y
+    _ = ‖x - y‖ ^ 2 + ‖y‖ ^ 2 + 2 * ‖x - y‖ * ‖y‖ := by ring
+    _ ≤ ‖x - y‖ ^ 2 + ‖y‖ ^ 2 + ε' * ‖x - y‖ ^ 2 + (1 / ε') * ‖y‖ ^ 2 := by
+      simp_rw [add_assoc]
+      gcongr
+      exact todo_ineq (by positivity)
+    _ = (1 + ε') * ‖x - y‖ ^ 2 + (1 + 1 / ε') * ‖y‖ ^ 2 := by ring
+  specialize h_le ε hε
+  calc C' * ‖x‖ ^ 2
+  _ ≤ C' * ((1 + ε) * ‖x - y‖ ^ 2 + (1 + 1 / ε) * ‖y‖ ^ 2) := by gcongr
+  _ = (C' * (1 + 1 / ε)) * ‖y‖ ^ 2 + (C' * (1 + ε)) * ‖x - y‖ ^ 2 := by ring
+  _ = C / ε * ‖y‖ ^ 2 + C * ‖x - y‖ ^ 2 := by
+    unfold ε
+    congr 2
+    · simp only [one_div, inv_div]
+      rw [one_add_div (by rw [sub_ne_zero]; exact hC'_lt.ne'), div_div_eq_mul_div]
+      simp only [sub_add_cancel]
+      ring
+    · rw [one_add_div (by positivity)]
+      simp only [add_sub_cancel]
+      rw [mul_div_cancel₀ _ (by positivity)]
 
-lemma IsGaussian.memLp_id [SecondCountableTopology E]
-    (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞) (hp : p ≠ ∞) :
+lemma IsGaussian.memLp_id (μ : Measure E) [IsGaussian μ] (p : ℝ≥0∞) (hp : p ≠ ∞) :
     MemLp id p μ := by
   suffices MemLp (fun x ↦ ‖x‖ ^ 2) (p / 2) μ by
     rw [← memLp_norm_rpow_iff (q := 2) _ (by simp) (by simp)]

@@ -435,14 +435,23 @@ lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ)
     -- we can rotate the bands since `μ.prod μ` is invariant under rotation
     rw [map_rotation_eq_self _ hμ]
   _ = (μ.prod μ) {p | ‖p.1 - p.2‖ / √2 ≤ a ∧ b < ‖p.1 + p.2‖ / √2} := by
-    sorry
+    rw [Measure.map_apply]
+    rotate_left
+    · fun_prop
+    · refine MeasurableSet.inter ?_ ?_
+      · sorry
+      · sorry
+    congr 1
+    simp only [Set.preimage_setOf_eq, ContinuousLinearMap.rotation_apply, neg_smul]
+    congr! with p
+    · sorry
+    · sorry
   _ ≤ (μ.prod μ) {p | (b - a) / √2 < ‖p.1‖ ∧ (b - a) / √2 < ‖p.2‖} := by
     -- the rotated bands are contained in quadrants.
     refine measure_mono fun p ↦ ?_
     simp only [Set.mem_setOf_eq, and_imp]
     intro hp1 hp2
-    suffices (b - a) / √2 < min ‖p.1‖ ‖p.2‖ by
-      sorry
+    suffices (b - a) / √2 < min ‖p.1‖ ‖p.2‖ from lt_min_iff.mp this
     calc (b - a) / √2
     _ < (‖p.1 + p.2‖ - ‖p.1 - p.2‖) / 2 := by
       suffices b - a < ‖p.1 + p.2‖ / √2 - ‖p.1 - p.2‖ / √2 by
@@ -459,52 +468,147 @@ open Metric in
 /-- Special case of Fernique's theorem for centered Gaussian distributions. -/
 lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
-  obtain ⟨a, hc_gt, hc_lt⟩ : ∃ a, 2⁻¹ ≤ μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1 := by
+  by_cases hμ' : μ = Measure.dirac 0
+  · refine ⟨1, by positivity, ?_⟩
+    rw [hμ']
+    exact integrable_dirac' <| Measurable.stronglyMeasurable <| by fun_prop
+  obtain ⟨a, hc_gt, hc_lt⟩ : ∃ a, 2⁻¹ < μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1 := by
     sorry
   have ha_pos : 0 < a := by
+    by_contra! ha
+    have : {x : E | ‖x‖ ≤ a} ⊆ {0} := by
+      intro x hx
+      simp only [Set.mem_setOf_eq] at hx
+      suffices ‖x‖ = 0 from norm_eq_zero.mp this
+      exact le_antisymm (hx.trans ha) (norm_nonneg x)
+    have h_not_lt : ¬ (2 : ℝ≥0∞)⁻¹ < 0 := by simp
+    refine h_not_lt (hc_gt.trans_le ?_)
+    simp only [nonpos_iff_eq_zero]
+    refine measure_mono_null this ?_
     sorry
   let c := μ {x | ‖x‖ ≤ a}
+  replace hc_gt : 2⁻¹ < c := hc_gt
+  have hc_pos : 0 < c := lt_of_lt_of_le (by simp) hc_gt.le
+  replace hc_lt : c < 1 := hc_lt
+  have hc_lt_top : c < ∞ := lt_top_of_lt hc_lt
   let C : ℝ := a⁻¹ ^ 2 * Real.log (c / (1 - c)).toReal / 24
-  refine ⟨C, ?_, ?_⟩
-  · simp only [inv_pow, ENNReal.toReal_div, Nat.ofNat_pos, div_pos_iff_of_pos_right, C]
+  have hC_pos : 0 < C := by
+    simp only [inv_pow, ENNReal.toReal_div, Nat.ofNat_pos, div_pos_iff_of_pos_right, C]
     refine mul_pos (by positivity) ?_
     rw [Real.log_pos_iff]
     · rw [one_lt_div_iff]
       left
       constructor
-      · simp only [ENNReal.toReal_pos_iff, tsub_pos_iff_lt]
-        sorry
+      · simp only [ENNReal.toReal_pos_iff, tsub_pos_iff_lt, hc_lt, true_and, C]
+        exact lt_top_of_lt (b := 2) (tsub_le_self.trans_lt (by simp))
       · gcongr
-        · sorry
-        · sorry
+        · exact hc_lt_top.ne
+        · refine ENNReal.sub_lt_of_lt_add hc_lt.le ?_
+          sorry
     · positivity
+  refine ⟨C, hC_pos, ?_⟩
   -- main part of the proof: prove integrability by bounding the measure of a sequence of annuli
   refine ⟨Measurable.aestronglyMeasurable <| by fun_prop, ?_⟩
   simp only [HasFiniteIntegral, ← ofReal_norm_eq_enorm, Real.norm_eq_abs, Real.abs_exp]
   -- `⊢ ∫⁻ (a : E), ENNReal.ofReal (rexp (C * ‖a‖ ^ 2)) ∂μ < ⊤`
   let t : ℕ → ℝ := Nat.rec a fun n tn ↦ a + √2 * tn -- t 0 = a ; t (n + 1) = a + √2 * t n
+  have ht_succ n : t (n + 1) = a * (1 + √2) * (√2 ^ (n + 2) - 1) := by
+    induction n with
+    | zero =>
+      simp only [zero_add, Nat.rec_one, Nat.ofNat_nonneg, Real.sq_sqrt, t, C]
+      ring
+    | succ n hn =>
+      have : t (n + 1 + 1) = a + √2 * t (n + 1) := rfl
+      rw [this, hn]
+      simp_rw [← mul_assoc, mul_comm _ a, mul_assoc]
+      nth_rw 1 [← mul_one a]
+      rw [← mul_add]
+      congr
+      ring_nf
+      congr 2
+      rw [add_sub, ← sub_eq_add_neg, Real.sq_sqrt (by positivity)]
+      ring
+  have ht_succ_le n : t (n + 1) ^ 2 ≤ a ^ 2 * (1 + √2) ^ 2 * 2 ^ (n + 2) := by
+    simp_rw [ht_succ, mul_pow, mul_assoc]
+    gcongr
+    sorry
   have ht_meas_le n : μ {x | t n < ‖x‖} ≤ c * ((1 - c) / c) ^ (2 ^ n) := by
-    sorry
-  have ht_int_zero : ∫⁻ x in closedBall 0 (t 0), ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
-      ≤ ENNReal.ofReal (rexp (C * t 0 ^ 2)) := by
-    sorry
-  have ht_int_le n : ∫⁻ x in (closedBall 0 (t (n + 1)) \ closedBall 0 (t n)),
-        ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
-      ≤ ENNReal.ofReal (rexp (C * t (n + 1) ^ 2)) * μ {x | t n < ‖x‖} := by
-    sorry
+    induction n with
+    | zero =>
+      simp only [pow_zero, pow_one, C]
+      rw [ENNReal.mul_div_cancel hc_pos.ne' hc_lt_top.ne]
+      refine le_of_eq ?_
+      rw [← prob_compl_eq_one_sub]
+      · congr with x
+        simp [t]
+      · exact measurableSet_le (by fun_prop) (by fun_prop)
+    | succ n _ =>
+      sorry
   have h_iUnion : (Set.univ : Set E)
       = closedBall 0 (t 0) ∪ ⋃ n, closedBall 0 (t (n + 1)) \ closedBall 0 (t n) := by
     ext x
     simp only [Set.mem_univ, Set.mem_union, Metric.mem_closedBall, dist_zero_right, Set.mem_iUnion,
       Set.mem_diff, not_le, true_iff]
     sorry
+  have ht_int_zero : ∫⁻ x in closedBall 0 (t 0), ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
+      ≤ ENNReal.ofReal (rexp (C * t 0 ^ 2)) := by
+    calc ∫⁻ x in closedBall 0 (t 0), ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
+    _ ≤ ∫⁻ x in closedBall 0 (t 0), ENNReal.ofReal (rexp (C * t 0 ^ 2)) ∂μ := by
+      refine setLIntegral_mono (by fun_prop) fun x hx ↦ ?_
+      gcongr
+      simpa using hx
+    _ ≤ ∫⁻ x, ENNReal.ofReal (rexp (C * t 0 ^ 2)) ∂μ := setLIntegral_le_lintegral _ _
+    _ = ENNReal.ofReal (rexp (C * t 0 ^ 2)) := by simp
+  have ht_int_le n : ∫⁻ x in (closedBall 0 (t (n + 1)) \ closedBall 0 (t n)),
+        .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
+      ≤ .ofReal (rexp (C * t (n + 1) ^ 2)) * μ {x | t n < ‖x‖} := by
+    calc ∫⁻ x in (closedBall 0 (t (n + 1)) \ closedBall 0 (t n)), .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
+    _ ≤ ∫⁻ x in (closedBall 0 (t (n + 1)) \ closedBall 0 (t n)),
+        .ofReal (rexp (C * t (n + 1) ^ 2)) ∂μ := by
+      refine setLIntegral_mono (by fun_prop) fun x hx ↦ ?_
+      gcongr
+      simp only [Set.mem_diff, mem_closedBall, dist_zero_right, not_le] at hx
+      exact hx.1
+    _ = .ofReal (rexp (C * t (n + 1) ^ 2)) * μ (closedBall 0 (t (n + 1)) \ closedBall 0 (t n)) := by
+      simp only [lintegral_const, MeasurableSet.univ, Measure.restrict_apply, Set.univ_inter, C, t]
+    _ ≤ .ofReal (rexp (C * t (n + 1) ^ 2)) * μ {x | t n < ‖x‖} := by
+      gcongr
+      intro x
+      simp
   rw [← setLIntegral_univ, h_iUnion, lintegral_union, lintegral_iUnion]
   rotate_left
+  · exact fun _ ↦ measurableSet_closedBall.diff measurableSet_closedBall
   · sorry
+  · exact MeasurableSet.iUnion fun _ ↦ measurableSet_closedBall.diff measurableSet_closedBall
   · sorry
-  · sorry
-  · sorry
-  sorry
+  refine ENNReal.add_lt_top.mpr ⟨ht_int_zero.trans_lt ENNReal.ofReal_lt_top, ?_⟩
+  calc ∑' i, ∫⁻ x in closedBall 0 (t (i + 1)) \ closedBall 0 (t i),
+      .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
+  _ ≤ ∑' i, .ofReal (rexp (C * t (i + 1) ^ 2)) * μ {x | t i < ‖x‖} := by
+    gcongr with i
+    exact ht_int_le i
+  _ ≤ ∑' i, .ofReal (rexp (C * (a ^ 2 * (1 + √2) ^ 2 * 2 ^ (i + 2))))
+      * (c * ((1 - c) / c) ^ (2 ^ i)) := by
+    gcongr with i
+    · exact ht_succ_le i
+    · exact ht_meas_le i
+  _ = c * ∑' i, .ofReal (rexp (C * (a ^ 2 * (1 + √2) ^ 2 * 2 ^ (i + 2))))
+      * ((1 - c) / c) ^ (2 ^ i) := by rw [← ENNReal.tsum_mul_left]; congr with i; ring
+  _ = c * ∑' i, .ofReal (rexp ((C * a ^ 2 * (1 + √2) ^ 2 * 4 * 2 ^ i)
+      + (- Real.log (c / (1 - c)).toReal * 2 ^ i))) := by
+    congr with i
+    rw [Real.exp_add, ENNReal.ofReal_mul (by positivity)]
+    congr 3
+    · ring
+    · rw [← Real.log_inv, mul_comm _ (2 ^ i), ← Real.log_rpow, Real.exp_log]
+      · sorry
+      · simp only [ENNReal.toReal_div, inv_div]
+        sorry
+      · simp only [ENNReal.toReal_div, inv_div]
+        sorry
+  _ < ⊤ := by
+    refine ENNReal.mul_lt_top hc_lt_top ?_
+    sorry
 
 /-- **Fernique's theorem** -/
 theorem IsGaussian.exists_integrable_exp_sq (μ : Measure E) [IsGaussian μ] :

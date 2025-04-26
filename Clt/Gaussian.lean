@@ -422,11 +422,88 @@ end ToLpₗ
 
 section Fernique
 
-variable {μ : Measure E} [IsGaussian μ]
+variable [SecondCountableTopology E] [CompleteSpace E] {μ : Measure E} [IsGaussian μ]
 
 lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ)
     {a b : ℝ} (ha : 0 < a) (h : a < b) :
     μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖} ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by
+  calc μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖}
+  _ = (μ.prod μ) ({x | ‖x‖ ≤ a} ×ˢ {y | b < ‖y‖}) := by rw [Measure.prod_prod]
+    -- this is the measure of two bands in the plane (draw a picture!)
+  _ = (μ.prod μ) {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := rfl
+  _ = ((μ.prod μ).map (ContinuousLinearMap.rotation (- π/4))) {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := by
+    -- we can rotate the bands since `μ.prod μ` is invariant under rotation
+    rw [map_rotation_eq_self _ hμ]
+  _ = (μ.prod μ) {p | ‖p.1 - p.2‖ / √2 ≤ a ∧ b < ‖p.1 + p.2‖ / √2} := by
+    sorry
+  _ ≤ (μ.prod μ) {p | (b - a) / √2 < ‖p.1‖ ∧ (b - a) / √2 < ‖p.2‖} := by
+    -- the rotated bands are contained in quadrants.
+    refine measure_mono fun p ↦ ?_
+    simp only [Set.mem_setOf_eq, and_imp]
+    intro hp1 hp2
+    suffices (b - a) / √2 < min ‖p.1‖ ‖p.2‖ by
+      sorry
+    calc (b - a) / √2
+    _ < (‖p.1 + p.2‖ - ‖p.1 - p.2‖) / 2 := by
+      suffices b - a < ‖p.1 + p.2‖ / √2 - ‖p.1 - p.2‖ / √2 by
+        sorry
+      calc b - a
+      _ < ‖p.1 + p.2‖ / √2 - a := by gcongr
+      _ ≤ ‖p.1 + p.2‖ / √2 - ‖p.1 - p.2‖ / √2 := by gcongr
+    _ ≤ min ‖p.1‖ ‖p.2‖ := by
+      sorry
+  _ = (μ.prod μ) ({x | (b - a) / √2 < ‖x‖} ×ˢ {y | (b - a) / √2 < ‖y‖}) := rfl
+  _ ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by rw [Measure.prod_prod, pow_two]
+
+open Metric in
+/-- Special case of Fernique's theorem for centered Gaussian distributions. -/
+lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
+    ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
+  obtain ⟨a, hc_gt, hc_lt⟩ : ∃ a, 2⁻¹ ≤ μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1 := by
+    sorry
+  have ha_pos : 0 < a := by
+    sorry
+  let c := μ {x | ‖x‖ ≤ a}
+  let C : ℝ := a⁻¹ ^ 2 * Real.log (c / (1 - c)).toReal / 24
+  refine ⟨C, ?_, ?_⟩
+  · simp only [inv_pow, ENNReal.toReal_div, Nat.ofNat_pos, div_pos_iff_of_pos_right, C]
+    refine mul_pos (by positivity) ?_
+    rw [Real.log_pos_iff]
+    · rw [one_lt_div_iff]
+      left
+      constructor
+      · simp only [ENNReal.toReal_pos_iff, tsub_pos_iff_lt]
+        sorry
+      · gcongr
+        · sorry
+        · sorry
+    · positivity
+  -- main part of the proof: prove integrability by bounding the measure of a sequence of annuli
+  refine ⟨Measurable.aestronglyMeasurable <| by fun_prop, ?_⟩
+  simp only [HasFiniteIntegral, ← ofReal_norm_eq_enorm, Real.norm_eq_abs, Real.abs_exp]
+  -- `⊢ ∫⁻ (a : E), ENNReal.ofReal (rexp (C * ‖a‖ ^ 2)) ∂μ < ⊤`
+  let t : ℕ → ℝ := Nat.rec a fun n tn ↦ a + √2 * tn -- t 0 = a ; t (n + 1) = a + √2 * t n
+  have ht_meas_le n : μ {x | t n < ‖x‖} ≤ c * ((1 - c) / c) ^ (2 ^ n) := by
+    sorry
+  have ht_int_zero : ∫⁻ x in closedBall 0 (t 0), ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
+      ≤ ENNReal.ofReal (rexp (C * t 0 ^ 2)) := by
+    sorry
+  have ht_int_le n : ∫⁻ x in (closedBall 0 (t (n + 1)) \ closedBall 0 (t n)),
+        ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
+      ≤ ENNReal.ofReal (rexp (C * t (n + 1) ^ 2)) * μ {x | t n < ‖x‖} := by
+    sorry
+  have h_iUnion : (Set.univ : Set E)
+      = closedBall 0 (t 0) ∪ ⋃ n, closedBall 0 (t (n + 1)) \ closedBall 0 (t n) := by
+    ext x
+    simp only [Set.mem_univ, Set.mem_union, Metric.mem_closedBall, dist_zero_right, Set.mem_iUnion,
+      Set.mem_diff, not_le, true_iff]
+    sorry
+  rw [← setLIntegral_univ, h_iUnion, lintegral_union, lintegral_iUnion]
+  rotate_left
+  · sorry
+  · sorry
+  · sorry
+  · sorry
   sorry
 
 /-- **Fernique's theorem** -/
@@ -462,7 +539,7 @@ end Fernique
 
 section ToLp
 
-variable {p : ℝ≥0∞} [SecondCountableTopology E]
+variable {p : ℝ≥0∞} [SecondCountableTopology E] [CompleteSpace E]
 
 lemma norm_toLpₗ_le (μ : Measure E) [IsGaussian μ] (L : E →L[ℝ] ℝ) (hp : p ≠ 0) (hp_top : p ≠ ∞) :
     ‖L.toLpₗ μ p hp_top‖ ≤ ‖L‖ * (eLpNorm id p μ).toReal := by
@@ -544,7 +621,7 @@ end Mean
 
 section Covariance
 
-variable [SecondCountableTopology E]
+variable [SecondCountableTopology E] [CompleteSpace E]
 
 -- todo: this is the right def only for centered gaussian measures
 /-- Covariance operator of a Gaussian measure. -/

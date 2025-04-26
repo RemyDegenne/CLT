@@ -518,6 +518,10 @@ lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ) (a b : ℝ) 
   _ = (μ.prod μ) ({x | (b - a) / √2 < ‖x‖} ×ˢ {y | (b - a) / √2 < ‖y‖}) := rfl
   _ ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by rw [Measure.prod_prod, pow_two]
 
+lemma aux {c : ℝ} (hc : c < 0) :
+    ∑' i, .ofReal (rexp (c * 2 ^ i)) < ∞ := by
+  sorry
+
 open Metric in
 /-- Special case of Fernique's theorem for centered Gaussian distributions. -/
 lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
@@ -545,6 +549,13 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
   have hc_pos : 0 < c := lt_of_lt_of_le (by simp) hc_gt.le
   replace hc_lt : c < 1 := hc_lt
   have hc_lt_top : c < ∞ := lt_top_of_lt hc_lt
+  have hc_one_sub_lt_top : 1 - c < ∞ := lt_top_of_lt (b := 2) (tsub_le_self.trans_lt (by simp))
+  have h_one_sub_lt_self : 1 - c < c := by
+    refine ENNReal.sub_lt_of_lt_add hc_lt.le ?_
+    rw [← two_mul]
+    rwa [inv_eq_one_div, ENNReal.div_lt_iff, mul_comm] at hc_gt
+    · simp
+    · simp
   let C : ℝ := a⁻¹ ^ 2 * Real.log (c / (1 - c)).toReal / 24
   have hC_pos : 0 < C := by
     simp only [inv_pow, ENNReal.toReal_div, Nat.ofNat_pos, div_pos_iff_of_pos_right, C]
@@ -553,15 +564,9 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     · rw [one_lt_div_iff]
       left
       constructor
-      · simp only [ENNReal.toReal_pos_iff, tsub_pos_iff_lt, hc_lt, true_and, C]
-        exact lt_top_of_lt (b := 2) (tsub_le_self.trans_lt (by simp))
+      · simp only [ENNReal.toReal_pos_iff, tsub_pos_iff_lt, hc_lt, true_and, C, hc_one_sub_lt_top]
       · gcongr
-        · exact hc_lt_top.ne
-        · refine ENNReal.sub_lt_of_lt_add hc_lt.le ?_
-          rw [← two_mul]
-          rwa [inv_eq_one_div, ENNReal.div_lt_iff, mul_comm] at hc_gt
-          · simp
-          · simp
+        exact hc_lt_top.ne
     · positivity
   refine ⟨C, hC_pos, ?_⟩
   -- main part of the proof: prove integrability by bounding the measure of a sequence of annuli
@@ -628,12 +633,20 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
       · congr with x
         simp [t]
       · exact measurableSet_le (by fun_prop) (by fun_prop)
-    | succ n _ =>
+    | succ n hn =>
       have h_mul_le : c * μ {x | t (n + 1) < ‖x‖} ≤ μ {x | t n < ‖x‖} ^ 2 := by
         convert IsGaussian.measure_le_mul_measure_gt_le hμ _ _
         rw [ht_succ_def]
         field_simp
-      sorry
+      calc μ {x | t (n + 1) < ‖x‖}
+      _ = c⁻¹ * (c * μ {x | t (n + 1) < ‖x‖}) := by
+        rw [← mul_assoc, ENNReal.inv_mul_cancel hc_pos.ne' hc_lt_top.ne, one_mul]
+      _ ≤ c⁻¹ * μ {x | t n < ‖x‖} ^ 2 := by gcongr
+      _ ≤ c⁻¹ * (c * ((1 - c) / c) ^ 2 ^ n) ^ 2 := by gcongr
+      _ = c * ((1 - c) / c) ^ 2 ^ (n + 1) := by
+        rw [mul_pow, ← pow_mul, ← mul_assoc, pow_two, ← mul_assoc,
+          ENNReal.inv_mul_cancel hc_pos.ne' hc_lt_top.ne, one_mul]
+        congr
   -- cut the space into annuli
   have h_iUnion : (Set.univ : Set E)
       = closedBall 0 (t 0) ∪ ⋃ n, closedBall 0 (t (n + 1)) \ closedBall 0 (t n) := by
@@ -693,15 +706,47 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     rw [Real.exp_add, ENNReal.ofReal_mul (by positivity)]
     congr 3
     · ring
-    · rw [← Real.log_inv, mul_comm _ (2 ^ i), ← Real.log_rpow, Real.exp_log]
-      · sorry
+    · have h_pos : 0 < (1 - c).toReal / c.toReal := by
+        refine div_pos ?_ ?_
+        · simp [ENNReal.toReal_pos_iff, hc_lt, hc_one_sub_lt_top]
+        · simp [ENNReal.toReal_pos_iff, hc_pos, hc_lt_top]
+      rw [← Real.log_inv, mul_comm _ (2 ^ i), ← Real.log_rpow, Real.exp_log]
+      · rw [← ENNReal.ofReal_rpow_of_nonneg (by positivity) (by positivity),
+          ENNReal.toReal_div, inv_div, ← ENNReal.toReal_div,  ENNReal.ofReal_toReal]
+        · norm_cast
+        · simp [ENNReal.div_eq_top, hc_pos.ne']
       · simp only [ENNReal.toReal_div, inv_div]
-        sorry
-      · simp only [ENNReal.toReal_div, inv_div]
-        sorry
+        refine Real.rpow_pos_of_pos h_pos _
+      · simp only [ENNReal.toReal_div, inv_div, h_pos]
+  _ = c * ∑' i, .ofReal (rexp ((((1 + √2) ^ 2 * 4 / 24) - 1)
+      * Real.log (c / (1 - c)).toReal * 2 ^ i)) := by
+    congr with i
+    congr
+    rw [← add_mul]
+    congr
+    unfold C
+    field_simp
+    ring
   _ < ⊤ := by
     refine ENNReal.mul_lt_top hc_lt_top ?_
-    sorry
+    refine aux ?_
+    refine mul_neg_of_neg_of_pos ?_ ?_
+    · have : (1 + √2) ^ 2 = 1 + 2 * √2 + √2 ^ 2 := by ring
+      rw [Real.sq_sqrt (by positivity)] at this
+      rw [this, add_mul, add_mul, add_comm, ← add_assoc, sub_neg, div_lt_one (by positivity)]
+      norm_num
+      rw [mul_comm, ← mul_assoc, ← lt_sub_iff_add_lt']
+      norm_num
+      suffices 2 * √2 < 3 by linarith
+      rw [← sq_lt_sq₀ (by positivity) (by positivity), mul_pow, Real.sq_sqrt (by positivity)]
+      norm_num
+    · refine Real.log_pos ?_
+      simp only [ENNReal.toReal_div, one_lt_div_iff, ENNReal.toReal_pos_iff, tsub_pos_iff_lt, hc_lt,
+        hc_one_sub_lt_top, and_self, ne_eq, ENNReal.sub_eq_top_iff, ENNReal.one_ne_top, false_and,
+        not_false_eq_true, true_and]
+      left
+      rw [ENNReal.toReal_lt_toReal hc_one_sub_lt_top.ne hc_lt_top.ne]
+      exact h_one_sub_lt_self
 
 lemma todo_ineq {a b ε : ℝ} (hε : 0 < ε) : 2 * a * b ≤ ε * a ^ 2 + (1 / ε) * b ^ 2 := by
   have h : 2 * (ε * a) * b ≤ (ε * a) ^ 2 + b ^ 2 := two_mul_le_add_sq (ε * a) b

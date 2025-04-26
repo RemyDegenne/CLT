@@ -522,7 +522,16 @@ lemma aux {c : ℝ} (hc : c < 0) :
     ∑' i, .ofReal (rexp (c * 2 ^ i)) < ∞ := by
   sorry
 
-open Metric in
+lemma one_lt_sqrt_two : 1 < √2 := by
+  rw [← Real.sqrt_one]
+  exact Real.sqrt_lt_sqrt (by positivity) (by simp)
+
+lemma sqrt_two_lt_three_halves : √2 < 3 / 2 := by
+  suffices 2 * √2 < 3 by linarith
+  rw [← sq_lt_sq₀ (by positivity) (by positivity), mul_pow, Real.sq_sqrt (by positivity)]
+  norm_num
+
+open Metric Filter in
 /-- Special case of Fernique's theorem for centered Gaussian distributions. -/
 lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     ∃ C, 0 < C ∧ Integrable (fun x ↦ rexp (C * ‖x‖ ^ 2)) μ := by
@@ -595,14 +604,16 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
         · simp
       _ < a + √2 * t (n + 1) := lt_add_of_pos_left _ ha_pos
   -- first, compute bounds on `t (n + 1)`
-  have ht_succ n : t (n + 1) = a * (1 + √2) * (√2 ^ (n + 2) - 1) := by
+  have ht_eq n : t n = a * (1 + √2) * (√2 ^ (n + 1) - 1) := by
     induction n with
     | zero =>
-      simp only [zero_add, Nat.rec_one, Nat.ofNat_nonneg, Real.sq_sqrt, t, C]
-      ring
+      simp only [zero_add, pow_one]
+      ring_nf
+      rw [Real.sq_sqrt (by positivity)]
+      ring_nf
+      rfl
     | succ n hn =>
-      have : t (n + 1 + 1) = a + √2 * t (n + 1) := rfl
-      rw [this, hn]
+      rw [ht_succ_def, hn]
       simp_rw [← mul_assoc, mul_comm _ a, mul_assoc]
       nth_rw 1 [← mul_one a]
       rw [← mul_add]
@@ -611,8 +622,17 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
       congr 2
       rw [add_sub, ← sub_eq_add_neg, Real.sq_sqrt (by positivity)]
       ring
+  have ht_tendsto : Tendsto t atTop atTop := by
+    suffices Tendsto (fun n ↦ a * (1 + √2) * (√2 ^ (n + 1) - 1)) atTop atTop by
+      convert this with n
+      exact ht_eq n
+    refine Tendsto.const_mul_atTop (by positivity) ?_
+    refine Tendsto.atTop_of_add_const 1 ?_
+    simp only [sub_add_cancel]
+    refine (tendsto_add_atTop_iff_nat 1).mpr ?_
+    exact tendsto_pow_atTop_atTop_of_one_lt (r := √2) one_lt_sqrt_two
   have ht_succ_le n : t (n + 1) ^ 2 ≤ a ^ 2 * (1 + √2) ^ 2 * 2 ^ (n + 2) := by
-    simp_rw [ht_succ, mul_pow, mul_assoc]
+    simp_rw [ht_eq, mul_pow, mul_assoc]
     gcongr
     calc (√2 ^ (n + 2) - 1) ^ 2
     _ ≤ (√2 ^ (n + 2)) ^ 2 := by
@@ -622,7 +642,7 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
         _ ≤ √2 ^ (n + 2) - 1 := by gcongr <;> simp
       · exact sub_le_self _ (by simp)
     _ = 2 ^ (n + 2) := by rw [← pow_mul, mul_comm, pow_mul, Real.sq_sqrt (by positivity)]
-  -- bound `μ {x | t n < ‖x‖}`
+  -- get a bound on `μ {x | t n < ‖x‖}`
   have ht_meas_le n : μ {x | t n < ‖x‖} ≤ c * ((1 - c) / c) ^ (2 ^ n) := by
     induction n with
     | zero =>
@@ -741,9 +761,8 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
       norm_num
       rw [mul_comm, ← mul_assoc, ← lt_sub_iff_add_lt']
       norm_num
-      suffices 2 * √2 < 3 by linarith
-      rw [← sq_lt_sq₀ (by positivity) (by positivity), mul_pow, Real.sq_sqrt (by positivity)]
-      norm_num
+      suffices √2 < 3 / 2 by linarith
+      exact sqrt_two_lt_three_halves
     · refine Real.log_pos ?_
       simp only [ENNReal.toReal_div, one_lt_div_iff, ENNReal.toReal_pos_iff, tsub_pos_iff_lt, hc_lt,
         hc_one_sub_lt_top, and_self, ne_eq, ENNReal.sub_eq_top_iff, ENNReal.one_ne_top, false_and,

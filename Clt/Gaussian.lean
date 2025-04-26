@@ -462,14 +462,17 @@ section Fernique
 
 variable [SecondCountableTopology E] [CompleteSpace E] {μ : Measure E} [IsGaussian μ]
 
-lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ)
-    {a b : ℝ} (ha : 0 < a) (h : a < b) :
+lemma norm_add_sub_norm_le_div_two_le_min (x y : E) :
+    (‖x + y‖ - ‖x - y‖) / 2 ≤ min ‖x‖ ‖y‖ := by
+  sorry
+
+lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ) (a b : ℝ) :
     μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖} ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by
   calc μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖}
   _ = (μ.prod μ) ({x | ‖x‖ ≤ a} ×ˢ {y | b < ‖y‖}) := by rw [Measure.prod_prod]
     -- this is the measure of two bands in the plane (draw a picture!)
   _ = (μ.prod μ) {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := rfl
-  _ = ((μ.prod μ).map (ContinuousLinearMap.rotation (- π/4))) {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := by
+  _ = ((μ.prod μ).map (ContinuousLinearMap.rotation (- (π/4)))) {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := by
     -- we can rotate the bands since `μ.prod μ` is invariant under rotation
     rw [map_rotation_eq_self _ hμ]
   _ = (μ.prod μ) {p | ‖p.1 - p.2‖ / √2 ≤ a ∧ b < ‖p.1 + p.2‖ / √2} := by
@@ -477,13 +480,23 @@ lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ)
     rotate_left
     · fun_prop
     · refine MeasurableSet.inter ?_ ?_
-      · sorry
-      · sorry
+      · change MeasurableSet {p : E × E | ‖p.1‖ ≤ a}
+        exact measurableSet_le (by fun_prop) (by fun_prop)
+      · change MeasurableSet {p : E × E | b < ‖p.2‖}
+        exact measurableSet_lt (by fun_prop) (by fun_prop)
     congr 1
-    simp only [Set.preimage_setOf_eq, ContinuousLinearMap.rotation_apply, neg_smul]
+    simp only [Set.preimage_setOf_eq, ContinuousLinearMap.rotation_apply, Real.cos_neg,
+      Real.cos_pi_div_four, Real.sin_neg, Real.sin_pi_div_four, neg_smul, neg_neg]
+    have h_twos : ‖2⁻¹ * √2‖ = (√2)⁻¹ := by
+      simp only [norm_mul, norm_inv, Real.norm_ofNat, Real.norm_eq_abs]
+      rw [abs_of_nonneg (by positivity)]
+      nth_rw 1 [← Real.sq_sqrt (by simp : (0 : ℝ) ≤ 2)]
+      rw [pow_two, mul_inv, mul_assoc, inv_mul_cancel₀ (by positivity), mul_one]
     congr! with p
-    · sorry
-    · sorry
+    · rw [← sub_eq_add_neg, ← smul_sub, norm_smul, div_eq_inv_mul, div_eq_inv_mul]
+      congr
+    · rw [← smul_add, norm_smul, div_eq_inv_mul, div_eq_inv_mul]
+      congr
   _ ≤ (μ.prod μ) {p | (b - a) / √2 < ‖p.1‖ ∧ (b - a) / √2 < ‖p.2‖} := by
     -- the rotated bands are contained in quadrants.
     refine measure_mono fun p ↦ ?_
@@ -493,12 +506,15 @@ lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ)
     calc (b - a) / √2
     _ < (‖p.1 + p.2‖ - ‖p.1 - p.2‖) / 2 := by
       suffices b - a < ‖p.1 + p.2‖ / √2 - ‖p.1 - p.2‖ / √2 by
-        sorry
+        calc (b - a) / √2
+        _ < (‖p.1 + p.2‖ / √2 - ‖p.1 - p.2‖ / √2) / √2 := by gcongr
+        _ = (‖p.1 + p.2‖ - ‖p.1 - p.2‖) / 2 := by
+          rw [sub_div, div_div, div_div, ← pow_two, Real.sq_sqrt, sub_div]
+          simp
       calc b - a
       _ < ‖p.1 + p.2‖ / √2 - a := by gcongr
       _ ≤ ‖p.1 + p.2‖ / √2 - ‖p.1 - p.2‖ / √2 := by gcongr
-    _ ≤ min ‖p.1‖ ‖p.2‖ := by
-      sorry
+    _ ≤ min ‖p.1‖ ‖p.2‖ := norm_add_sub_norm_le_div_two_le_min _ _
   _ = (μ.prod μ) ({x | (b - a) / √2 < ‖x‖} ×ˢ {y | (b - a) / √2 < ‖y‖}) := rfl
   _ ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by rw [Measure.prod_prod, pow_two]
 

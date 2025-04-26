@@ -654,12 +654,16 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     simp only [Set.mem_univ, Set.mem_union, Metric.mem_closedBall, dist_zero_right, Set.mem_iUnion,
       Set.mem_diff, not_le, true_iff]
     sorry
-  rw [← setLIntegral_univ, h_iUnion, lintegral_union, lintegral_iUnion]
-  rotate_left
-  · exact fun _ ↦ measurableSet_closedBall.diff measurableSet_closedBall
-  · sorry
-  · exact MeasurableSet.iUnion fun _ ↦ measurableSet_closedBall.diff measurableSet_closedBall
-  · sorry
+  rw [← setLIntegral_univ, h_iUnion]
+  have : ∫⁻ x in closedBall 0 (t 0) ∪ ⋃ n, closedBall 0 (t (n + 1)) \ closedBall 0 (t n),
+        .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
+      ≤ ∫⁻ x in closedBall 0 (t 0), .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ +
+        ∑' i, ∫⁻ x in closedBall 0 (t (i + 1)) \ closedBall 0 (t i),
+          .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ := by
+    refine (lintegral_union_le _ _ _).trans ?_
+    gcongr
+    exact lintegral_iUnion_le _ _
+  refine this.trans_lt ?_
   -- compute bounds on the integral over the annuli
   have ht_int_zero : ∫⁻ x in closedBall 0 (t 0), ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
       ≤ ENNReal.ofReal (rexp (C * t 0 ^ 2)) := by

@@ -558,7 +558,10 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
       · gcongr
         · exact hc_lt_top.ne
         · refine ENNReal.sub_lt_of_lt_add hc_lt.le ?_
-          sorry
+          rw [← two_mul]
+          rwa [inv_eq_one_div, ENNReal.div_lt_iff, mul_comm] at hc_gt
+          · simp
+          · simp
     · positivity
   refine ⟨C, hC_pos, ?_⟩
   -- main part of the proof: prove integrability by bounding the measure of a sequence of annuli
@@ -566,6 +569,27 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
   simp only [HasFiniteIntegral, ← ofReal_norm_eq_enorm, Real.norm_eq_abs, Real.abs_exp]
   -- `⊢ ∫⁻ (a : E), ENNReal.ofReal (rexp (C * ‖a‖ ^ 2)) ∂μ < ⊤`
   let t : ℕ → ℝ := Nat.rec a fun n tn ↦ a + √2 * tn -- t 0 = a ; t (n + 1) = a + √2 * t n
+  have ht_succ_def n : t (n + 1) = a + √2 * t n := rfl
+  have ht_nonneg n : 0 ≤ t n := by
+    induction n with
+    | zero => simp [t, ha_pos.le]
+    | succ n hn =>
+      rw [ht_succ_def]
+      positivity
+  have ht_mono : StrictMono t := by
+    refine strictMono_nat_of_lt_succ fun n ↦ ?_
+    cases n with
+    | zero => simp [t, ha_pos]
+    | succ n =>
+      conv_rhs => rw [ht_succ_def (n + 1)]
+      calc t (n + 1)
+      _ ≤ √2 * t (n + 1) := by
+        conv_lhs => rw [← one_mul (t (n + 1))]
+        gcongr
+        · exact ht_nonneg (n + 1)
+        · simp
+      _ < a + √2 * t (n + 1) := lt_add_of_pos_left _ ha_pos
+  -- first, compute bounds on `t (n + 1)`
   have ht_succ n : t (n + 1) = a * (1 + √2) * (√2 ^ (n + 2) - 1) := by
     induction n with
     | zero =>
@@ -585,7 +609,15 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
   have ht_succ_le n : t (n + 1) ^ 2 ≤ a ^ 2 * (1 + √2) ^ 2 * 2 ^ (n + 2) := by
     simp_rw [ht_succ, mul_pow, mul_assoc]
     gcongr
-    sorry
+    calc (√2 ^ (n + 2) - 1) ^ 2
+    _ ≤ (√2 ^ (n + 2)) ^ 2 := by
+      gcongr
+      · calc 0
+        _ ≤ √2 ^ (0 + 2) - 1 := by simp
+        _ ≤ √2 ^ (n + 2) - 1 := by gcongr <;> simp
+      · exact sub_le_self _ (by simp)
+    _ = 2 ^ (n + 2) := by rw [← pow_mul, mul_comm, pow_mul, Real.sq_sqrt (by positivity)]
+  -- bound `μ {x | t n < ‖x‖}`
   have ht_meas_le n : μ {x | t n < ‖x‖} ≤ c * ((1 - c) / c) ^ (2 ^ n) := by
     induction n with
     | zero =>
@@ -598,12 +630,20 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
       · exact measurableSet_le (by fun_prop) (by fun_prop)
     | succ n _ =>
       sorry
+  -- cut the space into annuli
   have h_iUnion : (Set.univ : Set E)
       = closedBall 0 (t 0) ∪ ⋃ n, closedBall 0 (t (n + 1)) \ closedBall 0 (t n) := by
     ext x
     simp only [Set.mem_univ, Set.mem_union, Metric.mem_closedBall, dist_zero_right, Set.mem_iUnion,
       Set.mem_diff, not_le, true_iff]
     sorry
+  rw [← setLIntegral_univ, h_iUnion, lintegral_union, lintegral_iUnion]
+  rotate_left
+  · exact fun _ ↦ measurableSet_closedBall.diff measurableSet_closedBall
+  · sorry
+  · exact MeasurableSet.iUnion fun _ ↦ measurableSet_closedBall.diff measurableSet_closedBall
+  · sorry
+  -- compute bounds on the integral over the annuli
   have ht_int_zero : ∫⁻ x in closedBall 0 (t 0), ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
       ≤ ENNReal.ofReal (rexp (C * t 0 ^ 2)) := by
     calc ∫⁻ x in closedBall 0 (t 0), ENNReal.ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
@@ -629,12 +669,7 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
       gcongr
       intro x
       simp
-  rw [← setLIntegral_univ, h_iUnion, lintegral_union, lintegral_iUnion]
-  rotate_left
-  · exact fun _ ↦ measurableSet_closedBall.diff measurableSet_closedBall
-  · sorry
-  · exact MeasurableSet.iUnion fun _ ↦ measurableSet_closedBall.diff measurableSet_closedBall
-  · sorry
+  -- put everything together
   refine ENNReal.add_lt_top.mpr ⟨ht_int_zero.trans_lt ENNReal.ofReal_lt_top, ?_⟩
   calc ∑' i, ∫⁻ x in closedBall 0 (t (i + 1)) \ closedBall 0 (t i),
       .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ

@@ -14,6 +14,13 @@ open scoped ENNReal NNReal Real Topology
 
 section Aux
 
+instance noAtoms_withDensity {X : Type*} {mX : MeasurableSpace X} {μ : Measure X}
+    [NoAtoms μ] (f : X → ℝ≥0∞) :
+    NoAtoms (μ.withDensity f) where
+  measure_singleton x := by
+    have h : μ {x} = 0 := by rw [measure_singleton]
+    exact withDensity_absolutelyContinuous μ f h
+
 @[simp]
 lemma variance_dirac {E : Type*} {mE : MeasurableSpace E} [MeasurableSingletonClass E]
     (X : E → ℝ) (x : E) :
@@ -181,6 +188,7 @@ lemma variance_continuousLinearMap_gaussianReal (L : ℝ →L[ℝ] ℝ) :
   variance_linearMap_gaussianReal _ _ L
 
 lemma noAtoms_gaussianReal (h : v ≠ 0) : NoAtoms (gaussianReal μ v) := by
-  sorry
+  rw [gaussianReal_of_var_ne_zero _ h]
+  infer_instance
 
 end ProbabilityTheory

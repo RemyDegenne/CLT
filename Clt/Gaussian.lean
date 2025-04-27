@@ -588,6 +588,29 @@ lemma IsGaussian.noAtoms_of_isCentered (hμ : IsCentered μ) (h : μ ≠ Measure
     refine measure_mono_null ?_ hL_zero
     exact fun ⦃a⦄ ↦ congrArg ⇑L
 
+lemma IsGaussian.exists_measure_norm_mem_Ioo (hμ : IsCentered μ) (h : μ ≠ Measure.dirac 0) :
+    ∃ a, 2⁻¹ < μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1 := by
+  sorry
+
+open Filter in
+lemma todo {t : ℕ → ℝ} (ht_mono : StrictMono t) (ht_tendsto : Tendsto t atTop atTop) (x : ℝ) :
+    x ≤ t 0 ∨ ∃ n, t n < x ∧ x ≤ t (n + 1) := by
+  by_cases hx0 : x ≤ t 0
+  · simp [hx0]
+  simp only [hx0, false_or]
+  have h : ∃ n, x ≤ t n := by
+    simp [tendsto_atTop_atTop_iff_of_monotone ht_mono.monotone] at ht_tendsto
+    exact ht_tendsto x
+  have h' := Nat.find_spec h
+  have h'' m := Nat.find_min h (m := m)
+  simp only [not_le] at h'' hx0
+  refine ⟨Nat.find h - 1, ?_, ?_⟩
+  · refine h'' _ ?_
+    simp [hx0]
+  · convert h'
+    rw [Nat.sub_add_cancel]
+    simp [hx0]
+
 open Metric Filter in
 /-- Special case of Fernique's theorem for centered Gaussian distributions. -/
 lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
@@ -596,8 +619,8 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
   · refine ⟨1, by positivity, ?_⟩
     rw [hμ']
     exact integrable_dirac' <| Measurable.stronglyMeasurable <| by fun_prop
-  obtain ⟨a, hc_gt, hc_lt⟩ : ∃ a, 2⁻¹ < μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1 := by
-    sorry
+  obtain ⟨a, hc_gt, hc_lt⟩ : ∃ a, 2⁻¹ < μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1 :=
+    IsGaussian.exists_measure_norm_mem_Ioo hμ hμ'
   have ha_pos : 0 < a := by
     by_contra! ha
     have : {x : E | ‖x‖ ≤ a} ⊆ {0} := by
@@ -731,7 +754,8 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     ext x
     simp only [Set.mem_univ, Set.mem_union, Metric.mem_closedBall, dist_zero_right, Set.mem_iUnion,
       Set.mem_diff, not_le, true_iff]
-    sorry
+    simp_rw [and_comm (b := t _ < ‖x‖)]
+    exact todo ht_mono ht_tendsto _
   rw [← setLIntegral_univ, h_iUnion]
   have : ∫⁻ x in closedBall 0 (t 0) ∪ ⋃ n, closedBall 0 (t (n + 1)) \ closedBall 0 (t n),
         .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ

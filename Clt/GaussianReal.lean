@@ -191,4 +191,28 @@ lemma noAtoms_gaussianReal (h : v ≠ 0) : NoAtoms (gaussianReal μ v) := by
   rw [gaussianReal_of_var_ne_zero _ h]
   infer_instance
 
+@[simp]
+lemma support_gaussianPDF (hv : v ≠ 0) : Function.support (gaussianPDF μ v) = Set.univ := by
+  rw [Function.support]
+  ext x
+  simp only [ne_eq, Set.mem_setOf_eq, Set.mem_univ, iff_true]
+  exact (gaussianPDF_pos _ hv x).ne'
+
+lemma gaussianReal_Ioi_pos (hv : v ≠ 0) (x : ℝ) : 0 < gaussianReal μ v (Set.Ioi x) := by
+  rw [gaussianReal_of_var_ne_zero _ hv]
+  simp only [measurableSet_Ioi, withDensity_apply]
+  rw [setLIntegral_pos_iff (by fun_prop)]
+  simp [hv]
+
+lemma gaussianReal_closedBall_lt_one (hv : v ≠ 0) (x : ℝ) : gaussianReal μ v {y | |y| ≤ x} < 1 := by
+  suffices 0 < gaussianReal μ v {y | x < |y|} by
+    have h_eq_compl : {y | x < |y|} = {y | |y| ≤ x}ᶜ := by ext; simp
+    rw [h_eq_compl, measure_compl, measure_univ] at this
+    · simpa using this
+    · exact measurableSet_le (by fun_prop) (by fun_prop)
+    · simp
+  refine (gaussianReal_Ioi_pos μ _ hv x).trans_le (measure_mono fun y hy ↦ ?_)
+  simp only [Set.mem_Ioi, Set.mem_setOf_eq] at hy ⊢
+  exact hy.trans_le (le_abs_self y)
+
 end ProbabilityTheory

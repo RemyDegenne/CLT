@@ -591,7 +591,29 @@ lemma IsGaussian.noAtoms_of_isCentered (hμ : IsCentered μ) (h : μ ≠ Measure
 lemma IsGaussian.measure_closedBall_lt_one (hμ : IsCentered μ) (h : μ ≠ Measure.dirac 0)
     (a : ℝ) :
     μ {x | ‖x‖ ≤ a} < 1 := by
-  sorry
+  obtain ⟨L, hL⟩ : ∃ L : E →L[ℝ] ℝ, Var[L ; μ] ≠ 0 := by
+    contrapose! h
+    exact eq_dirac_of_variance_eq_zero hμ h
+  by_contra! h_eq_one
+  replace h_eq_one : μ {x | ‖x‖ ≤ a} = 1 :=
+    le_antisymm ((measure_mono (Set.subset_univ _)).trans_eq (by simp)) h_eq_one
+  have h_eq_one' : μ.map L {x | |x| ≤ a * ‖L‖} = 1 := by
+    rw [Measure.map_apply (by fun_prop)]
+    swap; · exact measurableSet_le (by fun_prop) (by fun_prop)
+    simp only [Set.preimage_setOf_eq]
+    refine le_antisymm ((measure_mono (Set.subset_univ _)).trans_eq (by simp)) ?_
+    rw [← h_eq_one]
+    refine measure_mono fun x hx ↦ ?_
+    simp only [Set.mem_setOf_eq] at hx ⊢
+    calc ‖L x‖
+    _ ≤ ‖L‖ * ‖x‖ := L.le_opNorm x
+    _ ≤ a * ‖L‖ := by rw [mul_comm]; gcongr
+  have h_lt_one : μ.map L {y | |y| ≤ a * ‖L‖} < 1 := by
+    rw [IsGaussian.map_eq_gaussianReal L]
+    refine gaussianReal_closedBall_lt_one _ _ ?_ (a * ‖L‖)
+    simp only [ne_eq, Real.toNNReal_eq_zero, not_le]
+    exact lt_of_le_of_ne (variance_nonneg _ _) hL.symm
+  exact h_lt_one.ne h_eq_one'
 
 lemma IsGaussian.exists_measure_norm_mem_Ioo (hμ : IsCentered μ) (h : μ ≠ Measure.dirac 0) :
     ∃ a, μ {x | ‖x‖ ≤ a} ∈ Set.Ioo 2⁻¹ 1 := by

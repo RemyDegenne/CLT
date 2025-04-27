@@ -534,7 +534,25 @@ lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ) (a b : ℝ) 
 
 lemma aux {c : ℝ} (hc : c < 0) :
     ∑' i, .ofReal (rexp (c * 2 ^ i)) < ∞ := by
-  sorry
+  calc ∑' i, .ofReal (rexp (c * 2 ^ i))
+  _ ≤ ∑' i : ℕ, .ofReal (rexp (i * c)) := by
+    simp_rw [mul_comm _ c]
+    refine ENNReal.tsum_le_tsum fun i ↦ ?_
+    refine ENNReal.ofReal_le_ofReal ?_
+    refine Real.exp_monotone ?_
+    refine mul_le_mul_of_nonpos_left ?_ hc.le
+    norm_cast
+    -- `⊢ i ≤ 2 ^ i`
+    induction i with
+    | zero => simp
+    | succ n hn =>
+      rw [pow_succ, mul_two]
+      gcongr
+      exact Nat.one_le_two_pow
+  _ < ∞ := by
+    have h_sum : Summable fun i : ℕ ↦ rexp (i * c) := Real.summable_exp_nat_mul_iff.mpr hc
+    rw [← ENNReal.ofReal_tsum_of_nonneg (fun _ ↦ by positivity) h_sum]
+    simp
 
 lemma one_lt_sqrt_two : 1 < √2 := by
   rw [← Real.sqrt_one]

@@ -38,8 +38,6 @@ end Aux
 
 namespace ProbabilityTheory
 
-section GaussianReal
-
 variable (μ : ℝ) (v : ℝ≥0) {t : ℝ}
 
 -- `∗` notation not used because of ambiguous notation : `conv` vs `mconv`
@@ -182,6 +180,7 @@ lemma variance_continuousLinearMap_gaussianReal (L : ℝ →L[ℝ] ℝ) :
     Var[L ; gaussianReal μ v] = (L 1 ^ 2).toNNReal * v :=
   variance_linearMap_gaussianReal _ _ L
 
-end GaussianReal
+lemma noAtoms_gaussianReal (h : v ≠ 0) : NoAtoms (gaussianReal μ v) := by
+  sorry
 
 end ProbabilityTheory

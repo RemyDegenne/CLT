@@ -460,11 +460,25 @@ end ToLpₗ
 
 section Fernique
 
-variable [SecondCountableTopology E] [CompleteSpace E] {μ : Measure E} [IsGaussian μ]
+omit [NormedSpace ℝ E] in
+lemma norm_add_sub_norm_le_div_two_le (x y : E) :
+    (‖x + y‖ - ‖x - y‖) / 2 ≤ ‖x‖ := by
+  suffices ‖x + y‖ - ‖x - y‖ ≤ 2 * ‖x‖ by linarith
+  calc ‖x + y‖ - ‖x - y‖
+  _ = ‖x + x + y - x‖ - ‖x - y‖ := by congr; rw [add_assoc, add_sub_assoc, add_sub_cancel]
+  _ ≤ ‖x + x‖ + ‖y - x‖ - ‖x - y‖ := by gcongr; rw [add_sub_assoc]; exact norm_add_le _ _
+  _ = ‖x + x‖ := by rw [add_sub_assoc, norm_sub_rev]; simp
+  _ ≤ ‖x‖ + ‖x‖ := norm_add_le _ _
+  _ = 2 * ‖x‖ := by rw [two_mul]
 
+omit [NormedSpace ℝ E] in
 lemma norm_add_sub_norm_le_div_two_le_min (x y : E) :
     (‖x + y‖ - ‖x - y‖) / 2 ≤ min ‖x‖ ‖y‖ := by
-  sorry
+  refine le_min (norm_add_sub_norm_le_div_two_le x y) ?_
+  rw [norm_sub_rev, add_comm]
+  exact norm_add_sub_norm_le_div_two_le _ _
+
+variable [SecondCountableTopology E] [CompleteSpace E] {μ : Measure E} [IsGaussian μ]
 
 lemma IsGaussian.measure_le_mul_measure_gt_le (hμ : IsCentered μ) (a b : ℝ) :
     μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖} ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by
@@ -531,6 +545,31 @@ lemma sqrt_two_lt_three_halves : √2 < 3 / 2 := by
   rw [← sq_lt_sq₀ (by positivity) (by positivity), mul_pow, Real.sq_sqrt (by positivity)]
   norm_num
 
+-- todo: remove IsCentered (once we know that `∫ x, x ∂μ` is a thing)
+lemma eq_dirac_of_variance_eq_zero (hμ : IsCentered μ) (h : ∀ (L : E →L[ℝ] ℝ), Var[L ; μ] = 0) :
+    μ = Measure.dirac 0 := by
+  refine ext_of_charFunCLM ?_
+  ext L
+  rw [charFunCLM_dirac, IsGaussian.charFunCLM_eq_of_isCentered hμ L, h L]
+  simp
+
+lemma IsGaussian.noAtoms_of_isCentered (hμ : IsCentered μ) (h : μ ≠ Measure.dirac 0) :
+    NoAtoms μ where
+  measure_singleton x := by
+    obtain ⟨L, hL⟩ : ∃ L : E →L[ℝ] ℝ, Var[L ; μ] ≠ 0 := by
+      contrapose! h
+      exact eq_dirac_of_variance_eq_zero hμ h
+    have hL_zero : μ.map L {L x} = 0 := by
+      have : NoAtoms (μ.map L) := by
+        rw [IsGaussian.map_eq_gaussianReal L]
+        refine noAtoms_gaussianReal _ _ ?_
+        simp only [ne_eq, Real.toNNReal_eq_zero, not_le]
+        exact lt_of_le_of_ne (variance_nonneg _ _) hL.symm
+      rw [measure_singleton]
+    rw [Measure.map_apply (by fun_prop) (measurableSet_singleton _)] at hL_zero
+    refine measure_mono_null ?_ hL_zero
+    exact fun ⦃a⦄ ↦ congrArg ⇑L
+
 open Metric Filter in
 /-- Special case of Fernique's theorem for centered Gaussian distributions. -/
 lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
@@ -552,7 +591,8 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     refine h_not_lt (hc_gt.trans_le ?_)
     simp only [nonpos_iff_eq_zero]
     refine measure_mono_null this ?_
-    sorry
+    have : NoAtoms μ := IsGaussian.noAtoms_of_isCentered hμ hμ'
+    simp
   let c := μ {x | ‖x‖ ≤ a}
   replace hc_gt : 2⁻¹ < c := hc_gt
   have hc_pos : 0 < c := lt_of_lt_of_le (by simp) hc_gt.le

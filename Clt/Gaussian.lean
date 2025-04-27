@@ -221,7 +221,7 @@ lemma isCentered_conv_map_neg [SecondCountableTopology E] :
     · simp [integral_neg]
     · exact Measurable.aestronglyMeasurable <| by fun_prop
 
-lemma todol' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
+lemma memLp_comp_inl_prod (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
     MemLp (fun x ↦ (L.comp (.inl ℝ E F) x.1)) p (μ.prod ν) := by
   change MemLp ((L.comp (.inl ℝ E F) ∘ Prod.fst)) p (μ.prod ν)
   rw [← memLp_map_measure_iff]
@@ -231,7 +231,7 @@ lemma todol' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
     exact (IsGaussian.integrable_continuousLinearMap μ (L.comp (.inl ℝ E F))).1
   · fun_prop
 
-lemma todor' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
+lemma memLp_comp_inr_prod (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
     MemLp (fun x ↦ (L.comp (.inr ℝ E F) x.2)) p (μ.prod ν) := by
   change MemLp ((L.comp (.inr ℝ E F) ∘ Prod.snd)) p (μ.prod ν)
   rw [← memLp_map_measure_iff]
@@ -241,36 +241,36 @@ lemma todor' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
     exact (IsGaussian.integrable_continuousLinearMap _ (L.comp (.inr ℝ E F))).1
   · fun_prop
 
-lemma todo' (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
+lemma memLp_prod (L : E × F →L[ℝ] ℝ) {p : ℝ≥0∞} (hp : p ≠ ∞) :
     MemLp L p (μ.prod ν) := by
   suffices MemLp (fun v ↦ L.comp (.inl ℝ E F) v.1 + L.comp (.inr ℝ E F) v.2) p (μ.prod ν) by
     simp_rw [L.comp_inl_add_comp_inr] at this
     exact this
-  exact MemLp.add (todol' L hp) (todor' L hp)
+  exact MemLp.add (memLp_comp_inl_prod L hp) (memLp_comp_inr_prod L hp)
 
-lemma todol (L : E × F →L[ℝ] ℝ) :
+lemma integrable_comp_inl_prod (L : E × F →L[ℝ] ℝ) :
     Integrable (fun x ↦ (L.comp (.inl ℝ E F) x.1)) (μ.prod ν) := by
   rw [← memLp_one_iff_integrable]
-  exact todol' L (by simp)
+  exact memLp_comp_inl_prod L (by simp)
 
-lemma todor (L : E × F →L[ℝ] ℝ) :
+lemma integrable_comp_inr_prod (L : E × F →L[ℝ] ℝ) :
     Integrable (fun x ↦ (L.comp (.inr ℝ E F) x.2)) (μ.prod ν) := by
   rw [← memLp_one_iff_integrable]
-  exact todor' L (by simp)
+  exact memLp_comp_inr_prod L (by simp)
 
 lemma integral_continuousLinearMap_prod (L : E × F →L[ℝ] ℝ) :
     (μ.prod ν)[L] = μ[L.comp (.inl ℝ E F)] + ν[L.comp (.inr ℝ E F)] := by
   simp_rw [← L.comp_inl_add_comp_inr]
-  rw [integral_add (todol L) (todor L)]
+  rw [integral_add (integrable_comp_inl_prod L) (integrable_comp_inr_prod L)]
   · congr
-    · rw [integral_prod _ (todol L)]
+    · rw [integral_prod _ (integrable_comp_inl_prod L)]
       simp
-    · rw [integral_prod _ (todor L)]
+    · rw [integral_prod _ (integrable_comp_inr_prod L)]
       simp
 
 lemma variance_continuousLinearMap_prod [SecondCountableTopologyEither E F] (L : E × F →L[ℝ] ℝ) :
     Var[L ; μ.prod ν] = Var[L.comp (.inl ℝ E F) ; μ] + Var[L.comp (.inr ℝ E F) ; ν] := by
-  rw [variance_def' (todo' L (by simp)), integral_continuousLinearMap_prod L,
+  rw [variance_def' (memLp_prod L (by simp)), integral_continuousLinearMap_prod L,
     variance_def', variance_def']
   rotate_left
   · exact IsGaussian.memLp_continuousLinearMap _ _ _ (by simp)
@@ -292,13 +292,13 @@ lemma variance_continuousLinearMap_prod [SecondCountableTopologyEither E F] (L :
       swap; · exact Measurable.aestronglyMeasurable <| by fun_prop
       simp only [norm_pow]
       refine MemLp.integrable_norm_pow ?_ (by simp)
-      exact todol' L (by simp)
+      exact memLp_comp_inl_prod L (by simp)
     have h_int2 : Integrable (fun a ↦ L₂ a.2 ^ 2) (μ.prod ν) := by
       rw [← integrable_norm_iff]
       swap; · exact Measurable.aestronglyMeasurable <| by fun_prop
       simp only [norm_pow]
       refine MemLp.integrable_norm_pow ?_ (by simp)
-      exact todor' L (by simp)
+      exact memLp_comp_inr_prod L (by simp)
     rw [integral_add, integral_add]
     · simp_rw [mul_assoc]
       rw [integral_mul_left]
@@ -308,8 +308,8 @@ lemma variance_continuousLinearMap_prod [SecondCountableTopologyEither E F] (L :
     · simp_rw [mul_assoc]
       refine Integrable.const_mul ?_ _
       refine MemLp.integrable_mul (p := 2) (q := 2) ?_ ?_
-      · exact todol' L (by simp)
-      · exact todor' L (by simp)
+      · exact memLp_comp_inl_prod L (by simp)
+      · exact memLp_comp_inr_prod L (by simp)
   _ = ∫ x, L₁ x ^ 2 ∂μ + ∫ x, L₂ x ^ 2 ∂ν + 2 * μ[L₁] * ν[L₂] := by
     simp_rw [mul_assoc]
     congr
@@ -634,7 +634,8 @@ lemma IsGaussian.exists_measure_norm_mem_Ioo (hμ : IsCentered μ) (h : μ ≠ M
     exact fun hxa ↦ hxa.trans hab
 
 open Filter in
-lemma todo {t : ℕ → ℝ} (ht_mono : StrictMono t) (ht_tendsto : Tendsto t atTop atTop) (x : ℝ) :
+lemma exists_between {t : ℕ → ℝ} (ht_mono : StrictMono t) (ht_tendsto : Tendsto t atTop atTop)
+    (x : ℝ) :
     x ≤ t 0 ∨ ∃ n, t n < x ∧ x ≤ t (n + 1) := by
   by_cases hx0 : x ≤ t 0
   · simp [hx0]
@@ -796,7 +797,7 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
     simp only [Set.mem_univ, Set.mem_union, Metric.mem_closedBall, dist_zero_right, Set.mem_iUnion,
       Set.mem_diff, not_le, true_iff]
     simp_rw [and_comm (b := t _ < ‖x‖)]
-    exact todo ht_mono ht_tendsto _
+    exact exists_between ht_mono ht_tendsto _
   rw [← setLIntegral_univ, h_iUnion]
   have : ∫⁻ x in closedBall 0 (t 0) ∪ ⋃ n, closedBall 0 (t (n + 1)) \ closedBall 0 (t n),
         .ofReal (rexp (C * ‖x‖ ^ 2)) ∂μ
@@ -894,7 +895,8 @@ lemma IsGaussian.exists_integrable_exp_sq_of_isCentered (hμ : IsCentered μ) :
       rw [ENNReal.toReal_lt_toReal hc_one_sub_lt_top.ne hc_lt_top.ne]
       exact h_one_sub_lt_self
 
-lemma todo_ineq {a b ε : ℝ} (hε : 0 < ε) : 2 * a * b ≤ ε * a ^ 2 + (1 / ε) * b ^ 2 := by
+lemma two_mul_mul_le_mul_add_div {a b ε : ℝ} (hε : 0 < ε) :
+    2 * a * b ≤ ε * a ^ 2 + (1 / ε) * b ^ 2 := by
   have h : 2 * (ε * a) * b ≤ (ε * a) ^ 2 + b ^ 2 := two_mul_le_add_sq (ε * a) b
   calc 2 * a * b
   _ = (2 * (ε * a) * b) / ε := by field_simp; ring
@@ -950,7 +952,7 @@ theorem IsGaussian.exists_integrable_exp_sq (μ : Measure E) [IsGaussian μ] :
     _ ≤ ‖x - y‖ ^ 2 + ‖y‖ ^ 2 + ε' * ‖x - y‖ ^ 2 + (1 / ε') * ‖y‖ ^ 2 := by
       simp_rw [add_assoc]
       gcongr
-      exact todo_ineq (by positivity)
+      exact two_mul_mul_le_mul_add_div (by positivity)
     _ = (1 + ε') * ‖x - y‖ ^ 2 + (1 + 1 / ε') * ‖y‖ ^ 2 := by ring
   specialize h_le ε hε
   calc C' * ‖x‖ ^ 2

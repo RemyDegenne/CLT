@@ -588,9 +588,28 @@ lemma IsGaussian.noAtoms_of_isCentered (hμ : IsCentered μ) (h : μ ≠ Measure
     refine measure_mono_null ?_ hL_zero
     exact fun ⦃a⦄ ↦ congrArg ⇑L
 
-lemma IsGaussian.exists_measure_norm_mem_Ioo (hμ : IsCentered μ) (h : μ ≠ Measure.dirac 0) :
-    ∃ a, 2⁻¹ < μ {x | ‖x‖ ≤ a} ∧ μ {x | ‖x‖ ≤ a} < 1 := by
+lemma IsGaussian.measure_closedBall_lt_one (hμ : IsCentered μ) (h : μ ≠ Measure.dirac 0)
+    (a : ℝ) :
+    μ {x | ‖x‖ ≤ a} < 1 := by
   sorry
+
+lemma IsGaussian.exists_measure_norm_mem_Ioo (hμ : IsCentered μ) (h : μ ≠ Measure.dirac 0) :
+    ∃ a, μ {x | ‖x‖ ≤ a} ∈ Set.Ioo 2⁻¹ 1 := by
+  simp only [Set.mem_Ioo, IsGaussian.measure_closedBall_lt_one hμ h, and_true]
+  by_contra! h_le
+  suffices μ Set.univ ≤ 2⁻¹ by simp at this
+  have : (Set.univ : Set E) = ⋃ a : ℝ, {x : E | ‖x‖ ≤ a} := by
+    ext x
+    simp only [Set.mem_univ, Set.mem_iUnion, Set.mem_setOf_eq, true_iff]
+    exact ⟨‖x‖, le_rfl⟩
+  rw [this]
+  rw [Monotone.measure_iUnion]
+  · simp only [iSup_le_iff]
+    intro i
+    exact h_le i
+  · intro a b hab x
+    simp only [Set.mem_setOf_eq]
+    exact fun hxa ↦ hxa.trans hab
 
 open Filter in
 lemma todo {t : ℕ → ℝ} (ht_mono : StrictMono t) (ht_tendsto : Tendsto t atTop atTop) (x : ℝ) :

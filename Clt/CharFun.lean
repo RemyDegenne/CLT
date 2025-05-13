@@ -80,7 +80,7 @@ lemma charFun_conv (μ ν : Measure E) [IsFiniteMeasure μ] [IsFiniteMeasure ν]
   rw [integral_conv]
   · simp_rw [inner_add_left]
     push_cast
-    simp_rw [add_mul, Complex.exp_add, integral_mul_left, integral_mul_right]
+    simp_rw [add_mul, Complex.exp_add, integral_const_mul, integral_mul_const]
   · -- todo: extract lemma about integrability wrt conv?
     unfold Measure.conv
     rw [integrable_map_measure]
@@ -212,7 +212,7 @@ lemma integral_charFun_Icc {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ
     ring_nf
   _ = 2 * r * ∫ x, sinc (r * x) ∂μ := by
     norm_cast
-    rw [integral_complex_ofReal, ← integral_mul_left]
+    rw [integral_complex_ofReal, ← integral_const_mul]
 
 lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
     μ.real {x | r < |x|}
@@ -225,7 +225,7 @@ lemma measure_abs_ge_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r 
       inv_mul_cancel₀ (by positivity), lt_inv_mul_iff₀ (by positivity), mul_one]
   _ = ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 ∂μ := by simp
   _ = 2 * ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 2⁻¹ ∂μ := by
-    rw [← integral_mul_left]
+    rw [← integral_const_mul]
     congr with _
     rw [mul_inv_cancel₀ (by positivity)]
   _ ≤ 2 * ∫ x in {x | 2 < |2 * r⁻¹ * x|}, 1 - sinc (2 * r⁻¹ * x) ∂μ := by

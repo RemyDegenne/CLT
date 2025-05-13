@@ -54,7 +54,7 @@ end Real
 @[fun_prop, measurability]
 lemma measurable_sinc : Measurable sinc := Measurable.ite (by simp) (by fun_prop) (by fun_prop)
 
-@[measurability]
+@[fun_prop, measurability]
 lemma stronglyMeasurable_sinc : StronglyMeasurable sinc := measurable_sinc.stronglyMeasurable
 
 @[fun_prop]

@@ -171,7 +171,7 @@ theorem isGaussian_iff_charFunCLM_eq {μ : Measure E} [IsFiniteMeasure μ] :
   simp only [ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul, ofReal_mul,
     Real.coe_toNNReal']
   congr
-  · rw [integral_mul_left, integral_complex_ofReal]
+  · rw [integral_const_mul, integral_complex_ofReal]
   · rw [max_eq_left (variance_nonneg _ _), mul_comm, ← ofReal_pow, ← ofReal_mul, ← variance_mul]
     congr
 
@@ -301,7 +301,7 @@ lemma variance_continuousLinearMap_prod [SecondCountableTopologyEither E F] (L :
       exact memLp_comp_inr_prod L (by simp)
     rw [integral_add, integral_add]
     · simp_rw [mul_assoc]
-      rw [integral_mul_left]
+      rw [integral_const_mul]
     · exact h_int1
     · exact h_int2
     · exact Integrable.add h_int1 h_int2
@@ -1120,7 +1120,7 @@ lemma norm_covarianceOperator_le {μ : Measure E} [IsGaussian μ] (L₁ L₂ : E
       · exact ContinuousLinearMap.le_opNorm L₁ x
       · exact ContinuousLinearMap.le_opNorm L₂ x
   _ = ‖L₁‖ * ‖L₂‖ * ∫ x, ‖x‖ ^ 2 ∂μ := by
-    rw [← integral_mul_left]
+    rw [← integral_const_mul]
     congr with x
     ring
 

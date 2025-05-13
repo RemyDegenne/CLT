@@ -140,7 +140,7 @@ theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) 
           AddChar.coe_mk, ofReal_inv, fourierPowSMulRight_apply, mul_one, Finset.prod_const,
           Finset.card_univ, Fintype.card_fin, Pi.one_apply, real_smul, ofReal_pow, smul_eq_mul,
           Circle.smul_def, ofReal_neg]
-        simp_rw [mul_left_comm (exp _), integral_mul_left]
+        simp_rw [mul_left_comm (exp _), integral_const_mul]
         calc (-((↑π)⁻¹ * 2⁻¹)) ^ n
           * ((-(2 * ↑π * I)) ^ n * ∫ a, cexp (2 * ↑π * (↑a * ((↑π)⁻¹ * 2⁻¹ * ↑t)) * I) * ↑a ^ n ∂μ)
         _ = I ^ n * ∫ a, cexp (2 * ↑π * (↑a * ((↑π)⁻¹ * 2⁻¹ * ↑t)) * I) * ↑a ^ n ∂μ := by

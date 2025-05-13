@@ -83,17 +83,17 @@ lemma covariance_smul_left (c : ℝ) :
     cov[c • X, Y; μ] = c * cov[X, Y; μ] := by
   simp_rw [covariance]
   simp only [Pi.smul_apply, smul_eq_mul]
-  simp_rw [← integral_mul_left, ← mul_assoc, mul_sub]
+  simp_rw [← integral_const_mul, ← mul_assoc, mul_sub]
   congr with ω
-  congr <;> rw [integral_mul_left]
+  congr <;> rw [integral_const_mul]
 
 lemma covariance_smul_right (c : ℝ) :
     cov[X, c • Y; μ] = c * cov[X, Y; μ] := by
   simp_rw [covariance]
   simp only [Pi.smul_apply, smul_eq_mul]
-  simp_rw [← integral_mul_left, ← mul_assoc, mul_comm c, mul_assoc, mul_sub, mul_comm c]
+  simp_rw [← integral_const_mul, ← mul_assoc, mul_comm c, mul_assoc, mul_sub, mul_comm c]
   congr with ω
-  rw [integral_mul_right]
+  rw [integral_mul_const]
 
 @[simp]
 lemma covariance_neg_left : cov[-X, Y; μ] = -cov[X, Y; μ] := by

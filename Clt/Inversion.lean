@@ -76,7 +76,7 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
     simp_rw [hw]
     rw [integral_finset_sum]
     · congr with y
-      rw [integral_mul_left]
+      rw [integral_const_mul]
     · intro i hi
       refine Integrable.const_mul ?_ _
       change Integrable (fun x ↦ innerProbChar i x) μ

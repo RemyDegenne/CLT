@@ -3,14 +3,16 @@ Copyright (c) 2025 Rémy Degenne. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rémy Degenne
 -/
-import Clt.Gaussian
+import Mathlib.Analysis.CStarAlgebra.Matrix
+import Mathlib.LinearAlgebra.Matrix.PosDef
+import Mathlib.Probability.Distributions.Gaussian.Basic
 
 
 /-!
 # Multivariate Gaussian distributions
 -/
 
-open MeasureTheory ProbabilityTheory Filter Matrix
+open MeasureTheory ProbabilityTheory Filter Matrix NormedSpace
 open scoped ENNReal NNReal Topology RealInnerProductSpace
 
 namespace ProbabilityTheory
@@ -28,7 +30,7 @@ def stdGaussian : Measure E :=
 
 variable [BorelSpace E]
 
-instance : IsProbabilityMeasure (stdGaussian E) where
+instance isProbabilityMeasure_stdGaussian : IsProbabilityMeasure (stdGaussian E) where
   measure_univ := by
     rw [stdGaussian, Measure.map_apply (by fun_prop) .univ]
     simp
@@ -43,7 +45,7 @@ lemma integral_eval_pi {i : Fin d} {μ : Fin d → Measure ℝ} [∀ i, IsProbab
     ∫ (a : Fin d → ℝ), f (a i) ∂Measure.pi μ = ∫ x, f x ∂μ i := by
   sorry
 
-lemma isCentered_stdGaussian : IsCentered (stdGaussian E) := by
+lemma isCentered_stdGaussian : ∀ L : Dual ℝ E, (stdGaussian E)[L] = 0 := by
   intro L
   rw [stdGaussian, integral_map _ (by fun_prop)]
   swap; · exact (Finset.measurable_sum _ (by fun_prop)).aemeasurable -- todo: add fun_prop tag
@@ -55,7 +57,7 @@ lemma isCentered_stdGaussian : IsCentered (stdGaussian E) := by
     convert integrable_eval_pi (i := i) (f := id) ?_
     · infer_instance
     · rw [← memLp_one_iff_integrable]
-      exact memLp_id_gaussianReal _ _ 1
+      exact memLp_id_gaussianReal 1
   refine Finset.sum_eq_zero fun i _ ↦ ?_
   rw [integral_mul_const]
   have : (∫ (a : Fin (Module.finrank ℝ E) → ℝ), a i ∂Measure.pi fun x ↦ gaussianReal 0 1)
@@ -64,18 +66,18 @@ lemma isCentered_stdGaussian : IsCentered (stdGaussian E) := by
     · rfl
     · infer_instance
     · rw [← memLp_one_iff_integrable]
-      exact memLp_id_gaussianReal _ _ 1
+      exact memLp_id_gaussianReal 1
   simp [this]
 
-lemma variance_continuousLinearMap_stdGaussian (L : E →L[ℝ] ℝ) :
+lemma variance_dual_stdGaussian (L : Dual ℝ E) :
     Var[L; stdGaussian E] = ∑ i, L (stdOrthonormalBasis ℝ E i) ^ 2 := by
   sorry
 
 instance isGaussian_stdGaussian : IsGaussian (stdGaussian E) := by
-  refine isGaussian_of_charFunCLM_eq fun L ↦ ?_
+  refine isGaussian_of_charFunDual_eq fun L ↦ ?_
   rw [integral_complex_ofReal, isCentered_stdGaussian L]
   simp only [Complex.ofReal_zero, zero_mul, zero_sub]
-  -- todo: need a lemma `charFunCLM_map_sum_pi`
+  -- todo: need a lemma `charFunDual_map_sum_pi`
   sorry
 
 noncomputable

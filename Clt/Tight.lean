@@ -178,7 +178,7 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
       simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, smul_eq_mul]
       ring_nf
       rw [mul_inv_cancel₀ hr.ne', one_mul]
-  have h_le n r := measure_abs_inner_ge_le_charFun (μ := μ n) (a := z) (r := r)
+  have h_le n r := measureReal_abs_inner_gt_le_integral_charFun (μ := μ n) (a := z) (r := r)
   -- We introduce an upper bound for the limsup.
   -- This is where we use the fact that `charFun (μ n)` converges to `f`.
   have h_limsup_le r (hr : 0 < r) :

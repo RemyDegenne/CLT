@@ -67,8 +67,8 @@ For $a \in \mathbb{R}$ and $X$ a random variable with law $\mu$, the characteris
 
 
 \begin{lemma}\label{lem:charFun_add_of_indep}
-\leanok
-\lean{ProbabilityTheory.charFun_conv}
+\mathlibok
+\lean{MeasureTheory.charFun_conv}
 \uses{def:charFun}
 If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are independent, then $X+Y$ has characteristic function $\hat{\mu} \times \hat{\nu}$.
 \end{lemma}
@@ -78,8 +78,8 @@ If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are inde
 
 
 \begin{lemma}\label{lem:integral_exp_I}
-\leanok
-\lean{ProbabilityTheory.integral_exp_Icc}
+\mathlibok
+\lean{integral_exp_mul_I_eq_sin}
 \begin{align*}
     \int_{-r}^r e^{i t} \, d t = 2 \sin r \: .
 \end{align*}
@@ -91,8 +91,8 @@ If two random variables $X, Y : \Omega \to S$ with laws $\mu$ and $\nu$ are inde
 
 \begin{lemma}\label{lem:integral_charFun}
 \uses{def:charFun}
-\leanok
-\lean{ProbabilityTheory.integral_charFun_Icc}
+\mathlibok
+\lean{integral_exp_mul_I_eq_sinc}
 \begin{align*}
     \int_{-r}^r \hat{\mu}(t) dt = 2 r \int \frac{\sin(r x)}{r x} \, d\mu(x)
 \end{align*}
@@ -133,8 +133,8 @@ We will use Fubini's theorem to exchange the order of integration.
 
 
 \begin{lemma}\label{lem:charFun_bound_large}
-\leanok
-\lean{ProbabilityTheory.measure_abs_ge_le_charFun}
+\mathlibok
+\lean{MeasureTheory.measureReal_abs_gt_le_integral_charFun}
 \uses{def:charFun}
 For $\mu$ a probability measure on $\mathbb{R}$ and $r > 0$,
 \begin{align*}
@@ -166,8 +166,8 @@ In the end we used that $\sin x \le x /2$ for $x \ge 2$.
 
 
 \begin{lemma}\label{lem:charFun_bound_inner}
-\leanok
-\lean{ProbabilityTheory.measure_abs_inner_ge_le_charFun}
+\mathlibok
+\lean{MeasureTheory.measureReal_abs_inner_gt_le_integral_charFun}
 \uses{def:charFun}
 For $\mu$ a probability measure on an inner product space $E$ and $r > 0$, $a \in E$,
 \begin{align*}

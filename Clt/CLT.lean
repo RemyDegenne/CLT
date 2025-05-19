@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Thomas Zhu, Rémy Degenne
 -/
 import Mathlib.Probability.IdentDistrib
-import Clt.Gaussian
 import Clt.Inversion
 import Clt.MomentGenerating
 

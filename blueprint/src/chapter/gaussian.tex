@@ -29,7 +29,7 @@ The Gaussian distribution $\mathcal N(m, \sigma^2)$ has characteristic function 
 
 
 \begin{lemma}\label{lem:add_gaussianReal}
-\leanok
+\mathlibok
 \lean{ProbabilityTheory.gaussianReal_conv_gaussianReal}
 \uses{def:gaussianReal}
 The sum of two independent real Gaussian random variables is Gaussian.
@@ -43,13 +43,13 @@ The sum of two independent real Gaussian random variables is Gaussian.
 
 \begin{definition}\label{def:isGaussian}
 \uses{def:gaussianReal}
-\leanok
+\mathlibok
 \lean{ProbabilityTheory.IsGaussian}
 A Borel measure $\mu$ on a separable Banach space $E$ is said to be Gaussian if for all continuous linear maps $\ell : E \to \mathbb{R}$, the pushforward $\ell_*\mu$ is a real Gaussian measure.
 \end{definition}
 
 \begin{lemma}\label{lem:isProbabilityMeasure_isGaussian}
-\leanok
+\mathlibok
 \uses{def:isGaussian}
 A Gaussian measure is a probability measure.
 \end{lemma}
@@ -60,7 +60,7 @@ A Gaussian measure is a probability measure.
 
 
 \begin{lemma}\label{lem:isGaussian_gaussianReal}
-\leanok
+\mathlibok
 \lean{ProbabilityTheory.isGaussian_gaussianReal}
 \uses{def:gaussianReal, def:isGaussian}
 The real Gaussian measures are Gaussian measures in the sense of Definition~\ref{def:isGaussian}.
@@ -72,8 +72,8 @@ The real Gaussian measures are Gaussian measures in the sense of Definition~\ref
 
 
 \begin{lemma}\label{lem:isGaussian_add}
-\leanok
-\lean{ProbabilityTheory.isGaussian_map_prod_add}
+\mathlibok
+\lean{ProbabilityTheory.isGaussian_conv}
 \uses{def:isGaussian}
 The sum of two independent Gaussian random variables is Gaussian.
 \end{lemma}

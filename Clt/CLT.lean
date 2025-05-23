@@ -21,7 +21,7 @@ lemma tendsto_one_plus_div_cpow_cexp {f : ℕ → ℂ} (t : ℂ)
     (hf : (fun n ↦ f n - (1 + t / n)) =o[atTop] fun n ↦ 1 / (n : ℝ)) :
     Tendsto (fun n ↦ f n ^ n) atTop (𝓝 (exp t)) := by
   let g n := f n - 1
-  have fg (n) : f n = 1 + g n := by ring
+  have fg n : f n = 1 + g n := by ring
   simp_rw [fg, add_sub_add_left_eq_sub] at hf ⊢
 
   have hgO : g =O[atTop] fun n ↦ 1 / (n : ℝ) := by
@@ -45,30 +45,12 @@ lemma tendsto_one_plus_div_cpow_cexp {f : ℕ → ℂ} (t : ℂ)
     dsimp
     rw [exp_nat_mul, exp_log h0]
 
-  apply Tendsto.congr_dist (f₁ := fun n ↦ n * logTaylor 2 (g n))
-  · apply Tendsto.congr' (f₁ := fun n ↦ n * g n - n * (t / n) + t)
-    · filter_upwards [eventually_ne_atTop 0] with n h0
-      rw [mul_div_cancel₀ _ (Nat.cast_ne_zero.mpr h0)]
-      simp [h0, logTaylor_succ, logTaylor_zero]
-    · simpa [mul_sub] using hf.tendsto_inv_smul_nhds_zero.add_const t
-  · apply Asymptotics.IsBigO.trans_tendsto _ tendsto_one_div_atTop_nhds_zero_nat
-    simp_rw [dist_eq, ← mul_sub, norm_mul, norm_natCast]
-    rw [Asymptotics.isBigO_mul_iff_isBigO_div
-      ((eventually_ne_atTop 0).mono (fun n h0 ↦ Nat.cast_ne_zero.mpr h0))]
-    trans fun n ↦ ‖g n‖ ^ 2
-    · rw [Asymptotics.isBigO_iff]
-      use 1
-      filter_upwards [hg2] with n hg2
-      have hg1 : ‖g n‖ < 1 := hg2.trans_lt (by norm_num)
-      rw [norm_norm, norm_sub_rev]
-      apply (norm_log_sub_logTaylor_le 1 hg1).trans
-      norm_num only [Nat.reduceAdd, Nat.cast_one, norm_pow, norm_norm, one_mul]
-      rw [div_le_iff₀ (by norm_num)]
-      apply mul_le_mul_of_nonneg_left _ (sq_nonneg _)
-      rw [inv_le_comm₀ (sub_pos_of_lt hg1) two_pos]
-      linear_combination hg2
-    · simp_rw [← norm_pow, Asymptotics.isBigO_norm_left, pow_two]
-      simpa using hgO.mul hgO
+  refine tendsto_nat_mul_log_one_add_of_tendsto ?_
+  apply Tendsto.congr' (f₁ := fun n ↦ n * g n - n * (t / n) + t)
+  · filter_upwards [eventually_ne_atTop 0] with n h0
+    rw [mul_div_cancel₀ _ (Nat.cast_ne_zero.mpr h0)]
+    abel
+  · simpa [mul_sub] using hf.tendsto_inv_smul_nhds_zero.add_const t
 
 lemma tendsto_sqrt_atTop : Tendsto (√·) atTop atTop := by
   simp_rw [Real.sqrt_eq_rpow]

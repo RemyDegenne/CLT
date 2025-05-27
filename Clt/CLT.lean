@@ -17,40 +17,18 @@ open MeasureTheory ProbabilityTheory Complex Filter
 open scoped Real Topology
 
 /-- `(1 + t/n + o(1/n)) ^ n → exp t` for `t ∈ ℂ`. -/
-lemma tendsto_one_plus_div_cpow_cexp {f : ℕ → ℂ} (t : ℂ)
+lemma tendsto_pow_exp_of_isLittleO {f : ℕ → ℂ} (t : ℂ)
     (hf : (fun n ↦ f n - (1 + t / n)) =o[atTop] fun n ↦ 1 / (n : ℝ)) :
     Tendsto (fun n ↦ f n ^ n) atTop (𝓝 (exp t)) := by
   let g n := f n - 1
   have fg n : f n = 1 + g n := by ring
   simp_rw [fg, add_sub_add_left_eq_sub] at hf ⊢
 
-  have hgO : g =O[atTop] fun n ↦ 1 / (n : ℝ) := by
-    convert hf.isBigO.add (f₂ := fun n : ℕ ↦ t / n) _ using 1
-    · simp
-    apply Asymptotics.isBigO_of_le' (c := ‖t‖)
-    field_simp
-  have hg2 : ∀ᶠ n in atTop, ‖g n‖ ≤ 1 / 2 := by
-    have hg := hgO.trans_tendsto tendsto_one_div_atTop_nhds_zero_nat
-    rw [tendsto_zero_iff_norm_tendsto_zero] at hg
-    apply hg.eventually_le_const
-    norm_num
-  have hf0 : ∀ᶠ n in atTop, 1 + g n ≠ 0 := by
-    filter_upwards [hg2] with n hg2 hg0
-    rw [← add_eq_zero_iff_neg_eq.mp hg0] at hg2
-    norm_num at hg2
-
-  suffices Tendsto (fun n ↦ n * log (1 + g n)) atTop (𝓝 t) by
-    apply ((continuous_exp.tendsto _).comp this).congr'
-    filter_upwards [hf0] with n h0
-    dsimp
-    rw [exp_nat_mul, exp_log h0]
-
-  refine tendsto_nat_mul_log_one_add_of_tendsto ?_
-  apply Tendsto.congr' (f₁ := fun n ↦ n * g n - n * (t / n) + t)
-  · filter_upwards [eventually_ne_atTop 0] with n h0
-    rw [mul_div_cancel₀ _ (Nat.cast_ne_zero.mpr h0)]
-    abel
-  · simpa [mul_sub] using hf.tendsto_inv_smul_nhds_zero.add_const t
+  apply tendsto_one_add_pow_exp_of_tendsto
+  rw [← tendsto_sub_nhds_zero_iff]
+  apply hf.tendsto_inv_smul_nhds_zero.congr'
+  filter_upwards [eventually_ne_atTop 0] with n h0
+  simpa [mul_sub] using mul_div_cancel₀ t (mod_cast h0)
 
 lemma tendsto_sqrt_atTop : Tendsto (√·) atTop atTop := by
   simp_rw [Real.sqrt_eq_rpow]
@@ -151,10 +129,10 @@ theorem central_limit (hX : ∀ n, Measurable (X n))
   -- use existing results to rewrite the charFun
   simp_rw [charFun_invSqrtMulSum hX hindep hident]
 
-  -- apply tendsto_one_plus_div_cpow_cexp; suffices to show the base is (1 - t ^ 2 / 2n + o(1 / n))
+  -- apply tendsto_pow_exp_of_isLittleO; suffices to show the base is (1 - t ^ 2 / 2n + o(1 / n))
   norm_cast
   rw [ofReal_exp]
-  apply tendsto_one_plus_div_cpow_cexp
+  apply tendsto_pow_exp_of_isLittleO
 
   suffices (fun (n : ℕ) ↦
         charFun (Measure.map (X 0) P) ((√n)⁻¹ * t) - (1 + (-(((√n)⁻¹ * t) ^ 2 / 2) : ℂ)))

@@ -51,9 +51,9 @@ Let $X$ be a real random variable with characteristic function $\phi$, with $\ma
 \uses{lem:deriv_charFun, lem:taylor_peano}
 \end{proof}
 
-\begin{lemma}\label{lem:tendsto_one_plus_div_pow_exp}
+\begin{lemma}\label{lem:tendsto_pow_exp_of_isLittleO}
 \leanok
-\lean{tendsto_one_plus_div_cpow_cexp}
+\lean{tendsto_pow_exp_of_isLittleO}
 For $t\in\mathbb{C}$, $\lim_{n\to\infty}(1+t/n+o(1/n))^n=\exp(t)$ (where the little-$o$ term may be complex).
 \end{lemma}
 
@@ -70,7 +70,7 @@ Let $X_1, X_2, \ldots$ be i.i.d. real random variables with mean 0 and variance 
 \end{align*}
 \end{theorem}
 
-\begin{proof}\uses{lem:charFun_smul, lem:charFun_add_of_indep, thm:charFun_tendsto_iff_measure_tendsto, lem:charFun_taylor, lem:gaussian_charFun, lem:tendsto_one_plus_div_pow_exp, lem:iIndepFun_iff_pi_map_eq_map}
+\begin{proof}\uses{lem:charFun_smul, lem:charFun_add_of_indep, thm:charFun_tendsto_iff_measure_tendsto, lem:charFun_taylor, lem:gaussian_charFun, lem:tendsto_pow_exp_of_isLittleO, lem:iIndepFun_iff_pi_map_eq_map}
 \leanok
 Let $S_n = \frac{1}{\sqrt{n}}\sum_{k=1}^n X_k$. Let $\phi$ be the characteristic function of $X_k$. By Lemma~\ref{lem:charFun_smul} and~\ref{lem:charFun_add_of_indep}, the characteristic function of $S_n$ is $\phi_n(t) = (\phi(n^{-1/2}t))^n$.
 

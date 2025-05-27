@@ -3,6 +3,8 @@ Copyright (c) 2025 Rémy Degenne. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rémy Degenne
 -/
+import Mathlib.MeasureTheory.Measure.IntegralCharFun
+import Mathlib.MeasureTheory.Measure.TightNormed
 import Clt.CharFun
 
 /-!
@@ -269,23 +271,3 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
 end InnerProductSpace
 
 end FiniteDimensional
-
-variable {ι : Type*} [InnerProductSpace ℝ E] {μ : ι → Measure E} [∀ i, IsProbabilityMeasure (μ i)]
-
-section EquicontinuousAt
-
-lemma equicontinuousAt_charFun_zero_of_isTightMeasureSet (hμ : IsTightMeasureSet (Set.range μ)) :
-    EquicontinuousAt (fun i ↦ charFun (μ i)) 0 := by
-  sorry
-
-lemma isTightMeasureSet_of_equicontinuousAt_charFun
-    (hμ : EquicontinuousAt (fun i ↦ charFun (μ i)) 0) :
-    IsTightMeasureSet (Set.range μ) := by
-  sorry
-
-lemma isTightMeasureSet_iff_equicontinuousAt_charFun :
-    IsTightMeasureSet (Set.range μ) ↔ EquicontinuousAt (fun i ↦ charFun (μ i)) 0 :=
-  ⟨equicontinuousAt_charFun_zero_of_isTightMeasureSet,
-    isTightMeasureSet_of_equicontinuousAt_charFun⟩
-
-end EquicontinuousAt

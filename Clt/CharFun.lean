@@ -1,62 +1,16 @@
 /-
 Copyright (c) 2023 Rémy Degenne. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Rémy Degenne
+Authors: Rémy Degenne, Thomas Zhu
 -/
-import Mathlib.Analysis.Fourier.FourierTransform
-import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
-import Mathlib.MeasureTheory.Group.Convolution
-import Mathlib.Probability.Notation
-import Mathlib
+import Mathlib.MeasureTheory.Measure.CharacteristicFunction
 
 /-!
 # Characteristic function of a measure
 
-## Main definitions
-
-* `FooBar`
-
-## Main statements
-
-* `fooBar_unique`
-
-## Notation
-
-
-
-## Implementation details
-
-
-
 -/
 
-
-noncomputable section
-
-open MeasureTheory ComplexConjugate Complex Real
-
-open scoped RealInnerProductSpace Real
-
-section Character
-
-open scoped FourierTransform Real
-
-section
-
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
-
-@[fun_prop]
-lemma integrable_probChar {μ : Measure ℝ} [IsProbabilityMeasure μ] (y : ℝ) :
-    Integrable (fun x ↦ (Real.probChar (y * x) : ℂ)) μ := by
-  rw [← integrable_norm_iff]
-  · simp
-  · exact Measurable.aestronglyMeasurable <| by fun_prop
-
-end
-
-end Character
-
-open BoundedContinuousFunction
+open MeasureTheory
 
 namespace ProbabilityTheory
 
@@ -85,17 +39,5 @@ lemma charFun_map_sum_pi_const (μ : Measure E) [IsFiniteMeasure μ] (n : ℕ) (
     · congr 1 with x
       apply Fin.sum_univ_succ
     all_goals { fun_prop }
-
-section bounds
-
-lemma measure_Icc_le_charFun {μ : Measure ℝ} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) :
-    (μ (Set.Icc (-r) r)).toReal ≤ 2 * r * ∫ t in (- r⁻¹)..(r⁻¹), ‖charFun μ t‖ := by
-  sorry
-
-lemma abs_sub_charFun_le {μ : Measure ℝ} [IsProbabilityMeasure μ] {s t : ℝ} :
-    ‖charFun μ s - charFun μ t‖ ≤ 2 * ∫ x, min (|(s - t) * x|) 1 ∂μ := by
-  sorry
-
-end bounds
 
 end ProbabilityTheory

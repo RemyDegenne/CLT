@@ -24,15 +24,15 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDim
 variable (E) in
 /-- Standard Gaussian distribution on `E`. -/
 noncomputable
-def stdGaussian : Measure E :=
+def stdGaussianMulti : Measure E :=
   (Measure.pi (fun _ : Fin (Module.finrank ℝ E) ↦ gaussianReal 0 1)).map
     (fun x ↦ ∑ i, x i • stdOrthonormalBasis ℝ E i)
 
 variable [BorelSpace E]
 
-instance isProbabilityMeasure_stdGaussian : IsProbabilityMeasure (stdGaussian E) where
+instance isProbabilityMeasure_stdGaussianMulti : IsProbabilityMeasure (stdGaussianMulti E) where
   measure_univ := by
-    rw [stdGaussian, Measure.map_apply (by fun_prop) .univ]
+    rw [stdGaussianMulti, Measure.map_apply (by fun_prop) .univ]
     simp
 
 lemma integrable_eval_pi {i : Fin d} {μ : Fin d → Measure ℝ} [∀ i, IsProbabilityMeasure (μ i)]
@@ -45,9 +45,9 @@ lemma integral_eval_pi {i : Fin d} {μ : Fin d → Measure ℝ} [∀ i, IsProbab
     ∫ (a : Fin d → ℝ), f (a i) ∂Measure.pi μ = ∫ x, f x ∂μ i := by
   sorry
 
-lemma isCentered_stdGaussian : ∀ L : Dual ℝ E, (stdGaussian E)[L] = 0 := by
+lemma isCentered_stdGaussianMulti : ∀ L : Dual ℝ E, (stdGaussianMulti E)[L] = 0 := by
   intro L
-  rw [stdGaussian, integral_map _ (by fun_prop)]
+  rw [stdGaussianMulti, integral_map _ (by fun_prop)]
   swap; · exact (Finset.measurable_sum _ (by fun_prop)).aemeasurable -- todo: add fun_prop tag
   simp only [map_sum, map_smul, smul_eq_mul]
   rw [integral_finset_sum]
@@ -69,13 +69,13 @@ lemma isCentered_stdGaussian : ∀ L : Dual ℝ E, (stdGaussian E)[L] = 0 := by
       exact memLp_id_gaussianReal 1
   simp [this]
 
-lemma variance_dual_stdGaussian (L : Dual ℝ E) :
-    Var[L; stdGaussian E] = ∑ i, L (stdOrthonormalBasis ℝ E i) ^ 2 := by
+lemma variance_dual_stdGaussianMulti (L : Dual ℝ E) :
+    Var[L; stdGaussianMulti E] = ∑ i, L (stdOrthonormalBasis ℝ E i) ^ 2 := by
   sorry
 
-instance isGaussian_stdGaussian : IsGaussian (stdGaussian E) := by
+instance isGaussian_stdGaussianMulti : IsGaussian (stdGaussianMulti E) := by
   refine isGaussian_of_charFunDual_eq fun L ↦ ?_
-  rw [integral_complex_ofReal, isCentered_stdGaussian L]
+  rw [integral_complex_ofReal, isCentered_stdGaussianMulti L]
   simp only [Complex.ofReal_zero, zero_mul, zero_sub]
   -- todo: need a lemma `charFunDual_map_sum_pi`
   sorry
@@ -84,7 +84,7 @@ noncomputable
 def multivariateGaussian (μ : EuclideanSpace ℝ (Fin d)) (S : Matrix (Fin d) (Fin d) ℝ)
     (hS : S.PosSemidef) :
     Measure (EuclideanSpace ℝ (Fin d)) :=
-  (stdGaussian (EuclideanSpace ℝ (Fin d))).map (fun x ↦ μ + toEuclideanCLM (𝕜 := ℝ) hS.sqrt x)
+  (stdGaussianMulti (EuclideanSpace ℝ (Fin d))).map (fun x ↦ μ + toEuclideanCLM (𝕜 := ℝ) hS.sqrt x)
 
 
 end ProbabilityTheory

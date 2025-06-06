@@ -41,5 +41,5 @@ iteratedDeriv_charFun
 taylor_isLittleO
 ProbabilityTheory.iIndepFun_iff_map_fun_eq_pi_map
 taylor_charFun
-tendsto_one_plus_div_cpow_cexp
+tendsto_pow_exp_of_isLittleO
 ProbabilityTheory.central_limit

@@ -37,7 +37,7 @@ lemma tendsto_iSup_of_tendsto_limsup {u : ℕ → ℝ → ℝ≥0∞}
   replace h_all : ∀ ε > 0, ∀ n, ∃ N, ∀ n_1 ≥ N, u n n_1 ≤ ε := fun ε hε n ↦ h_all n ε hε
   choose rs hrs using h_all ε hε
   refine ⟨r ⊔ ⨆ n : Finset.range N, rs n, fun v hv ↦ ?_⟩
-  simp only [Set.mem_setOf_eq, iSup_exists, iSup_le_iff, forall_apply_eq_imp_iff]
+  simp only [iSup_le_iff]
   intro n
   by_cases hn : n < N
   · refine hrs n v ?_
@@ -139,7 +139,7 @@ lemma isTightMeasureSet_of_tendsto_limsup_inner_of_norm_eq_one
   convert h' using 7 with r n x
   rw [inner_smul_left]
   simp only [map_inv₀, conj_trivial, abs_mul, abs_inv, abs_norm]
-  rw [mul_lt_mul_left]
+  rw [mul_lt_mul_iff_right₀]
   positivity
 
 /-- If the characteristic functions converge pointwise to a function which is continuous at 0,
@@ -166,7 +166,7 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
     have hr' : -(2 * r⁻¹) ≤ 2 * r⁻¹ := by rw [neg_le_self_iff]; positivity
     calc 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - charFun (μ n) (t • z)‖
     _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - charFun (μ n) (t • z)‖ := by
-      simp only [neg_mul, intervalIntegrable_const]
+      simp only [neg_mul]
       gcongr
       rw [intervalIntegral.integral_of_le hr', intervalIntegral.integral_of_le hr']
       exact norm_integral_le_integral_norm _
@@ -177,7 +177,7 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
       · exact ae_of_all _ fun _ ↦ by positivity
       · refine ae_of_all _ fun x ↦ norm_one_sub_charFun_le_two
     _ ≤ 4 := by
-      simp only [neg_mul, intervalIntegral.integral_const, sub_neg_eq_add, smul_eq_mul]
+      simp only [intervalIntegral.integral_const, sub_neg_eq_add, smul_eq_mul]
       ring_nf
       rw [mul_inv_cancel₀ hr.ne', one_mul]
   have h_le n r := measureReal_abs_inner_gt_le_integral_charFun (μ := μ n) (a := z) (r := r)
@@ -196,7 +196,7 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
         exact ⟨0, fun n _ ↦ h_le_4 n r hr⟩
     _ = 2⁻¹ * r * ‖∫ t in -2 * r⁻¹..2 * r⁻¹, 1 - f (t • z)‖ := by
       refine ((Tendsto.norm ?_).const_mul _).limsup_eq
-      simp only [neg_mul, intervalIntegrable_const]
+      simp only [neg_mul]
       have hr' : -(2 * r⁻¹) ≤ 2 * r⁻¹ := by rw [neg_le_self_iff]; positivity
       simp_rw [intervalIntegral.integral_of_le hr']
       refine tendsto_integral_of_dominated_convergence (fun _ ↦ 2) ?_ (by fun_prop) ?_ ?_
@@ -223,8 +223,8 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
   intro ε hε
   have hf0 : f 0 = 1 := by symm; simpa using h 0
   simp only [gt_iff_lt, dist_eq_norm_sub', zero_sub, norm_neg, hf0] at hf_tendsto
-  simp only [ge_iff_le, neg_mul, intervalIntegrable_const, dist_zero_right, norm_mul, norm_inv,
-    Real.norm_ofNat, Real.norm_eq_abs, norm_norm]
+  simp only [ge_iff_le, neg_mul, dist_zero_right, norm_mul, norm_inv,
+    Real.norm_ofNat, Real.norm_eq_abs]
   simp_rw [abs_of_nonneg (norm_nonneg _)]
   obtain ⟨δ, hδ, hδ_lt⟩ : ∃ δ, 0 < δ ∧ ∀ ⦃x : E⦄, ‖x‖ < δ → ‖1 - f x‖ < ε / 4 :=
     hf_tendsto (ε / 4) (by positivity)
@@ -234,7 +234,7 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
   have h_le_Ioc x (hx : x ∈ Set.Ioc (-(2 * r⁻¹)) (2 * r⁻¹)) :
       ‖1 - f (x • z)‖ ≤ ε / 4 := by
     refine (hδ_lt ?_).le
-    simp only [norm_smul, Real.norm_eq_abs, OrthonormalBasis.norm_eq_one, mul_one, hz]
+    simp only [norm_smul, Real.norm_eq_abs, mul_one, hz]
     calc |x|
     _ ≤ 2 * r⁻¹ := by
       rw [abs_le]

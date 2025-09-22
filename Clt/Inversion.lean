@@ -17,20 +17,6 @@ noncomputable section
 open Filter MeasureTheory ProbabilityTheory BoundedContinuousFunction Real RCLike
 open scoped Topology RealInnerProductSpace
 
-section FromMathlibPR19761
-
--- See Mathlib#19761, these conditions might change
-variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
-    [MeasurableSpace V] [BorelSpace V] [CompleteSpace V] [SecondCountableTopology V]
-
-theorem MeasureTheory.ProbabilityMeasure.ext_of_charFun (μ ν : ProbabilityMeasure V)
-    (h : charFun (μ : Measure V) = charFun ν) :
-    μ = ν := by
-  ext
-  rw [Measure.ext_of_charFun h]
-
-end FromMathlibPR19761
-
 variable (𝕜 : Type*) [RCLike 𝕜]
 
 lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
@@ -82,7 +68,7 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
       exact BoundedContinuousFunction.integrable μ _
   simp_rw [h_eq (μ _), h_eq μ₀]
   refine tendsto_finset_sum _ fun y hy ↦ Tendsto.const_mul _ ?_
-  simp only [bilinFormOfRealInner_apply_apply, inner_apply, conj_trivial]
+  simp only [bilinFormOfRealInner_apply_apply]
   simp_rw [← charFun_eq_integral_probChar]
   exact h y
 

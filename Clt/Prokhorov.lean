@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2025 Rémy Degenne. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Rémy Degenne, Miyahara Kō
+Authors: Rémy Degenne, Miyahara Kō, Lawrence Wu
 -/
 import Mathlib.MeasureTheory.Measure.Tight
 import Mathlib.MeasureTheory.Measure.LevyProkhorovMetric
@@ -21,12 +21,23 @@ theorem isTightMeasureSet_iff_isCompact_closure
 
 lemma isCompact_closure_of_isTightMeasureSet
     {E : Type*} {mE : MeasurableSpace E} [MetricSpace E] [BorelSpace E]
-    {S : Set (ProbabilityMeasure E)}
+    [SecondCountableTopology E] {S : Set (ProbabilityMeasure E)}
     (hS : IsTightMeasureSet {((μ : ProbabilityMeasure E) : Measure E) | μ ∈ S}) :
     IsCompact (closure S) := by
-  suffices ∀ ⦃P : ℕ → ProbabilityMeasure E⦄, (∀ n, P n ∈ S) → ∃ P', ∃ N : ℕ → ℕ, StrictMono N ∧
-      Tendsto (P ∘ N) atTop (𝓝 P') by
-    sorry
+  suffices hPc : ∀ ⦃P : ℕ → ProbabilityMeasure E⦄, (∀ n, P n ∈ S) →
+      ∃ P', ∃ N : ℕ → ℕ, StrictMono N ∧ Tendsto (P ∘ N) atTop (𝓝 P') by
+    let := pseudoMetrizableSpacePseudoMetric (ProbabilityMeasure E)
+    apply IsSeqCompact.isCompact
+    intro P hPS
+    have hP' (n : ℕ) : ∃ P' ∈ S, dist (P n) P' < 1 / (n + 1) :=
+      Metric.mem_closure_iff.mp (hPS n) _ (by positivity)
+    choose P' hP'S hP'P using hP'
+    obtain ⟨P'', N, hN, hP''N⟩ := hPc hP'S
+    refine ⟨P'', mem_closure_of_tendsto hP''N (by simp_all), N, hN, ?_⟩
+    rw [tendsto_iff_dist_tendsto_zero] at *
+    apply squeeze_zero (fun _ => dist_nonneg) (fun n => dist_triangle _ _ _)
+    simpa using (squeeze_zero (fun _ => dist_nonneg) (fun n => le_of_lt (hP'P (N n)))
+      (tendsto_one_div_add_atTop_nhds_zero_nat.comp hN.tendsto_atTop)).add hP''N
   intro P hP
   obtain ⟨u, hum, hult1, hut1⟩ := exists_seq_strictMono_tendsto' (show (0 : ℝ≥0) < 1 by norm_num)
   replace hult1 n := (hult1 n).right
@@ -57,7 +68,23 @@ lemma isCompact_closure_of_isTightMeasureSet
   obtain ⟨K, hKm, hKc, hKP⟩ := hK
   have h𝓐 : ∃ (𝓐 : Set (Set E)), 𝓐.Countable ∧ (∀ A ∈ 𝓐, IsOpen A) ∧
       ∀ (G : Set E), IsOpen G → ∀ x ∈ (⋃ n, K n) ∩ G, ∃ A ∈ 𝓐, x ∈ A ∧ closure A ⊆ G := by
-    sorry
+    obtain ⟨D, hD1, hD2⟩ := IsSeparable.iUnion (fun n => (hKc n).isSeparable)
+    let 𝓐 := (fun p : E × ℚ ↦ Metric.ball p.1 p.2) '' D ×ˢ {q | 0 < q}
+    refine ⟨𝓐, (hD1.prod (Set.to_countable _)).image _, ⟨by rintro _ ⟨_, _, rfl⟩; simp, ?_⟩⟩
+    intro G hG x ⟨hxM, hxG⟩
+    obtain ⟨ε, hε0, hεG⟩ : ∃ ε > 0, Metric.ball x ε ⊆ G := Metric.isOpen_iff.1 hG x hxG
+    obtain ⟨q, hq_pos, hq_lt⟩ : ∃ q : ℚ, 0 < q ∧ q < ε / 2 :=
+      mod_cast exists_rat_btwn (half_pos hε0)
+    obtain ⟨c, hcD, hcb⟩ : ∃ c ∈ D, dist x c < q := by
+      simp [Metric.mem_closure_iff.mp (hD2 hxM) q (mod_cast hq_pos)]
+    refine ⟨_, ⟨⟨c, q⟩, ⟨hcD, hq_pos⟩, rfl⟩, by simpa, ?_⟩
+    intro y hy
+    have h_dist : dist y c ≤ q := by
+      rw [Metric.mem_closure_iff] at hy
+      refine le_of_forall_pos_le_add fun δ δ_pos => ?_
+      obtain ⟨b, hb, hb'⟩ := hy δ δ_pos
+      linarith [dist_triangle y b c, Metric.mem_ball.mp hb]
+    exact hεG (Metric.mem_ball.mpr <| by linarith [dist_triangle_right y x c])
   obtain ⟨𝓐, h𝓐c, h𝓐o, h𝓐G⟩ := h𝓐
   let 𝓗 : Set (Set E) :=
     (fun P : Set (Set E × ℕ) => ⋃ p ∈ P, closure p.1 ∩ K p.2) ''

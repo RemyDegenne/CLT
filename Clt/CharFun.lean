@@ -29,9 +29,10 @@ We express this in terms of the pushforward of $P^{\otimes n}$ by summation.
 -/
 lemma charFun_map_sum_pi_const (μ : Measure E) [IsFiniteMeasure μ] (n : ℕ) (t : E) :
     charFun ((Measure.pi fun (_ : Fin n) ↦ μ).map fun x ↦ ∑ i, x i) t = charFun μ t ^ n := by
-  induction' n with n ih
-  · simp [Measure.map_const, charFun_apply]
-  · rw [pow_succ', ← ih, ← charFun_conv]
+  induction n with
+  | zero => simp [Measure.map_const, charFun_apply]
+  | succ n ih =>
+    rw [pow_succ', ← ih, ← charFun_conv]
     congr 1
     have h := (measurePreserving_piFinSuccAbove (fun (_ : Fin (n + 1)) ↦ μ) 0).map_eq
     nth_rw 2 [← μ.map_id]

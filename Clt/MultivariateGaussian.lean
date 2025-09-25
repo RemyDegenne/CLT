@@ -45,7 +45,7 @@ lemma integral_eval_pi {i : Fin d} {μ : Fin d → Measure ℝ} [∀ i, IsProbab
     ∫ (a : Fin d → ℝ), f (a i) ∂Measure.pi μ = ∫ x, f x ∂μ i := by
   sorry
 
-lemma isCentered_stdGaussianMulti : ∀ L : Dual ℝ E, (stdGaussianMulti E)[L] = 0 := by
+lemma isCentered_stdGaussianMulti : ∀ L : StrongDual ℝ E, (stdGaussianMulti E)[L] = 0 := by
   intro L
   rw [stdGaussianMulti, integral_map _ (by fun_prop)]
   swap; · exact (Finset.measurable_sum _ (by fun_prop)).aemeasurable -- todo: add fun_prop tag
@@ -69,7 +69,7 @@ lemma isCentered_stdGaussianMulti : ∀ L : Dual ℝ E, (stdGaussianMulti E)[L] 
       exact memLp_id_gaussianReal 1
   simp [this]
 
-lemma variance_dual_stdGaussianMulti (L : Dual ℝ E) :
+lemma variance_dual_stdGaussianMulti (L : StrongDual ℝ E) :
     Var[L; stdGaussianMulti E] = ∑ i, L (stdOrthonormalBasis ℝ E i) ^ 2 := by
   sorry
 

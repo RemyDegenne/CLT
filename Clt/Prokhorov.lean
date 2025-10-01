@@ -213,8 +213,6 @@ lemma isCompact_closure_of_isTightMeasureSet
     simp only [Subtype.forall, and_imp, mem_setOf]
     intro H hHG hH𝓗
     exact hαb hH𝓗
-  -- have hβbd M : BddAbove (range (fun Gs : ↥{G : Set E | M ⊆ G ∧ IsOpen G} => β ↑Gs)) := by
-  --   simp only [bddAbove_def, forall_mem_range]; exact ⟨1, fun Hs => hβb Hs.prop.right⟩
   have hβm {M₁ M₂} (hM : M₁ ⊆ M₂) : β M₁ ≤ β M₂ :=
     ciSup_mono' (hαbd _) (by
       simp only [coe_setOf, mem_setOf_eq, Subtype.exists, exists_prop, Subtype.forall, and_imp]

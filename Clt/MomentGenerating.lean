@@ -72,6 +72,8 @@ The `n`th derivative of `charFun μ`.
 The proof uses results on iterated derivatives of the Fourier transform.
 -/
 
+/-- The scalar product as a continuous bilinear map.
+TODO: this is already in Mathlib, as `innerSL ℝ`. Use that instead. -/
 noncomputable
 def continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ :=
   (isBoundedBilinearMap_inner (𝕜 := ℝ)).toContinuousLinearMap

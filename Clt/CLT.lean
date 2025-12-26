@@ -39,9 +39,12 @@ namespace ProbabilityTheory
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {X : ℕ → Ω → ℝ}
 
+/-- The standard real Gaussian `𝓝 (0, 1)`. -/
 abbrev stdGaussian : ProbabilityMeasure ℝ :=
   ⟨gaussianReal 0 1, inferInstance⟩
 
+/-- Sum of `n` random variables over `Fin n`, normalized by `1/√ n` for the
+central limit theorem. -/
 abbrev invSqrtMulSum {Ω} (X : ℕ → Ω → ℝ) (n : ℕ) (ω : Ω) : ℝ :=
   (√n)⁻¹ * ∑ i : Fin n, X i ω
 
@@ -82,12 +85,12 @@ lemma taylor_charFun_two' {X : Ω → ℝ} (hX : Measurable X) {P : Measure Ω} 
     (fun t ↦ charFun (P.map X) t - (1 + P[X] * t * I - P[X ^ 2] * t ^ 2 / 2))
       =o[𝓝 0] fun t ↦ t ^ 2 := by
   -- Apply Taylor's theorem to `charFun`
-  have : IsProbabilityMeasure (P.map X) := isProbabilityMeasure_map hX.aemeasurable
+  have : IsProbabilityMeasure (P.map X) := Measure.isProbabilityMeasure_map hX.aemeasurable
   have h := taylor_charFun hint
   -- simplify the Taylor expansion
   simp only [Nat.reduceAdd, ofReal_inv, ofReal_natCast, mul_pow, Finset.sum_range_succ,
     Finset.range_one, Finset.sum_singleton, Nat.factorial_zero, Nat.cast_one, inv_one, pow_zero,
-    mul_one, integral_const, measureReal_univ_eq_one, smul_eq_mul, ofReal_one, Nat.factorial_one,
+    mul_one, integral_const, probReal_univ, smul_eq_mul, ofReal_one, Nat.factorial_one,
     pow_one, one_mul, Nat.factorial_two, Nat.cast_ofNat, I_sq, mul_neg, neg_mul] at h
   have h1 : ∫ x, x ∂P.map X = P[X] := by
     rw [integral_map hX.aemeasurable]

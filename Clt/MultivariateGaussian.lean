@@ -5,6 +5,7 @@ Authors: Rémy Degenne
 -/
 import Mathlib.Analysis.CStarAlgebra.Matrix
 import Mathlib.LinearAlgebra.Matrix.PosDef
+import Mathlib.Analysis.Matrix.Order
 import Mathlib.Probability.Distributions.Gaussian.Basic
 
 
@@ -80,11 +81,14 @@ instance isGaussian_stdGaussianMulti : IsGaussian (stdGaussianMulti E) := by
   -- todo: need a lemma `charFunDual_map_sum_pi`
   sorry
 
-noncomputable
-def multivariateGaussian (μ : EuclideanSpace ℝ (Fin d)) (S : Matrix (Fin d) (Fin d) ℝ)
-    (hS : S.PosSemidef) :
-    Measure (EuclideanSpace ℝ (Fin d)) :=
-  (stdGaussianMulti (EuclideanSpace ℝ (Fin d))).map (fun x ↦ μ + toEuclideanCLM (𝕜 := ℝ) hS.sqrt x)
 
+open scoped MatrixOrder
+
+/-- Gaussian measure on `ℝ^d` with a given covariance matrix. -/
+noncomputable
+def multivariateGaussian (μ : EuclideanSpace ℝ (Fin d)) (S : Matrix (Fin d) (Fin d) ℝ) :
+    Measure (EuclideanSpace ℝ (Fin d)) :=
+  (stdGaussianMulti (EuclideanSpace ℝ (Fin d))).map (fun x ↦ μ + toEuclideanCLM (𝕜 := ℝ)
+    (CFC.sqrt S) x)
 
 end ProbabilityTheory

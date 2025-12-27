@@ -65,9 +65,14 @@ end ForMathlib
 
 section InnerProductSpace
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+/-!
+The `n`th derivative of `charFun μ`.
+The proof uses results on iterated derivatives of the Fourier transform.
+-/
 
-variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
   {μ : Measure E} [IsProbabilityMeasure μ]
 
 @[fun_prop]

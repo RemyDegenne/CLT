@@ -52,12 +52,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
     (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)))
     {g : E →ᵇ ℂ}
-    (hg : g ∈ charPoly continuous_probChar (L := bilinFormOfRealInner) continuous_inner) :
+    (hg : g ∈ charPoly continuous_probChar (L := innerₗ E) continuous_inner) :
     Tendsto (fun n ↦ ∫ x, g x ∂(μ n)) atTop (𝓝 (∫ x, g x ∂μ₀)) := by
   rw [mem_charPoly] at hg
   obtain ⟨w, hw⟩ := hg
   have h_eq (μ : Measure E) (hμ : IsProbabilityMeasure μ) :
-      ∫ x, g x ∂μ = ∑ a ∈ w.support, w a * ∫ x, (probChar (bilinFormOfRealInner x a) : ℂ) ∂μ := by
+      ∫ x, g x ∂μ = ∑ a ∈ w.support, w a * ∫ x, (probChar (innerₗ E x a) : ℂ) ∂μ := by
     simp_rw [hw]
     rw [integral_finset_sum]
     · congr with y
@@ -68,18 +68,18 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
       exact BoundedContinuousFunction.integrable μ _
   simp_rw [h_eq (μ _), h_eq μ₀]
   refine tendsto_finset_sum _ fun y hy ↦ Tendsto.const_mul _ ?_
-  simp only [bilinFormOfRealInner_apply_apply]
+  simp only [innerₗ_apply_apply]
   simp_rw [← charFun_eq_integral_probChar]
   exact h y
 
 lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tendsto_charFun
-    [CompleteSpace E] [SecondCountableTopology E] [FiniteDimensional ℝ E]
+    [FiniteDimensional ℝ E]
     (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t))) :
     Tendsto μ atTop (𝓝 μ₀) := by
   have h_tight : IsTightMeasureSet (𝓧 := E) {μ n | n} :=
     isTightMeasureSet_of_tendsto_charFun (by fun_prop) (by fun_prop) h
   refine tendsto_of_tight_of_separatesPoints h_tight (𝕜 := ℂ)
-    (A := charPoly continuous_probChar (L := bilinFormOfRealInner) continuous_inner) ?_ ?_
+    (A := charPoly continuous_probChar (L := innerₗ E) continuous_inner) ?_ ?_
   · refine separatesPoints_charPoly continuous_probChar probChar_ne_one _ ?_
     exact fun v hv ↦ DFunLike.ne_iff.mpr ⟨v, inner_self_ne_zero.mpr hv⟩
   · exact fun g ↦ tendsto_charPoly_of_tendsto_charFun h
@@ -98,7 +98,7 @@ The => direction is much harder:
 
 -/
 theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun
-    [CompleteSpace E] [SecondCountableTopology E] [FiniteDimensional ℝ E] :
+    [FiniteDimensional ℝ E] :
     Tendsto μ atTop (𝓝 μ₀) ↔
       ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
   refine ⟨fun h t ↦ ?_, tendsto_of_tendsto_charFun⟩

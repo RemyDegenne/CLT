@@ -65,28 +65,14 @@ end ForMathlib
 
 section InnerProductSpace
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-
 /-!
 The `n`th derivative of `charFun μ`.
 The proof uses results on iterated derivatives of the Fourier transform.
 -/
 
-/-- The scalar product as a continuous bilinear map.
-TODO: this is already in Mathlib, as `innerSL ℝ`. Use that instead. -/
-noncomputable
-def continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ :=
-  (isBoundedBilinearMap_inner (𝕜 := ℝ)).toContinuousLinearMap
 
-@[simp]
-lemma continuousBilinFormOfInner_apply {x y : E} : continuousBilinFormOfInner x y = ⟪x, y⟫ := rfl
-
-@[simp]
-lemma toLinearMap₂_continuousBilinFormOfInner :
-    ContinuousLinearMap.toLinearMap₁₂ (continuousBilinFormOfInner : E →L[ℝ] E →L[ℝ] ℝ)
-      = bilinFormOfRealInner := rfl
-
-variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
   {μ : Measure E} [IsProbabilityMeasure μ]
 
 @[fun_prop]
@@ -98,8 +84,7 @@ theorem contDiff_charFun
     rw [Nat.cast_le] at hk
     exact integrable_norm_pow_antitone μ aestronglyMeasurable_id hk hint
   simp_rw [funext charFun_eq_fourierIntegral']
-  rw [← toLinearMap₂_continuousBilinFormOfInner]
-  refine (VectorFourier.contDiff_fourierIntegral (L := continuousBilinFormOfInner) hint').comp ?_
+  refine (VectorFourier.contDiff_fourierIntegral (L := innerSL ℝ) hint').comp ?_
   exact contDiff_const_smul _
 
 @[fun_prop]
@@ -116,7 +101,7 @@ variable {μ : Measure ℝ} [IsProbabilityMeasure μ]
 open VectorFourier in
 theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) μ) :
     iteratedDeriv n (charFun μ) t = I ^ n * ∫ x, x ^ n * exp (t * x * I) ∂μ := by
-  have h : bilinFormOfRealInner = (ContinuousLinearMap.mul ℝ ℝ).toLinearMap₁₂ := by ext; rfl
+  have h : innerₗ ℝ = (ContinuousLinearMap.mul ℝ ℝ).toLinearMap₁₂ := by ext; rfl
   have hint' (k : ℕ) (hk : k ≤ (n : ℕ∞)) : Integrable (fun x ↦ ‖x‖ ^ k * ‖(1 : ℝ → ℂ) x‖) μ := by
     simp only [Pi.one_apply, norm_one, mul_one]
     rw [Nat.cast_le] at hk

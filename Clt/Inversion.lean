@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2024 Thomas Zhu. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Thomas Zhu, Rémy Degenne
+Authors: Thomas Zhu, Rémy Degenne, Miyahara Kō
 -/
 import Clt.MomentGenerating
 import Clt.Prokhorov
@@ -14,8 +14,21 @@ Inverting the characteristic function
 
 noncomputable section
 
-open Filter MeasureTheory ProbabilityTheory BoundedContinuousFunction Real RCLike
+open Function Filter MeasureTheory ProbabilityMeasure ProbabilityTheory BoundedContinuousFunction
+  Real RCLike
 open scoped Topology RealInnerProductSpace
+
+section ForMathlib
+
+lemma MeasureTheory.charFun_map_inner_right
+    {E : Type*} {mE : MeasurableSpace E} {μ : Measure E}
+    [SeminormedAddCommGroup E] [InnerProductSpace ℝ E] [OpensMeasurableSpace E]
+    (r : ℝ) (t : E) :
+    charFun (μ.map (fun (x : E) => ⟪x, t⟫)) r = charFun μ (r • t) := by
+  rw [charFun_apply_real, charFun_apply, integral_map (by fun_prop) (by fun_prop)]
+  simp [real_inner_smul_right]
+
+end ForMathlib
 
 variable (𝕜 : Type*) [RCLike 𝕜]
 
@@ -42,7 +55,7 @@ lemma MeasureTheory.ProbabilityMeasure.tendsto_of_tight_of_separatesPoints
   specialize heq g hg
   suffices Tendsto (fun n ↦ ∫ x, g x ∂(μ (ns (φ n)))) atTop (𝓝 (∫ x, g x ∂μ')) from
     tendsto_nhds_unique this <| heq.comp (hns.comp hφ_mono.tendsto_atTop)
-  rw [ProbabilityMeasure.tendsto_iff_forall_integral_rclike_tendsto 𝕜] at hφ_tendsto
+  rw [tendsto_iff_forall_integral_rclike_tendsto 𝕜] at hφ_tendsto
   exact hφ_tendsto g
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -102,6 +115,17 @@ theorem MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun
     Tendsto μ atTop (𝓝 μ₀) ↔
       ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)) := by
   refine ⟨fun h t ↦ ?_, tendsto_of_tendsto_charFun⟩
-  rw [ProbabilityMeasure.tendsto_iff_forall_integral_rclike_tendsto ℂ] at h
+  rw [tendsto_iff_forall_integral_rclike_tendsto ℂ] at h
   simp_rw [charFun_eq_integral_innerProbChar]
   exact h (innerProbChar t)
+
+lemma ProbabilityTheory.tendsto_iff_forall_tendto_inner_right
+    {E : Type*} {mE : MeasurableSpace E}
+    [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [BorelSpace E]
+    {P : ℕ → ProbabilityMeasure E} {P₀ : ProbabilityMeasure E} :
+    Tendsto P atTop (𝓝 P₀) ↔
+      ∀ a, Tendsto (fun n => (P n).map (f := fun x => ⟪x, a⟫) (by fun_prop))
+        atTop (𝓝 (P₀.map (f := fun x => ⟪x, a⟫) (by fun_prop))) := by
+  simp_rw [tendsto_iff_tendsto_charFun, toMeasure_map, charFun_map_inner_right]
+  rw [forall_comm, ← Prod.forall',
+    (show Surjective (fun p : ℝ × E => p.1 • p.2) by intro a; use (1, a); simp).forall]

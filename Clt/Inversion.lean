@@ -49,6 +49,7 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [MeasurableSpace E] [BorelSpace E]
   {μ : ℕ → ProbabilityMeasure E} {μ₀ : ProbabilityMeasure E}
 
+set_option backward.isDefEq.respectTransparency false
 lemma MeasureTheory.ProbabilityMeasure.tendsto_charPoly_of_tendsto_charFun
     (h : ∀ t : E, Tendsto (fun n ↦ charFun (μ n) t) atTop (𝓝 (charFun μ₀ t)))
     {g : E →ᵇ ℂ}

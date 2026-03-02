@@ -83,7 +83,7 @@ lemma isTightMeasureSet_iff_tendsto_limsup_measure_norm_gt :
       ↔ Tendsto (fun r : ℝ ↦ limsup (fun n ↦ μ n {x | r < ‖x‖}) atTop) atTop (𝓝 0) := by
   refine ⟨fun h ↦ ?_, isTightMeasureSet_of_tendsto_limsup_measure_norm_gt⟩
   have h_sup := tendsto_measure_norm_gt_of_isTightMeasureSet h
-  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h_sup (fun _ ↦ zero_le') ?_
+  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h_sup (fun _ ↦ zero_le _) ?_
   intro r
   simp_rw [iSup_range]
   exact limsup_le_iSup
@@ -115,7 +115,7 @@ lemma isTightMeasureSet_iff_tendsto_limsup_inner :
   refine ⟨fun h z ↦ ?_, isTightMeasureSet_of_tendsto_limsup_inner⟩
   rw [isTightMeasureSet_iff_inner_tendsto ℝ] at h
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds (h z)
-    (fun _ ↦ zero_le') fun r ↦ ?_
+    (fun _ ↦ zero_le _) fun r ↦ ?_
   simp_rw [iSup_range]
   exact limsup_le_iSup
 
@@ -157,7 +157,7 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
       rw [ENNReal.ofReal_toReal]
       refine ne_top_of_le_ne_top (by simp : 1 ≠ ∞) ?_
       refine limsup_le_of_le ?_ (.of_forall fun _ ↦ prob_le_one)
-      exact IsCoboundedUnder.of_frequently_ge <| .of_forall fun _ ↦ zero_le'
+      exact IsCoboundedUnder.of_frequently_ge <| .of_forall fun _ ↦ zero_le _
     simp_rw [h_ofReal]
     rw [← ENNReal.ofReal_zero]
     exact ENNReal.tendsto_ofReal this
@@ -180,6 +180,7 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
       simp only [intervalIntegral.integral_const, sub_neg_eq_add, smul_eq_mul]
       ring_nf
       rw [mul_inv_cancel₀ hr.ne', one_mul]
+      rfl
   have h_le n r := measureReal_abs_inner_gt_le_integral_charFun (μ := μ n) (a := z) (r := r)
   -- We introduce an upper bound for the limsup.
   -- This is where we use the fact that `charFun (μ n)` converges to `f`.
@@ -246,6 +247,7 @@ lemma isTightMeasureSet_of_tendsto_charFun {μ : ℕ → Measure E} [∀ i, IsPr
       ring_nf
       gcongr
       norm_num
+      grind
   rw [abs_of_nonneg hr.le]
   calc 2⁻¹ * r * ‖∫ t in -(2 * r⁻¹)..2 * r⁻¹, 1 - f (t • z)‖
   _ ≤ 2⁻¹ * r * ∫ t in -(2 * r⁻¹)..2 * r⁻¹, ‖1 - f (t • z)‖ := by

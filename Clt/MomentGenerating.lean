@@ -75,6 +75,7 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
   {μ : Measure E} [IsProbabilityMeasure μ]
 
+set_option backward.isDefEq.respectTransparency false
 @[fun_prop]
 theorem contDiff_charFun
     {n : ℕ} (hint : Integrable (‖·‖ ^ n) μ) :
@@ -98,6 +99,7 @@ end InnerProductSpace
 
 variable {μ : Measure ℝ} [IsProbabilityMeasure μ]
 
+set_option backward.isDefEq.respectTransparency false
 open VectorFourier in
 theorem iteratedDeriv_charFun {n : ℕ} {t : ℝ} (hint : Integrable (|·| ^ n) μ) :
     iteratedDeriv n (charFun μ) t = I ^ n * ∫ x, x ^ n * exp (t * x * I) ∂μ := by

@@ -74,6 +74,7 @@ lemma variance_dual_stdGaussianMulti (L : StrongDual ℝ E) :
     Var[L; stdGaussianMulti E] = ∑ i, L (stdOrthonormalBasis ℝ E i) ^ 2 := by
   sorry
 
+set_option backward.isDefEq.respectTransparency false
 instance isGaussian_stdGaussianMulti : IsGaussian (stdGaussianMulti E) := by
   refine isGaussian_of_charFunDual_eq fun L ↦ ?_
   rw [integral_complex_ofReal, isCentered_stdGaussianMulti L]

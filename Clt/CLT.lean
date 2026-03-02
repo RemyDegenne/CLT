@@ -17,6 +17,7 @@ noncomputable section
 open MeasureTheory ProbabilityTheory Complex Filter
 open scoped Real Topology
 
+set_option backward.isDefEq.respectTransparency false
 /-- `(1 + t/n + o(1/n)) ^ n → exp t` for `t ∈ ℂ`. -/
 lemma tendsto_pow_exp_of_isLittleO {f : ℕ → ℂ} (t : ℂ)
     (hf : (fun n ↦ f n - (1 + t / n)) =o[atTop] fun n ↦ 1 / (n : ℝ)) :

@@ -6,7 +6,7 @@ Authors: Thomas Zhu, Rémy Degenne
 import Mathlib.Probability.Distributions.Gaussian.Real
 import Mathlib.Probability.IdentDistrib
 import Clt.Inversion
-import Clt.MomentGenerating
+import Mathlib.Probability.Independence.CharacteristicFunction
 
 /-!
 The Central Limit Theorem
@@ -79,47 +79,21 @@ lemma charFun_invSqrtMulSum (hX : ∀ n, Measurable (X n)) {P : Measure Ω} [IsP
     (indep_fin n)
   have map_eq (n : ℕ) := (hident n).map_eq
   -- use existing results to rewrite the charFun
-  simp_rw [map_invSqrtMulSum P hX, charFun_map_mul, pi_fin, map_eq, charFun_map_sum_pi_const]
-
-lemma taylor_charFun_two' {X : Ω → ℝ} (hX : Measurable X) {P : Measure Ω} [IsProbabilityMeasure P]
-    (hint : Integrable (|·| ^ 2) (P.map X)) :
-    (fun t ↦ charFun (P.map X) t - (1 + P[X] * t * I - P[X ^ 2] * t ^ 2 / 2))
-      =o[𝓝 0] fun t ↦ t ^ 2 := by
-  -- Apply Taylor's theorem to `charFun`
-  have : IsProbabilityMeasure (P.map X) := Measure.isProbabilityMeasure_map hX.aemeasurable
-  have h := taylor_charFun hint
-  -- simplify the Taylor expansion
-  simp only [Nat.reduceAdd, ofReal_inv, ofReal_natCast, mul_pow, Finset.sum_range_succ,
-    Finset.range_one, Finset.sum_singleton, Nat.factorial_zero, Nat.cast_one, inv_one, pow_zero,
-    mul_one, integral_const, probReal_univ, smul_eq_mul, ofReal_one, Nat.factorial_one,
-    pow_one, one_mul, Nat.factorial_two, Nat.cast_ofNat, I_sq, mul_neg, neg_mul] at h
-  have h1 : ∫ x, x ∂P.map X = P[X] := by
-    rw [integral_map hX.aemeasurable]
-    exact aestronglyMeasurable_id
-  have h2 : ∫ x, x ^ 2 ∂P.map X = P[X ^ 2] := by
-    rw [integral_map hX.aemeasurable]
-    · simp
-    · exact aestronglyMeasurable_id.pow 2
-  simp only [h1, h2, Pi.pow_apply, ← sub_eq_add_neg] at h
-  simp only [integral_complex_ofReal, Pi.pow_apply, ← ofReal_pow]
-  simp only [ofReal_pow]
-  convert h using 4 with t
-  · ring
-  · ring
+  have := P.isProbabilityMeasure_map (hX 0).aemeasurable
+  simp_rw [map_invSqrtMulSum P hX, charFun_map_mul, pi_fin, map_eq, charFun_map_sum_pi_eq_prod]
+  simp
 
 lemma taylor_charFun_two {X : Ω → ℝ} (hX : Measurable X) {P : Measure Ω} [IsProbabilityMeasure P]
     (h0 : P[X] = 0) (h1 : P[X ^ 2] = 1) :
     (fun t ↦ charFun (P.map X) t - (1 - t ^ 2 / 2)) =o[𝓝 0] fun t ↦ t ^ 2 := by
-  have hint : Integrable (|·| ^ 2) (P.map X) := by
-    simp_rw [_root_.sq_abs]
-    apply Integrable.of_integral_ne_zero
-    erw [← integral_map hX.aemeasurable (aestronglyMeasurable_id.pow 2)] at h1
-    simp only [Pi.pow_apply, id_eq] at h1
-    simp [h1]
-  convert taylor_charFun_two' hX hint with t
-  · simp [integral_complex_ofReal, h0]
-  · simp only [Pi.pow_apply] at h1
-    simp [← ofReal_pow, integral_complex_ofReal, h1]
+  simp_rw [← taylorWithinEval_charFun_two_zero' (by fun_prop) h0 h1]
+  convert taylor_isLittleO_univ ?_
+  · simp
+  · refine contDiff_charFun ?_
+    refine (memLp_two_iff_integrable_sq (by fun_prop)).2 (.of_integral_ne_zero ?_)
+    rw [integral_map]
+    any_goals fun_prop
+    simp_all
 
 theorem central_limit (hX : ∀ n, Measurable (X n))
     {P : ProbabilityMeasure Ω} (h0 : P[X 0] = 0) (h1 : P[X 0 ^ 2] = 1)

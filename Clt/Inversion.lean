@@ -3,10 +3,11 @@ Copyright (c) 2024 Thomas Zhu. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Thomas Zhu, Rémy Degenne
 -/
-import Clt.MomentGenerating
+-- import Clt.MomentGenerating
 import Clt.Prokhorov
 import Clt.Tight
 import Mathlib.MeasureTheory.Measure.LevyProkhorovMetric
+import Mathlib.MeasureTheory.Measure.CharacteristicFunction.TaylorExpansion
 
 /-!
 Inverting the characteristic function

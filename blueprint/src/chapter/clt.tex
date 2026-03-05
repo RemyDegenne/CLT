@@ -87,6 +87,8 @@ Since the r.h.s. is the characteristic function of $Z$, we conclude that $\frac{
 
 \begin{theorem}[Cramér-Wold]\label{thm:cramer_wold}
     \uses{def:cvg_distribution}
+    \leanok
+    \lean{ProbabilityTheory.tendsto_iff_forall_tendto_inner_right}
 Let $X, X_1, X_2, \ldots$ be random variables in $\mathbb{R}^d$.
 Then $X_n \xrightarrow{d} X$ iff for every $a \in \mathbb{R}^d$, $\langle a, X_n \rangle \xrightarrow{d} \langle a, X \rangle$.
 \end{theorem}

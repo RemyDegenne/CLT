@@ -43,3 +43,4 @@ ProbabilityTheory.iIndepFun_iff_map_fun_eq_pi_map
 taylor_charFun
 tendsto_pow_exp_of_isLittleO
 ProbabilityTheory.central_limit
+ProbabilityTheory.tendsto_iff_forall_tendto_inner_right
